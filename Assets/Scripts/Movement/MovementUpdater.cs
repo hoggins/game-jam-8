@@ -36,6 +36,38 @@ namespace Movement
     internal void Unregister(MovementAgent agent) =>
       _activeAgents.Remove(agent);
 
+    internal void QueryCircle(
+      MovementAgent origin,
+      float radius,
+      MovementLayer collisionMask,
+      List<MovementAgent> result)
+    {
+      if (origin == null)
+      {
+        result.Clear();
+        return;
+      }
+
+      _spatialMap.QueryCircle(
+        origin,
+        Mathf.Max(0f, radius),
+        collisionMask,
+        result);
+    }
+
+    internal void QueryCircle(
+      Vector3 centerPosition,
+      float radius,
+      MovementLayer collisionMask,
+      List<MovementAgent> result)
+    {
+      _spatialMap.QueryCircle(
+        centerPosition,
+        Mathf.Max(0f, radius),
+        collisionMask,
+        result);
+    }
+
     void IInitializable.Initialize()
     {
       SceneManager.sceneLoaded += OnSceneLoaded;

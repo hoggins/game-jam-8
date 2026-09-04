@@ -123,6 +123,7 @@ GameObject:
   - component: {fileID: 5278000020382377454}
   - component: {fileID: 6612269009932751248}
   - component: {fileID: 2925691346927250991}
+  - component: {fileID: 8364999448545982152}
   m_Layer: 0
   m_Name: Mob
   m_TagString: Untagged
@@ -176,3 +177,16 @@ MonoBehaviour:
   _rotationSpeed: 10
   _avoidancePower: 1
   _collidesWith: -1
+--- !u!114 &8364999448545982152
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5917521179565502705}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b2b11323224842c1a6661c282f4d24b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Combat.Mob
+  _maxHealth: 15

@@ -49,10 +49,29 @@ namespace Movement
       MovementLayer collisionMask,
       List<MovementAgent> result)
     {
+      QueryCircle(self, self.Position, radius, collisionMask, result);
+    }
+
+    public void QueryCircle(
+      Vector3 centerPosition,
+      float radius,
+      MovementLayer collisionMask,
+      List<MovementAgent> result)
+    {
+      QueryCircle(null, centerPosition, radius, collisionMask, result);
+    }
+
+    private void QueryCircle(
+      MovementAgent self,
+      Vector3 centerPosition,
+      float radius,
+      MovementLayer collisionMask,
+      List<MovementAgent> result)
+    {
       result.Clear();
       _seen.Clear();
 
-      var center = ToPlane(self.Position);
+      var center = ToPlane(centerPosition);
       var min = GetCell(center - Vector2.one * radius);
       var max = GetCell(center + Vector2.one * radius);
 

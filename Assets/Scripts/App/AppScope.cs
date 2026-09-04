@@ -48,6 +48,9 @@ namespace App
       builder.Register<CharacterService>(Lifetime.Singleton).AsSelf();
       builder.Register<MainMenuService>(Lifetime.Singleton).AsSelf();
       builder.Register<PauseMenuService>(Lifetime.Singleton).AsSelf();
+      builder.Register<Pooling.Pool>(Lifetime.Singleton)
+        .AsSelf()
+        .AsImplementedInterfaces();
 
       var movementSettings = Resources.Load<Movement.MovementSettings>("MovementSettings");
       if (movementSettings == null)

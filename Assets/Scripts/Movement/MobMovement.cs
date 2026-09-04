@@ -1,9 +1,10 @@
+using Combat;
 using UnityEngine;
 
 namespace Movement
 {
   [DisallowMultipleComponent]
-  [RequireComponent(typeof(MovementAgent))]
+  [RequireComponent(typeof(MovementAgent), typeof(Mob))]
   public sealed class MobMovement : MonoBehaviour, IMovementController
   {
     [Header("Movement")]
