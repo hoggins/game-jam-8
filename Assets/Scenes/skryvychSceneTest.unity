@@ -1152,8 +1152,6 @@ MonoBehaviour:
     _secondEnd: 15
   _player: {fileID: 667697734}
   _camera: {fileID: 330585545}
-  _spawnRadiusMin: 8
-  _spawnRadiusMax: 12
   _cameraViewportMargin: 0.05
   _positionAttempts: 32
 --- !u!4 &1311754033
@@ -1305,6 +1303,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1451513498}
+  - component: {fileID: 1451513499}
   m_Layer: 0
   m_Name: Test
   m_TagString: Untagged
@@ -1327,6 +1326,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1451513499
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1451513497}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90198e1b647504b61870c486f0b284a7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::App.DebugCheatManager
 --- !u!1001 &1451868319
 PrefabInstance:
   m_ObjectHideFlags: 0
