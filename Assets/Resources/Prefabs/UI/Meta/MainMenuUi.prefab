@@ -1118,6 +1118,30 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1378182241957879270, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1378182241957879270, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1378182241957879270, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1378182241957879270, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1378182241957879270, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1378182241957879270, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3159500683715583442, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -1202,6 +1226,30 @@ PrefabInstance:
       propertyPath: m_Sprite
       value: 
       objectReference: {fileID: 21300000, guid: efc78626bf77e4182a8c2557bc152fb8, type: 3}
+    - target: {fileID: 3725694382617808128, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3725694382617808128, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3725694382617808128, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3725694382617808128, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3725694382617808128, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3725694382617808128, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5719777227461545449, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}
       propertyPath: m_Name
       value: MaxHealthItem
@@ -1258,6 +1306,17 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 9151685823834979121}
   m_SourcePrefab: {fileID: 100100000, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}
+--- !u!114 &1210215537476829299 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7613965523405213493, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}
+  m_PrefabInstance: {fileID: 8746467471635287878}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
 --- !u!1 &3891403400480441007 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5719777227461545449, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}
@@ -1277,6 +1336,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Metagame.Stats.MaxHealthProgressionItemUi
   _upgradeButton: {fileID: 8456735786372471682}
   _valueText: {fileID: 5237895924919508077}
+  _priceText: {fileID: 1210215537476829299}
 --- !u!114 &5237895924919508077 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3589667165023736619, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}
@@ -1333,6 +1393,30 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 71212091861219680, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1378182241957879270, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1378182241957879270, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1378182241957879270, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1378182241957879270, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1378182241957879270, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1378182241957879270, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
@@ -1416,6 +1500,30 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3725694382617808128, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3725694382617808128, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3725694382617808128, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3725694382617808128, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3725694382617808128, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3725694382617808128, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5719777227461545449, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}
       propertyPath: m_Name
       value: AttackItem
@@ -1452,6 +1560,17 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 6737945026303836677}
   m_SourcePrefab: {fileID: 100100000, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}
+--- !u!114 &1409548450490896679 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7613965523405213493, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}
+  m_PrefabInstance: {fileID: 8801587923634216466}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
 --- !u!1 &3838542976924193787 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5719777227461545449, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}
@@ -1471,6 +1590,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Metagame.Stats.AttackPowerProgressionItemUi
   _upgradeButton: {fileID: 8509665991889898198}
   _valueText: {fileID: 5473152081282616633}
+  _priceText: {fileID: 1409548450490896679}
 --- !u!114 &5473152081282616633 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3589667165023736619, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}

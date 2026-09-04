@@ -1,4 +1,5 @@
 using App;
+using Balance;
 using Model;
 using TMPro;
 using UnityEngine;
@@ -12,6 +13,7 @@ namespace Metagame.Stats
     [Inject] private readonly CharacterService _characterService;
     [SerializeField] private Button _upgradeButton;
     [SerializeField] private TMP_Text _valueText;
+    [SerializeField] private TMP_Text _priceText;
 
     private void Awake()
     {
@@ -39,6 +41,7 @@ namespace Metagame.Stats
     private void Refresh()
     {
       _valueText.text = _characterService.MaxHealth.ToString();
+      _priceText.text = ProgressionBalance.MaxHealthUpgradeCost.ToString();
       _upgradeButton.interactable = _characterService.CanUpgradeMaxHealth;
     }
   }
