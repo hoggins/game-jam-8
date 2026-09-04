@@ -5,18 +5,48 @@ using UnityEditor;
 
 namespace Map
 {
-  public class MapGridFiller : MonoBehaviour
+  public class LevelData : MonoBehaviour
   {
     private const string ContainerName = "SpawnedHouses";
 
     [SerializeField] private MapData mapData;
     [SerializeField] private HouseSet houseSet;
     [SerializeField] private int seed;
+    [SerializeField] private int gridExtent = 10;
+    [SerializeField] private bool showGrid = true;
+    [HideInInspector] public bool isEditing;
 
     public MapData MapData => mapData;
     public HouseSet HouseSet => houseSet;
 
     private void Start() => Fill();
+
+    private void OnDrawGizmos()
+    {
+      if (!showGrid || mapData == null)
+        return;
+
+      var cellSize = mapData.CellSize;
+
+      Gizmos.color = isEditing ? new Color(0.2f, 0.8f, 1f, 0.5f) : new Color(0.2f, 0.8f, 0.2f, 0.5f);
+      foreach (var cell in mapData.FilledCells)
+      {
+        var center = new Vector3(
+          cell.x * cellSize + cellSize * 0.5f,
+          0f,
+          cell.y * cellSize + cellSize * 0.5f);
+        Gizmos.DrawCube(center, new Vector3(cellSize, 0.1f, cellSize));
+      }
+
+      var extent = gridExtent * cellSize;
+      Gizmos.color = new Color(1f, 1f, 1f, 0.3f);
+      for (var i = -gridExtent; i <= gridExtent; i++)
+      {
+        var offset = i * cellSize;
+        Gizmos.DrawLine(new Vector3(offset, 0f, -extent), new Vector3(offset, 0f, extent));
+        Gizmos.DrawLine(new Vector3(-extent, 0f, offset), new Vector3(extent, 0f, offset));
+      }
+    }
 
     public void Fill()
     {
@@ -69,6 +99,12 @@ namespace Map
     {
       var container = new GameObject(ContainerName).transform;
       container.SetParent(transform, false);
+
+      var parentScale = transform.lossyScale;
+      container.localScale = new Vector3(
+        parentScale.x != 0f ? 1f / parentScale.x : 1f,
+        parentScale.y != 0f ? 1f / parentScale.y : 1f,
+        parentScale.z != 0f ? 1f / parentScale.z : 1f);
 
 #if UNITY_EDITOR
       if (!Application.isPlaying)

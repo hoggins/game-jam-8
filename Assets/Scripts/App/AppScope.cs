@@ -1,3 +1,5 @@
+using Destruction;
+using Map;
 using Metagame.MainMenu;
 using Metagame.PauseMenu;
 using Model;
@@ -59,6 +61,21 @@ namespace App
       builder.RegisterInstance(movementSettings);
       builder.RegisterEntryPoint<Movement.MovementUpdater>(Lifetime.Singleton)
         .AsSelf();
+
+      RegisterMap(builder);
+    }
+
+    private static void RegisterMap(IContainerBuilder builder)
+    {
+      var decaySettings = Resources.Load<EnvironmentDecaySettings>("EnvironmentDecaySettings");
+      if (decaySettings == null)
+        throw new System.InvalidOperationException("EnvironmentDecaySettings asset was not found in Resources.");
+
+      builder.RegisterInstance(decaySettings);
+      builder.RegisterEntryPoint<EnvironmentDecayManager>(Lifetime.Singleton)
+        .AsSelf();
+
+      builder.Register<MapEnvironmentSpawner>(Lifetime.Singleton).AsSelf();
     }
   }
 }
