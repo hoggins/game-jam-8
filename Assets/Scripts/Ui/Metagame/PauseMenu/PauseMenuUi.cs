@@ -1,5 +1,6 @@
 using System.Collections;
 using App;
+using ScenesManagement;
 using UnityEngine;
 using UnityEngine.UI;
 using VContainer;
@@ -15,26 +16,33 @@ namespace Metagame.PauseMenu
     [SerializeField] private AnimationCurve _transitionCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
     [SerializeField, Min(0f)] private float _hiddenScale = 0.9f;
 
-    [Inject] private PauseMenuService _pauseMenuService;
+    [Inject] private SceneService _sceneService;
     private CanvasGroup _canvasGroup;
     private Coroutine _transitionCoroutine;
+
+    public bool IsPaused { get; private set; }
+
+    public void Pause() =>
+      SetPaused(true);
+
+    public void Resume() =>
+      SetPaused(false);
+
+    public void TogglePause() =>
+      SetPaused(!IsPaused);
 
     private void Awake()
     {
       this.AsInjected();
-      _pauseMenuService.PauseChanged += SetVisible;
 
       _canvasGroup = GetComponent<CanvasGroup>();
       if (_canvasGroup == null)
         _canvasGroup = gameObject.AddComponent<CanvasGroup>();
 
-      var isPaused = _pauseMenuService.IsPaused;
-      _canvasGroup.interactable = isPaused;
-      _canvasGroup.blocksRaycasts = isPaused;
-      SetTransitionState(isPaused ? 1f : 0f, Vector3.one * (isPaused ? 1f : _hiddenScale));
-
-      if (!isPaused)
-        gameObject.SetActive(false);
+      _canvasGroup.interactable = false;
+      _canvasGroup.blocksRaycasts = false;
+      SetTransitionState(0f, Vector3.one * _hiddenScale);
+      gameObject.SetActive(false);
     }
 
     private void OnEnable()
@@ -57,14 +65,25 @@ namespace Metagame.PauseMenu
 
     private void OnDestroy()
     {
-      _pauseMenuService.PauseChanged -= SetVisible;
+      if (IsPaused)
+        Time.timeScale = 1f;
     }
 
-    private void Resume() =>
-      _pauseMenuService.Resume();
+    private void ToMainMenu()
+    {
+      Resume();
+      _sceneService.LoadMainMenuScene();
+    }
 
-    private void ToMainMenu() =>
-      _pauseMenuService.ToMainMenu();
+    private void SetPaused(bool isPaused)
+    {
+      if (IsPaused == isPaused)
+        return;
+
+      IsPaused = isPaused;
+      Time.timeScale = isPaused ? 0f : 1f;
+      SetVisible(isPaused);
+    }
 
     private void SetVisible(bool isVisible)
     {

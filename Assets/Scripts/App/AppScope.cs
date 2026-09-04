@@ -1,7 +1,5 @@
 using Destruction;
 using Map;
-using Metagame.MainMenu;
-using Metagame.PauseMenu;
 using Model;
 using ScenesManagement;
 using UnityEngine;
@@ -47,9 +45,15 @@ namespace App
         .AsSelf()
         .AsImplementedInterfaces();
 
-      builder.Register<CharacterService>(Lifetime.Singleton).AsSelf();
-      builder.Register<MainMenuService>(Lifetime.Singleton).AsSelf();
-      builder.Register<PauseMenuService>(Lifetime.Singleton).AsSelf();
+      builder.Register<BattleService>(Lifetime.Singleton)
+        .AsSelf()
+        .AsImplementedInterfaces();
+      builder.Register<CharacterService>(Lifetime.Singleton)
+        .AsSelf()
+        .AsImplementedInterfaces();
+      builder.Register<ArrowService>(Lifetime.Singleton)
+        .AsSelf()
+        .AsImplementedInterfaces();
       builder.Register<Pooling.Pool>(Lifetime.Singleton)
         .AsSelf()
         .AsImplementedInterfaces();

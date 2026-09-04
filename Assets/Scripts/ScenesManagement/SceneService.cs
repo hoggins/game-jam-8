@@ -1,4 +1,5 @@
 using System;
+using Model;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Scripting;
@@ -13,9 +14,17 @@ namespace ScenesManagement
     private const string MainMenuSceneName = "MainMenuScene";
     private const string LoadingUiResourcePath = "Prefabs/SceneLoadingUi";
 
+    private readonly BattleService _battleService;
+
     private SceneLoadingUi _sceneLoadingUi;
     private AsyncOperation _loadingOperation;
+    private string _loadingSceneName;
     private bool _isLoading;
+
+    public SceneService(BattleService battleService)
+    {
+      _battleService = battleService;
+    }
 
     public void LoadBattleScene()
     {
@@ -48,6 +57,7 @@ namespace ScenesManagement
         throw new InvalidOperationException($"Unity could not start loading scene '{sceneName}'.");
       }
 
+      _loadingSceneName = sceneName;
       _isLoading = true;
     }
 
@@ -83,6 +93,11 @@ namespace ScenesManagement
       _sceneLoadingUi?.EnableLoading(false);
       _loadingOperation = null;
       _isLoading = false;
+
+      string loadedSceneName = _loadingSceneName;
+      _loadingSceneName = null;
+      if (loadedSceneName == BattleSceneName)
+        _battleService.StartBattle();
     }
 
     void IDisposable.Dispose()
@@ -92,6 +107,7 @@ namespace ScenesManagement
 
       _sceneLoadingUi = null;
       _loadingOperation = null;
+      _loadingSceneName = null;
       _isLoading = false;
     }
   }

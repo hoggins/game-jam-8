@@ -1,4 +1,5 @@
 using App;
+using ScenesManagement;
 using UnityEngine;
 using UnityEngine.UI;
 using VContainer;
@@ -7,6 +8,13 @@ namespace Metagame.MainMenu
 {
   public class MainMenuUi : UiBase
   {
+    private static bool _openProgressionRequested;
+
+    /// Asks the next MainMenuUi to show the progression screen instead of the main menu.
+    /// Call it before loading MainMenuScene - it is consumed once the screen is enabled.
+    public static void RequestProgression() =>
+      _openProgressionRequested = true;
+
     [SerializeField] private GameObject _mainMenu;
     [SerializeField] private GameObject _progressionMenu;
     [SerializeField] private Button _playButton;
@@ -14,7 +22,7 @@ namespace Metagame.MainMenu
     [SerializeField] private Button _quitButton;
     [SerializeField] private Button _progressionBackButton;
 
-    [Inject] private MainMenuService _mainMenuService;
+    [Inject] private SceneService _sceneService;
 
     private void Awake()
     {
@@ -28,7 +36,11 @@ namespace Metagame.MainMenu
       _progressionButton.onClick.AddListener(OpenProgression);
       _quitButton.onClick.AddListener(Quit);
       _progressionBackButton.onClick.AddListener(ShowMainMenu);
-      ShowMainMenu();
+
+      if (ConsumeOpenProgressionRequest())
+        OpenProgression();
+      else
+        ShowMainMenu();
     }
 
     protected override void OnDisable()
@@ -40,17 +52,17 @@ namespace Metagame.MainMenu
       base.OnDisable();
     }
 
-    private void Play() =>
-      _mainMenuService.Play();
-
-    private void Quit() =>
-      _mainMenuService.Quit();
-
     protected override void OnCancel()
     {
       if (_progressionMenu != null && _progressionMenu.activeSelf)
         ShowMainMenu();
     }
+
+    private void Play() =>
+      _sceneService.LoadBattleScene();
+
+    private static void Quit() =>
+      Application.Quit();
 
     private void ShowMainMenu()
     {
@@ -62,6 +74,15 @@ namespace Metagame.MainMenu
     {
       SetActive(_mainMenu, false);
       SetActive(_progressionMenu, true);
+    }
+
+    private static bool ConsumeOpenProgressionRequest()
+    {
+      if (!_openProgressionRequested)
+        return false;
+
+      _openProgressionRequested = false;
+      return true;
     }
 
     private static void SetActive(GameObject target, bool isActive)
