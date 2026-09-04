@@ -50,7 +50,12 @@ namespace Destruction
       if (CurrentHealth == 0)
       {
         _isDestroyed = true;
-        _characterService?.RegisterBuildingDestroyed();
+
+        // Only actual buildings count towards the run statistic; the battle timer's digits are
+        // destructible too but are not buildings.
+        if (_objectType == DestructibleObjectType.House)
+          _characterService?.RegisterBuildingDestroyed();
+
         _destructibleObject.Break(origin);
       }
     }

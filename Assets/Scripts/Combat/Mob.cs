@@ -26,6 +26,7 @@ namespace Combat
 
     [Inject] private Pool _pool;
     [Inject] private CharacterService _characterService;
+    [Inject] private BattleService _battleService;
 
     private static readonly int InflateId = Shader.PropertyToID("_Inflate");
 
@@ -71,6 +72,9 @@ namespace Combat
     private void Update()
     {
       if (!IsAlive || _hasAttacked)
+        return;
+
+      if (_battleService != null && _battleService.IsCombatSuspended)
         return;
 
       ResolvePlayer();

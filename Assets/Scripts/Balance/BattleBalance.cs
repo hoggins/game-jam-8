@@ -5,14 +5,18 @@ namespace Balance
 {
   public static class BattleBalance
   {
-    public static float BattleDuration => 100000f;
+    /// Beat held on 00:00, with damage switched off, before the timeout defeat lands.
+    public static float TimerExpiredDefeatDelay => 2f;
+    public static float BattleDuration => 90;
     public static int DuckMaxHealth => 2;
     public static int DuckAttackDamage => 1;
     public static float DuckAttackDistance => 3f;
 
     private static readonly Dictionary<DestructibleObjectType, int> DestructibleMaxHealth = new()
     {
-      [DestructibleObjectType.House] = 7
+      [DestructibleObjectType.House] = 7,
+      [DestructibleObjectType.TimerDigit] = 15,
+      [DestructibleObjectType.TimerDivider] = 10,
     };
 
     public static int GetDestructibleMaxHealth(DestructibleObjectType type) =>

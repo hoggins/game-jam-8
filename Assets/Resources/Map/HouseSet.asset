@@ -17,11 +17,19 @@ MonoBehaviour:
     prefab: {fileID: 6954928472654060805, guid: a0fec0480e2d7453bb6c593f9d9b01b8, type: 3}
     size: {x: 1, y: 1}
     enabled: 1
+    unique: 0
   - name: House01
     prefab: {fileID: 6954928472654060805, guid: a0fec0480e2d7453bb6c593f9d9b01b8, type: 3}
     size: {x: 1, y: 2}
     enabled: 1
+    unique: 0
   - name: House01
     prefab: {fileID: 6954928472654060805, guid: a0fec0480e2d7453bb6c593f9d9b01b8, type: 3}
     size: {x: 2, y: 1}
     enabled: 1
+    unique: 0
+  - name: BattleTimer
+    prefab: {fileID: 6775418544681209697, guid: f1baf58a7ee9643a987187050600e04a, type: 3}
+    size: {x: 2, y: 1}
+    enabled: 1
+    unique: 1

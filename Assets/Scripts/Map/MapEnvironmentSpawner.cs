@@ -26,6 +26,12 @@ namespace Map
       if (mapData == null || houseSet == null)
         return;
 
+      // This service outlives the scene, so the bookkeeping from the previous level is still here.
+      // Everything it describes died with that scene; leaving it would keep those cells reserved
+      // forever and silently skip every object that survived the last battle.
+      _objects.Clear();
+      _occupied.Clear();
+
       _container = new GameObject(ContainerName).transform;
       _container.SetParent(parent, false);
 

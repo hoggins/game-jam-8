@@ -29,15 +29,29 @@ namespace Map
       cells.Sort((a, b) => a.y != b.y ? a.y.CompareTo(b.y) : a.x.CompareTo(b.x));
 
       var houses = new List<HouseObject>();
+      var uniqueHouses = new List<HouseObject>();
       foreach (var house in houseSet.Houses)
-        if (house.enabled && house.prefab != null && house.size.x > 0 && house.size.y > 0)
+      {
+        if (!house.enabled || house.prefab == null || house.size.x <= 0 || house.size.y <= 0)
+          continue;
+
+        if (house.unique)
+          uniqueHouses.Add(house);
+        else
           houses.Add(house);
+      }
+
       houses.Sort((a, b) => (b.size.x * b.size.y).CompareTo(a.size.x * a.size.y));
 
-      if (houses.Count == 0)
+      if (houses.Count == 0 && uniqueHouses.Count == 0)
         return placements;
 
       var random = new System.Random(seed);
+
+      PlaceUniqueHouses(uniqueHouses, cells, free, placements, random);
+
+      if (houses.Count == 0)
+        return placements;
 
       foreach (var cell in cells)
       {
@@ -64,6 +78,31 @@ namespace Map
       }
 
       return placements;
+    }
+
+    /// Unique houses go down first, each at a random cell that fits, so a single mandatory
+    /// building is guaranteed to appear instead of depending on the random per-cell draw.
+    private static void PlaceUniqueHouses(
+      List<HouseObject> uniqueHouses,
+      List<Vector2Int> cells,
+      HashSet<Vector2Int> free,
+      List<HousePlacement> placements,
+      System.Random random)
+    {
+      foreach (var house in uniqueHouses)
+      {
+        var startIndex = random.Next(cells.Count);
+        for (var i = 0; i < cells.Count; i++)
+        {
+          var cell = cells[(startIndex + i) % cells.Count];
+          if (!free.Contains(cell) || !CanPlace(free, cell, house.size))
+            continue;
+
+          Occupy(free, cell, house.size);
+          placements.Add(new HousePlacement(house, cell));
+          break;
+        }
+      }
     }
 
     private static bool CanPlace(HashSet<Vector2Int> free, Vector2Int origin, Vector2Int size)
