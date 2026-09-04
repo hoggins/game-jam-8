@@ -179,6 +179,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: bootstrup
       objectReference: {fileID: 0}
+    - target: {fileID: 6010458571201069911, guid: c47350293018144e19866d5dd6106a20, type: 3}
+      propertyPath: _speed
+      value: 20
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -196,6 +200,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 669975139}
+  - component: {fileID: 669975140}
   m_Layer: 0
   m_Name: Level
   m_TagString: Untagged
@@ -218,6 +223,24 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &669975140
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 669975138}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 06f27f9c436fa4a208a8c7554b9d90f9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Map.LevelEditor
+  mapData: {fileID: 11400000, guid: c922d9da4b38244aeb1bc5f629f6fa0d, type: 2}
+  houseSet: {fileID: 11400000, guid: 2be63b4228ce6471a8facbc07e6e860b, type: 2}
+  seed: 0
+  gridExtent: 70
+  showGrid: 1
+  isEditing: 0
 --- !u!1 &686435236
 GameObject:
   m_ObjectHideFlags: 0
@@ -230,7 +253,6 @@ GameObject:
   - component: {fileID: 686435239}
   - component: {fileID: 686435238}
   - component: {fileID: 686435237}
-  - component: {fileID: 686435241}
   m_Layer: 0
   m_Name: Plane
   m_TagString: Untagged
@@ -327,29 +349,11 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 10, y: 1, z: 10}
+  m_LocalScale: {x: 100, y: 1, z: 100}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &686435241
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 686435236}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 06f27f9c436fa4a208a8c7554b9d90f9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Map.LevelEditor
-  mapData: {fileID: 11400000, guid: c922d9da4b38244aeb1bc5f629f6fa0d, type: 2}
-  houseSet: {fileID: 11400000, guid: 2be63b4228ce6471a8facbc07e6e860b, type: 2}
-  seed: 0
-  gridExtent: 10
-  showGrid: 1
-  isEditing: 0
 --- !u!1 &848411683
 GameObject:
   m_ObjectHideFlags: 0
@@ -489,7 +493,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1915691982}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5a3f7e632e7b341b1a348414d9aa8e2f, type: 3}
   m_Name: 

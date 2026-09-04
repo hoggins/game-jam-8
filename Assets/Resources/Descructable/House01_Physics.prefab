@@ -90,7 +90,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 208dac2293f004745999f92738b4a8d5, type: 3}
       propertyPath: m_Layer
-      value: 7
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 2187734615552427934, guid: 208dac2293f004745999f92738b4a8d5, type: 3}
       propertyPath: m_Layer
@@ -117,6 +117,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 208dac2293f004745999f92738b4a8d5, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3655513556250794614}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 208dac2293f004745999f92738b4a8d5, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5950374576173308430}
     - targetCorrespondingSourceObject: {fileID: 2187734615552427934, guid: 208dac2293f004745999f92738b4a8d5, type: 3}
       insertIndex: -1
       addedObject: {fileID: 9221379145889206482}
@@ -726,6 +729,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae3a31e081dac4ba2acd27782b575bb6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Destruction.ImpulseDestructible
+  _breakMagnitude: 5
 --- !u!65 &900094320363922888
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -759,6 +763,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f903e9399414745ada58a14464dc2c85, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Movement.FlowMapNoGoZone
+--- !u!114 &5950374576173308430
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7703177036018164856}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2bb62d9dcd49f449fb9f45585be7cb37, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Destruction.DestructibleHealth
+  _maxHealth: 1
 --- !u!1 &7957627060275827545 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -8626244017970689424, guid: 208dac2293f004745999f92738b4a8d5, type: 3}

@@ -11,6 +11,8 @@ namespace Destruction
   {
     private const string FrictionMaterialPath = "Descructable/FirstHouseFriction";
 
+    [SerializeField, Min(0f)] private float _breakMagnitude = 5f;
+
     [Inject] private EnvironmentDecayManager _decayManager;
 
     private FlowMapNoGoZone _noGoZone;
@@ -34,6 +36,9 @@ namespace Destruction
           collider.material = friction;
       }
     }
+
+    public void Break(Vector3 origin) =>
+      Impulse(origin, _breakMagnitude);
 
     public void Impulse(Vector3 origin, float magnitude)
     {
@@ -88,5 +93,8 @@ namespace Destruction
 
       return closest;
     }
+
+    private void OnValidate() =>
+      _breakMagnitude = Mathf.Max(0f, _breakMagnitude);
   }
 }

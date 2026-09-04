@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Destruction;
+using Movement;
 using UnityEngine;
 
 namespace Map
@@ -10,9 +11,13 @@ namespace Map
 
     private readonly Dictionary<int, RuntimeEnvironmentObject> _objects = new();
     private readonly HashSet<Vector2Int> _occupied = new();
+    private readonly MovementUpdater _movementUpdater;
 
     private Transform _container;
     private int _nextId;
+
+    public MapEnvironmentSpawner(MovementUpdater movementUpdater) =>
+      _movementUpdater = movementUpdater;
 
     public IReadOnlyCollection<RuntimeEnvironmentObject> SpawnedObjects => _objects.Values;
 
@@ -47,6 +52,8 @@ namespace Map
         if (destructible != null)
           destructible.Destroyed += _ => Release(id);
       }
+
+      _movementUpdater.RefreshNoGoZones();
     }
 
     private bool TryReserve(Vector2Int origin, Vector2Int size)

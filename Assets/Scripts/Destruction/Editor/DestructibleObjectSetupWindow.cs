@@ -93,12 +93,19 @@ namespace Destruction.Editor
       var meshFilters = root.GetComponentsInChildren<MeshFilter>(true);
       var configuredCount = 0;
 
+      var partLayer = LayerMask.NameToLayer(DestructibleLayers.Parts);
+      if (partLayer < 0)
+        Debug.LogWarning($"Layer '{DestructibleLayers.Parts}' is not defined; leaving part layers unchanged.", root);
+
       foreach (var meshFilter in meshFilters)
       {
         if (meshFilter.sharedMesh == null)
           continue;
 
         var part = meshFilter.gameObject;
+        if (partLayer >= 0)
+          part.layer = partLayer;
+
         var meshCollider = part.GetComponent<MeshCollider>();
         if (meshCollider == null && part.GetComponent<Collider>() == null)
           meshCollider = part.AddComponent<MeshCollider>();
@@ -136,54 +143,82 @@ namespace Destruction.Editor
 
     private static void ConfigureRoot(GameObject root)
     {
-      var rootCollider = root.GetComponent<Collider>();
-      if (rootCollider == null)
-      {
-        var boxCollider = root.AddComponent<BoxCollider>();
-        boxCollider.isTrigger = true;
-        SetBounds(boxCollider, root);
-      }
+      var boxCollider = root.GetComponent<BoxCollider>();
+      if (boxCollider == null)
+        boxCollider = root.AddComponent<BoxCollider>();
+
+      boxCollider.isTrigger = true;
+      SetBounds(boxCollider, root);
+
+      var damagableLayer = LayerMask.NameToLayer(DestructibleLayers.Damagable);
+      if (damagableLayer < 0)
+        Debug.LogWarning($"Layer '{DestructibleLayers.Damagable}' is not defined; leaving root layer unchanged.", root);
+      else
+        root.layer = damagableLayer;
 
       if (root.GetComponent<FlowMapNoGoZone>() == null)
         root.AddComponent<FlowMapNoGoZone>();
 
       if (root.GetComponent<DestructibleObject>() == null)
         root.AddComponent<DestructibleObject>();
+
+      if (root.GetComponent<DestructibleHealth>() == null)
+        root.AddComponent<DestructibleHealth>();
     }
 
     private static void SetBounds(BoxCollider collider, GameObject root)
     {
       var renderers = root.GetComponentsInChildren<Renderer>(true);
-      if (renderers.Length == 0)
+      var childColliders = root.GetComponentsInChildren<Collider>(true);
+      var localBounds = default(Bounds);
+      var hasBounds = false;
+
+      foreach (var renderer in renderers)
+        EncapsulateWorldBounds(ref localBounds, ref hasBounds, renderer.bounds, root.transform);
+
+      foreach (var childCollider in childColliders)
+      {
+        if (childCollider.gameObject == root || childCollider == collider)
+          continue;
+
+        EncapsulateWorldBounds(
+          ref localBounds,
+          ref hasBounds,
+          childCollider.bounds,
+          root.transform);
+      }
+
+      if (!hasBounds)
       {
         Debug.LogWarning(
-          $"Prefab '{root.name}' has no Renderer components; using a unit root no-go collider.",
+          $"Prefab '{root.name}' has no child renderers or colliders; using a unit root no-go collider.",
           root);
         return;
       }
 
-      var localBounds = default(Bounds);
-      var hasBounds = false;
-      foreach (var renderer in renderers)
-      {
-        var worldBounds = renderer.bounds;
-        foreach (var corner in GetCorners(worldBounds))
-        {
-          var localPoint = root.transform.InverseTransformPoint(corner);
-          if (!hasBounds)
-          {
-            localBounds = new Bounds(localPoint, Vector3.zero);
-            hasBounds = true;
-          }
-          else
-          {
-            localBounds.Encapsulate(localPoint);
-          }
-        }
-      }
-
       collider.center = localBounds.center;
       collider.size = localBounds.size;
+    }
+
+    private static void EncapsulateWorldBounds(
+      ref Bounds localBounds,
+      ref bool hasBounds,
+      Bounds worldBounds,
+      Transform rootTransform)
+    {
+      foreach (var corner in GetCorners(worldBounds))
+      {
+        var localPoint = rootTransform.InverseTransformPoint(corner);
+        if (!hasBounds)
+        {
+          localBounds = new Bounds(localPoint, Vector3.zero);
+          hasBounds = true;
+        }
+        else
+        {
+          localBounds.Encapsulate(localPoint);
+        }
+      }
     }
 
     private static IEnumerable<Vector3> GetCorners(Bounds bounds)

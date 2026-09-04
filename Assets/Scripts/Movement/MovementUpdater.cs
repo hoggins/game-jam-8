@@ -93,7 +93,7 @@ namespace Movement
       RefreshNoGoZones();
     }
 
-    private void RefreshNoGoZones()
+    internal void RefreshNoGoZones()
     {
       ClearNoGoZones();
 

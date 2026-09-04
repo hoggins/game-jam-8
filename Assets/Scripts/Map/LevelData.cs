@@ -1,7 +1,9 @@
+using App;
 using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
+using VContainer;
 
 namespace Map
 {
@@ -16,10 +18,14 @@ namespace Map
     [SerializeField] private bool showGrid = true;
     [HideInInspector] public bool isEditing;
 
+    [Inject] private MapEnvironmentSpawner _spawner;
+
     public MapData MapData => mapData;
     public HouseSet HouseSet => houseSet;
 
-    private void Start() => Fill();
+    private void Awake() => this.AsInjected();
+
+    private void Start() => _spawner.Spawn(mapData, houseSet, seed, transform);
 
     private void OnDrawGizmos()
     {

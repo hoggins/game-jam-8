@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Combat;
+using Destruction;
 using Movement;
 using UnityEngine;
 using VContainer;
@@ -17,11 +18,15 @@ namespace Weapons
 
     private readonly List<MovementAgent> _targets = new(16);
     private readonly HashSet<Mob> _hitMobs = new();
+    private readonly Collider[] _destructibleHits = new Collider[16];
+
+    private int _damagableLayerMask;
 
     protected override void Awake()
     {
       base.Awake();
       PrewarmFx(_hitFxPrefab, _hitFxPrewarmCount);
+      _damagableLayerMask = LayerMask.GetMask(DestructibleLayers.Damagable);
     }
 
     protected override void Attack(int damage)
@@ -58,6 +63,15 @@ namespace Weapons
         mob.TakeDamage(damage);
         SpawnFx(_hitFxPrefab, mob.transform.position, mob.transform.rotation);
       }
+
+      var hitCount = Physics.OverlapSphereNonAlloc(
+        transform.position,
+        _attackRadius,
+        _destructibleHits,
+        _damagableLayerMask);
+
+      for (var i = 0; i < hitCount; i++)
+        DamageDestructible(_destructibleHits[i].gameObject, damage);
     }
 
     private void DamageTarget(MovementAgent target, int damage)
@@ -80,6 +94,24 @@ namespace Weapons
           continue;
 
         damageable.TakeDamage(damage);
+        SpawnFx(_hitFxPrefab, target.transform.position, target.transform.rotation);
+        break;
+      }
+    }
+
+    private void DamageDestructible(GameObject target, int damage)
+    {
+      var components = target.GetComponents<MonoBehaviour>();
+      for (var i = 0; i < components.Length; i++)
+      {
+        if (components[i] is not IDamageable damageable || !damageable.IsAlive)
+          continue;
+
+        if (damageable is IImpactDamageable impactDamageable)
+          impactDamageable.TakeDamage(damage, transform.position);
+        else
+          damageable.TakeDamage(damage);
+
         SpawnFx(_hitFxPrefab, target.transform.position, target.transform.rotation);
         break;
       }
