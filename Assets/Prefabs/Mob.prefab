@@ -12,7 +12,8 @@ GameObject:
   - component: {fileID: 6612269009932751248}
   - component: {fileID: 2925691346927250991}
   - component: {fileID: 8364999448545982152}
-  m_Layer: 0
+  - component: {fileID: 1475305018739610222}
+  m_Layer: 6
   m_Name: Mob
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -77,49 +78,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5b2b11323224842c1a6661c282f4d24b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Combat.Mob
-  _deathDissolveDuration: 0.3
-  _deathDissolveCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0.34932876
-      outSlope: 0.34932876
-      tangentMode: 34
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 0.12283552
-      value: 0.04290998
-      inSlope: 0.34913823
-      outSlope: 0.34913823
-      tangentMode: 34
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 0.69402105
-      value: 0.24222386
-      inSlope: 1.6138659
-      outSlope: 1.6138659
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.029710235
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 1
-      outSlope: 1
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
   _attachDuration: 0.35
   _attachPositionCurve:
     serializedVersion: 2
@@ -171,6 +129,67 @@ MonoBehaviour:
     m_RotationOrder: 4
   _attachRotationMin: {x: -30, y: -180, z: -30}
   _attachRotationMax: {x: 30, y: 180, z: 30}
+--- !u!114 &1475305018739610222
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5917521179565502705}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5dfe758cbc341437d9c3500f19537772, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Combat.MobDeath
+  _dissolveDuration: 0.3
+  _dissolveCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0.34932876
+      outSlope: 0.34932876
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.12283552
+      value: 0.04290998
+      inSlope: 0.34913823
+      outSlope: 0.34913823
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.69402105
+      value: 0.24222386
+      inSlope: 1.6138659
+      outSlope: 1.6138659
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.029710235
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 1
+      outSlope: 1
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  _throwDistance: 10
+  _throwLaunchAngle: 45
+  _throwSpinTorque: 5
+  _throwColliderRadius: 0.5
+  _throwColliderHeight: 1.5
+  _throwSettleDuration: 0.5
 --- !u!1001 &199463982887616756
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -226,6 +245,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 2b21d467b247e564ba3252f0bc75f4de, type: 3}
       propertyPath: m_Name
       value: Duck01
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 2b21d467b247e564ba3252f0bc75f4de, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
