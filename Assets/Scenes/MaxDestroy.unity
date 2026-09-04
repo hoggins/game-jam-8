@@ -167,6 +167,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 776171670584900271, guid: c47350293018144e19866d5dd6106a20, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 1306686755792595808, guid: c47350293018144e19866d5dd6106a20, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: 5040434158454343424, guid: c47350293018144e19866d5dd6106a20, type: 3}
       propertyPath: m_Name
       value: bootstrup
@@ -499,7 +507,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a3f7e632e7b341b1a348414d9aa8e2f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Destruction.PlayerDestructionEmulator
-  _destroyAction: {fileID: 0}
+  _interval: 0.5
   _radius: 3
   _magnitude: 5
 --- !u!1660057539 &9223372036854775807
