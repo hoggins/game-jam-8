@@ -13,5 +13,8 @@ namespace Map
 
     [Tooltip("Placed exactly once per map, before the regular fill, at a random cell that fits it.")]
     public bool unique;
+
+    [Range(1, HouseSet.DifficultyLevelCount)]
+    public int difficultyLevel = 1;
   }
 }

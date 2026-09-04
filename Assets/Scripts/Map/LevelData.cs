@@ -63,8 +63,9 @@ namespace Map
 
       var container = CreateContainer();
       var cellSize = mapData.CellSize;
+      var originCell = new Vector2(transform.position.x / cellSize, transform.position.z / cellSize);
 
-      foreach (var placement in MapFiller.Fill(mapData, houseSet, seed))
+      foreach (var placement in MapFiller.Fill(mapData, houseSet, originCell, seed))
       {
         var position = new Vector3(
           placement.Cell.x * cellSize + placement.House.size.x * cellSize * 0.5f,

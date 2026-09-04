@@ -36,8 +36,9 @@ namespace Map
       _container.SetParent(parent, false);
 
       var cellSize = mapData.CellSize;
+      var originCell = new Vector2(parent.position.x / cellSize, parent.position.z / cellSize);
 
-      foreach (var placement in MapFiller.Fill(mapData, houseSet, seed))
+      foreach (var placement in MapFiller.Fill(mapData, houseSet, originCell, seed))
       {
         if (!TryReserve(placement.Cell, placement.House.size))
           continue;

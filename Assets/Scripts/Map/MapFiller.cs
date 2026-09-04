@@ -17,7 +17,7 @@ namespace Map
 
   public static class MapFiller
   {
-    public static List<HousePlacement> Fill(MapData mapData, HouseSet houseSet, int seed = 0)
+    public static List<HousePlacement> Fill(MapData mapData, HouseSet houseSet, Vector2 originCell, int seed = 0)
     {
       var placements = new List<HousePlacement>();
       if (mapData == null || houseSet == null)
@@ -46,6 +46,14 @@ namespace Map
       if (houses.Count == 0 && uniqueHouses.Count == 0)
         return placements;
 
+      var housesByLevel = new Dictionary<int, List<HouseObject>>();
+      foreach (var house in houses)
+      {
+        if (!housesByLevel.TryGetValue(house.difficultyLevel, out var list))
+          housesByLevel[house.difficultyLevel] = list = new List<HouseObject>();
+        list.Add(house);
+      }
+
       var random = new System.Random(seed);
 
       PlaceUniqueHouses(uniqueHouses, cells, free, placements, random);
@@ -58,11 +66,15 @@ namespace Map
         if (!free.Contains(cell))
           continue;
 
+        var distance = Vector2.Distance(cell, originCell);
+        var level = houseSet.PickDifficultyLevel(distance, random);
+        var candidates = housesByLevel.TryGetValue(level, out var levelHouses) ? levelHouses : houses;
+
         HouseObject chosen = null;
-        var startIndex = random.Next(houses.Count);
-        for (var i = 0; i < houses.Count; i++)
+        var startIndex = random.Next(candidates.Count);
+        for (var i = 0; i < candidates.Count; i++)
         {
-          var house = houses[(startIndex + i) % houses.Count];
+          var house = candidates[(startIndex + i) % candidates.Count];
           if (CanPlace(free, cell, house.size))
           {
             chosen = house;
