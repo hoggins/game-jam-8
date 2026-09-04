@@ -11,8 +11,7 @@ Material:
   m_Shader: {fileID: 4800000, guid: 66e2bce270a384c75854fe31e53c1e70, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords:
-  - _ANIMATEPRINTS_ON
+  m_ValidKeywords: []
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -51,8 +50,12 @@ Material:
     m_Ints: []
     m_Floats:
     - _AddPrecomputedVelocity: 1
-    - _AnimatePrints: 1
+    - _AnimSinAdd: 0.21
+    - _AnimSinMul: 0.16
+    - _AnimSpeed: 6
+    - _AnimatePrints: 0
     - _EnvironmentReflections: 1
+    - _Hit: 0
     - _Keyword0: 0
     - _Metal: 0
     - _PannerDuration: 24
@@ -60,7 +63,7 @@ Material:
     - _PannerJitterSteps: 2
     - _PrintsColorAdd: 1
     - _PrintsColorMul: -1.4
-    - _PrintsNormalScale: 0.5
+    - _PrintsNormalScale: 1
     - _PrintsScale: 0.1
     - _PrintsSmoothAdd: 0
     - _PrintsSmoothMul: 1
@@ -71,11 +74,13 @@ Material:
     - _ScreenSpaceReflectionsContributeTransparent: 1
     - _Smoothness: 1
     - _SpecularHighlights: 1
+    - _VertexAnimAmplitude: 0.37
     - _XRMotionVectorsPass: 1
     m_Colors:
     - _Color0: {r: 0.49056602, g: 0.071733706, b: 0.071733706, a: 0}
     - _PrintsColor: {r: 1, g: 1, b: 1, a: 0}
     - _PrintsScale: {r: 0.1, g: 0.1, b: 0, a: 0}
     - _Vector0: {r: 3, g: 3, b: 3, a: 0}
+    - _Vector1: {r: 1, g: 1, b: 1, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

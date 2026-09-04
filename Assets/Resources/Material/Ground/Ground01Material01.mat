@@ -50,8 +50,12 @@ Material:
     m_Ints: []
     m_Floats:
     - _AddPrecomputedVelocity: 1
+    - _AnimSinAdd: 0
+    - _AnimSinMul: 0
+    - _AnimSpeed: 3
     - _AnimatePrints: 0
     - _EnvironmentReflections: 1
+    - _Hit: 0
     - _Keyword0: 0
     - _Metal: 0
     - _PannerDuration: 24
@@ -70,11 +74,13 @@ Material:
     - _ScreenSpaceReflectionsContributeTransparent: 1
     - _Smoothness: 1
     - _SpecularHighlights: 1
+    - _VertexAnimAmplitude: 1
     - _XRMotionVectorsPass: 1
     m_Colors:
     - _Color0: {r: 0.3490566, g: 0.1776237, b: 0.12348701, a: 0}
     - _PrintsColor: {r: 1, g: 1, b: 1, a: 0}
     - _PrintsScale: {r: 0.05, g: 0.05, b: 0, a: 0}
     - _Vector0: {r: 3, g: 3, b: 3, a: 0}
+    - _Vector1: {r: 1, g: 1, b: 1, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
