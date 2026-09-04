@@ -58,6 +58,7 @@ namespace Model
       IsBattleActive = true;
       IsTimerDestroyed = false;
       Timer = BattleBalance.BattleDuration;
+      Time.timeScale = 1f;
       foreach (var handler in _battleStartedHandlers)
         handler.OnBattleStarted();
 
@@ -91,6 +92,7 @@ namespace Model
 
     private void HandleBattleEnd()
     {
+      Time.timeScale = 0f;
       foreach (IBattleEnd handler in _battleEndHandlers)
         handler.OnBattleEnd();
     }

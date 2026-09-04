@@ -2,7 +2,7 @@ namespace Balance
 {
   public static class BattleBalance
   {
-    public static float BattleDuration => 10f;
+    public static float BattleDuration => 100000f;
     public static int DuckMaxHealth => 2;
     public static int DuckAttackDamage => 1;
     public static float DuckAttackDistance => 3f;
