@@ -1,7 +1,9 @@
 using Destruction;
 using Movement;
+using SceneHud;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 namespace Timer.Editor
 {
@@ -27,6 +29,23 @@ namespace Timer.Editor
     /// Glyph rows the two colon dots sit on, top first.
     private static readonly int[] DividerRows = { 1, 3 };
 
+    /// How high above the face the HUD camera hangs. Doubles as its far clip distance, which puts
+    /// the far plane exactly on the ground plane: lit pixels are fully in frame and the unlit ones
+    /// parked underground are clipped away. They would otherwise show through, because the camera
+    /// culls the ground and culled geometry does not occlude.
+    private const float HudCameraHeight = 10f;
+
+    /// Slack around the face inside the HUD frame, in world units.
+    private const float HudCameraMargin = 0.5f;
+
+    /// Vertical resolution of the HUD render texture; the horizontal one follows the framing.
+    private const int HudTextureHeight = 256;
+
+    /// What the HUD camera is allowed to see. The timer's own pixels are destructible parts; actors
+    /// and the default layer bring the player, the mobs and their effects in with them. Ground is
+    /// deliberately absent, which is what keeps the HUD background transparent.
+    private static readonly string[] HudCameraLayers = { "Default", "Actors", DestructibleLayers.Parts };
+
     [MenuItem("Tools/Destruction/Rebuild Battle Timer Prefab")]
     private static void RebuildMenu() => Debug.Log(Rebuild());
 
@@ -47,6 +66,8 @@ namespace Timer.Editor
         digits[d] = BuildDigit(root, d, material, partLayer, damagableLayer, decaySettings);
 
       BuildDivider(root, material, partLayer, damagableLayer, decaySettings);
+
+      BuildHudCamera(root);
 
       var timerObject = root.AddComponent<BattleTimerObject>();
       Apply(timerObject, so =>
@@ -166,6 +187,57 @@ namespace Timer.Editor
       var health = dividerRoot.AddComponent<DestructibleHealth>();
       Apply(health, so =>
         so.FindProperty("_objectType").intValue = (int)DestructibleObjectType.TimerDivider);
+    }
+
+    /// <summary>
+    /// The orthographic camera that mirrors the face onto the battle HUD, looking straight down with
+    /// its up vector along +Z so the glyph rows read top to bottom. The frame is only a hair wider
+    /// than the timer itself, so culling to the layers below picks up the digits plus whoever is
+    /// standing on them — fighting on top of the clock reads on the HUD.
+    /// </summary>
+    private static void BuildHudCamera(GameObject root)
+    {
+      var width = (ColumnCount - 1) * Pitch + PixelSize + HudCameraMargin;
+      var depth = (TimerDigit.Rows - 1) * Pitch + PixelSize + HudCameraMargin;
+
+      var cameraRoot = new GameObject("SceneHudCamera");
+      cameraRoot.transform.SetParent(root.transform, false);
+      cameraRoot.transform.localPosition = new Vector3(0f, HudCameraHeight, 0f);
+      cameraRoot.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
+
+      var camera = cameraRoot.AddComponent<Camera>();
+      camera.orthographic = true;
+      // The render texture's aspect drives the horizontal framing, so half the depth is the whole
+      // of the framing decision here; the texture below is sized to match.
+      camera.orthographicSize = depth * 0.5f;
+      camera.cullingMask = LayerMask.GetMask(HudCameraLayers);
+      camera.clearFlags = CameraClearFlags.SolidColor;
+      camera.backgroundColor = new Color(0f, 0f, 0f, 0f);
+      camera.nearClipPlane = 0.1f;
+      camera.farClipPlane = HudCameraHeight;
+      camera.useOcclusionCulling = false;
+      camera.allowHDR = false;
+      camera.allowMSAA = false;
+
+      // URP would add this with defaults on first render anyway; pinning it here keeps the HUD pass
+      // a plain unlit base render instead of inheriting whatever the project defaults become.
+      var cameraData = cameraRoot.AddComponent<UniversalAdditionalCameraData>();
+      cameraData.renderType = CameraRenderType.Base;
+      cameraData.renderPostProcessing = false;
+      cameraData.renderShadows = false;
+      cameraData.requiresColorOption = CameraOverrideOption.Off;
+      cameraData.requiresDepthOption = CameraOverrideOption.Off;
+
+      var element = cameraRoot.AddComponent<SceneHudElement>();
+      Apply(element, so =>
+      {
+        so.FindProperty("_id").intValue = (int)SceneHudElementId.BattleTimer;
+
+        var resolution = so.FindProperty("_resolution");
+        resolution.vector2IntValue = new Vector2Int(
+          Mathf.RoundToInt(HudTextureHeight * width / depth),
+          HudTextureHeight);
+      });
     }
 
     private static GameObject CreatePixel(

@@ -57,6 +57,9 @@ namespace App
       builder.Register<Pooling.Pool>(Lifetime.Singleton)
         .AsSelf()
         .AsImplementedInterfaces();
+      builder.Register<SceneHud.SceneHudService>(Lifetime.Singleton)
+        .AsSelf()
+        .AsImplementedInterfaces();
 
       var movementSettings = Resources.Load<Movement.MovementSettings>("MovementSettings");
       if (movementSettings == null)
