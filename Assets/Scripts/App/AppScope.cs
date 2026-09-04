@@ -45,7 +45,7 @@ namespace App
         .AsSelf()
         .AsImplementedInterfaces();
 
-      builder.Register<PlayerService>(Lifetime.Singleton).AsSelf();
+      builder.Register<CharacterService>(Lifetime.Singleton).AsSelf();
       builder.Register<MainMenuService>(Lifetime.Singleton).AsSelf();
       builder.Register<PauseMenuService>(Lifetime.Singleton).AsSelf();
     }

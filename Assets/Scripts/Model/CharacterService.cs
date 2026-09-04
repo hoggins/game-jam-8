@@ -4,7 +4,7 @@ using Balance;
 namespace Model
 {
   [UnityEngine.Scripting.Preserve]
-  public class PlayerService
+  public class CharacterService
   {
     private readonly Storage _storage;
 
@@ -19,7 +19,7 @@ namespace Model
 
     public int CurrentHealth { get; private set; }
 
-    public PlayerService(Storage storage)
+    public CharacterService(Storage storage)
     {
       _storage = storage;
     }

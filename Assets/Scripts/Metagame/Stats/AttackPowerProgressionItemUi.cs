@@ -9,7 +9,7 @@ namespace Metagame.Stats
 {
   public class AttackPowerProgressionItemUi : MonoBehaviour
   {
-    [Inject] private readonly PlayerService _playerService;
+    [Inject] private readonly CharacterService _characterService;
     [SerializeField] private Button _upgradeButton;
     [SerializeField] private TMP_Text _valueText;
 
@@ -21,23 +21,23 @@ namespace Metagame.Stats
     private void OnEnable()
     {
       _upgradeButton.onClick.AddListener(UpgradeClick);
-      _playerService.ProgressionChanged += Refresh;
+      _characterService.ProgressionChanged += Refresh;
       Refresh();
     }
 
     private void OnDisable()
     {
       _upgradeButton.onClick.RemoveListener(UpgradeClick);
-      _playerService.ProgressionChanged -= Refresh;
+      _characterService.ProgressionChanged -= Refresh;
     }
 
     private void UpgradeClick() =>
-      _playerService.UpgradeAttackPower();
+      _characterService.UpgradeAttackPower();
 
     private void Refresh()
     {
-      _valueText.text = _playerService.AttackPower.ToString();
-      _upgradeButton.interactable = _playerService.CanUpgradeAttackPower;
+      _valueText.text = _characterService.AttackPower.ToString();
+      _upgradeButton.interactable = _characterService.CanUpgradeAttackPower;
     }
   }
 }
