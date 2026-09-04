@@ -14,7 +14,7 @@ namespace App.TmpTest
 
     void ITickable.Tick()
     {
-      Debug.Log($"[{nameof(ScopeLogger)}] Tick");
+      // Debug.Log($"[{nameof(ScopeLogger)}] Tick");
     }
 
     void IDisposable.Dispose()
