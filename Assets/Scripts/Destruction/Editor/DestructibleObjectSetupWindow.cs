@@ -28,10 +28,12 @@ namespace Destruction.Editor
 
       EditorGUILayout.Space();
 
-      EditorGUILayout.LabelField("Base Decay Settings (scaled per part by its volume)", EditorStyles.boldLabel);
+      EditorGUILayout.LabelField("Base Decay Settings (multiplier is derived per part from its volume)", EditorStyles.boldLabel);
       var so = new SerializedObject(this);
       so.Update();
-      EditorGUILayout.PropertyField(so.FindProperty(nameof(baseDecaySettings)), true);
+      EditorGUILayout.PropertyField(
+        so.FindProperty(nameof(baseDecaySettings)).FindPropertyRelative(nameof(PartDecaySettings.baseFallSpeed)),
+        new GUIContent("Base Fall Speed"));
       so.ApplyModifiedProperties();
 
       EditorGUILayout.Space();
@@ -53,9 +55,17 @@ namespace Destruction.Editor
         return;
       }
 
+      var decaySettings = Resources.Load<EnvironmentDecaySettings>("EnvironmentDecaySettings");
+      if (decaySettings == null)
+      {
+        Debug.LogError("EnvironmentDecaySettings asset was not found in Resources.");
+        PrefabUtility.UnloadPrefabContents(root);
+        return;
+      }
+
       try
       {
-        var meshCount = ConfigureMeshParts(root, baseDecaySettings);
+        var meshCount = ConfigureMeshParts(root, baseDecaySettings, decaySettings.MaxFallSpeedMultiplier);
         ConfigureRoot(root);
 
         EditorUtility.SetDirty(root);
@@ -78,7 +88,7 @@ namespace Destruction.Editor
       }
     }
 
-    private static int ConfigureMeshParts(GameObject root, PartDecaySettings baseSettings)
+    private static int ConfigureMeshParts(GameObject root, PartDecaySettings baseSettings, float maxSpeedMultiplier)
     {
       var meshFilters = root.GetComponentsInChildren<MeshFilter>(true);
       var configuredCount = 0;
@@ -109,7 +119,7 @@ namespace Destruction.Editor
         if (decayPart == null)
           decayPart = part.AddComponent<DecayPart>();
 
-        decayPart.Configure(baseSettings.ForVolume(GetPartVolume(meshFilter)));
+        decayPart.Configure(baseSettings.ForVolume(GetPartVolume(meshFilter), maxSpeedMultiplier));
 
         configuredCount++;
       }

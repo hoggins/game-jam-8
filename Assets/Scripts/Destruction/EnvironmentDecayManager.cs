@@ -70,12 +70,16 @@ namespace Destruction
           part.GroundY = SampleGround(part.Body.position);
           part.Sinking = true;
           part.Body.isKinematic = true;
+
+          // Ignore physics from here on: other debris should pass through as this part sinks, not rest on top of it.
+          foreach (var partCollider in part.Body.GetComponentsInChildren<Collider>())
+            partCollider.enabled = false;
         }
 
-        part.Body.MovePosition(part.Body.position + Vector3.down * (part.Settings.fallSpeed * Time.deltaTime));
+        part.Body.MovePosition(part.Body.position + Vector3.down * (part.Settings.FallSpeed * Time.deltaTime));
 
         var bounds = GetBounds(part.Body.transform);
-        if (!IsUnderground(bounds, part.GroundY, part.Settings.sinkDepth))
+        if (!IsUnderground(bounds, part.GroundY, _settings.SinkDepth))
           continue;
 
         Remove(part.Body.gameObject);

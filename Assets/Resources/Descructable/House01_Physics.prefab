@@ -293,8 +293,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Destruction.DecayPart
   settings:
-    fallSpeed: 3
-    sinkDepth: 0.5
+    baseFallSpeed: 1
+    speedMultiplier: 3
 --- !u!1 &4238489262646353744 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -2525282553224116615, guid: 208dac2293f004745999f92738b4a8d5, type: 3}
@@ -362,8 +362,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Destruction.DecayPart
   settings:
-    fallSpeed: 3
-    sinkDepth: 0.5
+    baseFallSpeed: 1
+    speedMultiplier: 3
 --- !u!1 &4745642664374059353 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -6341719467454211984, guid: 208dac2293f004745999f92738b4a8d5, type: 3}
@@ -431,8 +431,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Destruction.DecayPart
   settings:
-    fallSpeed: 42.254345
-    sinkDepth: 0.5
+    baseFallSpeed: 1
+    speedMultiplier: 5
 --- !u!1 &5776083276248063522 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -5328178090829609205, guid: 208dac2293f004745999f92738b4a8d5, type: 3}
@@ -500,8 +500,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Destruction.DecayPart
   settings:
-    fallSpeed: 6.0499997
-    sinkDepth: 0.5
+    baseFallSpeed: 1
+    speedMultiplier: 5
 --- !u!1 &6486626527906906743 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4333420616004033374, guid: 208dac2293f004745999f92738b4a8d5, type: 3}
@@ -569,8 +569,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Destruction.DecayPart
   settings:
-    fallSpeed: 3
-    sinkDepth: 0.5
+    baseFallSpeed: 1
+    speedMultiplier: 3
 --- !u!1 &6493917486143548994 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4339571110108116843, guid: 208dac2293f004745999f92738b4a8d5, type: 3}
@@ -638,8 +638,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Destruction.DecayPart
   settings:
-    fallSpeed: 3
-    sinkDepth: 0.5
+    baseFallSpeed: 1
+    speedMultiplier: 3
 --- !u!1 &7337884554845112779 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -8938765112351895326, guid: 208dac2293f004745999f92738b4a8d5, type: 3}
@@ -707,8 +707,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Destruction.DecayPart
   settings:
-    fallSpeed: 3
-    sinkDepth: 0.5
+    baseFallSpeed: 1
+    speedMultiplier: 3
 --- !u!1 &7703177036018164856 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 208dac2293f004745999f92738b4a8d5, type: 3}
@@ -826,8 +826,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Destruction.DecayPart
   settings:
-    fallSpeed: 3
-    sinkDepth: 0.5
+    baseFallSpeed: 1
+    speedMultiplier: 3
 --- !u!1 &8186100541604173782 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -7512962469406372097, guid: 208dac2293f004745999f92738b4a8d5, type: 3}
@@ -895,8 +895,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Destruction.DecayPart
   settings:
-    fallSpeed: 0.72645396
-    sinkDepth: 0.5
+    baseFallSpeed: 1
+    speedMultiplier: 0.72645396
 --- !u!1 &8681289062639083191 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2187734615552427934, guid: 208dac2293f004745999f92738b4a8d5, type: 3}
@@ -964,8 +964,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Destruction.DecayPart
   settings:
-    fallSpeed: 3
-    sinkDepth: 0.5
+    baseFallSpeed: 1
+    speedMultiplier: 3
 --- !u!1 &8743164497849827954 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -6957020551732307109, guid: 208dac2293f004745999f92738b4a8d5, type: 3}
@@ -1033,8 +1033,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Destruction.DecayPart
   settings:
-    fallSpeed: 3
-    sinkDepth: 0.5
+    baseFallSpeed: 1
+    speedMultiplier: 3
 --- !u!1 &8881332518926254056 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -7104828924328450367, guid: 208dac2293f004745999f92738b4a8d5, type: 3}
@@ -1102,5 +1102,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Destruction.DecayPart
   settings:
-    fallSpeed: 0.27034757
-    sinkDepth: 0.5
+    baseFallSpeed: 1
+    speedMultiplier: 0.27034757
