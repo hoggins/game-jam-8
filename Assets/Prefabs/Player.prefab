@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 7434860180236888473}
   - component: {fileID: 7107969219782158665}
-  - component: {fileID: 850228895762470380}
   - component: {fileID: 5472302730410959488}
   m_Layer: 0
   m_Name: Player
@@ -47,25 +46,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f717f278c7704d99b5579a6984c5a14, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Movement.MovementAgent
---- !u!114 &850228895762470380
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 773140023587785399}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 91a5a0613931541faaa278036473c526, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Movement.MovementUpdater
-  _spatialCellSize: 2
-  _flowCellSize: 1
-  _flowPadding: 15
-  _flowTargetCellDeviation: 2
-  _maxFlowCellCount: 262144
-  _avoidanceSpread: 2
-  _avoidanceTargetDistance: 3
 --- !u!114 &5472302730410959488
 MonoBehaviour:
   m_ObjectHideFlags: 0

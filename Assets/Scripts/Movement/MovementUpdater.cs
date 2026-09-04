@@ -1,35 +1,18 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using VContainer.Unity;
 
 namespace Movement
 {
-  [DisallowMultipleComponent]
-  public sealed class MovementUpdater : MonoBehaviour
+  public sealed class MovementUpdater : IInitializable, ILateTickable, System.IDisposable
   {
     private const string PlayerTag = "Player";
-    private const float SelfRadiusModifier = 3f;
-
-    [Header("Spatial Map")]
-    [SerializeField, Min(0.01f)] private float _spatialCellSize = 2f;
-
-    [Header("Flow Map")]
-    [SerializeField, Min(0.01f)] private float _flowCellSize = 1f;
-    [SerializeField, Min(0f)] private float _flowPadding = 15f;
-    [SerializeField, Min(0)] private int _flowTargetCellDeviation = 2;
-    [SerializeField, Min(1)] private int _maxFlowCellCount = 262144;
-
-    [Header("Wall Collision")]
-    [SerializeField, Min(0f)] private float _wallSkin = 0.02f;
-    [SerializeField, Range(1, 4)] private int _wallSlideIterations = 3;
-
-    [Header("Flocking")]
-    [SerializeField, Min(0f)] private float _avoidanceSpread = 2f;
-    [SerializeField, Min(0.01f)] private float _avoidanceTargetDistance = 3f;
-
-    private static MovementUpdater _activeUpdater;
+    private readonly MovementSettings _settings;
 
     private readonly FlowMap _flowMap = new();
     private readonly SpatialMap _spatialMap = new();
+    private readonly List<MovementAgent> _activeAgents = new();
     private readonly List<MovementAgent> _neighbors = new(16);
     private readonly List<FlowMapNoGoZone> _knownNoGoZones = new();
     private readonly List<FlowMapNoGoZone> _noGoZones = new();
@@ -38,15 +21,47 @@ namespace Movement
 
     private int _noGoZoneRevision;
 
+    public MovementUpdater(MovementSettings settings) =>
+      _settings = settings;
+
     internal FlowMap FlowMap => _flowMap;
+    internal IReadOnlyList<MovementAgent> ActiveAgents => _activeAgents;
 
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    private static void ResetStatics() =>
-      _activeUpdater = null;
-
-    private void Awake()
+    internal void Register(MovementAgent agent)
     {
-      var noGoZones = FindObjectsByType<FlowMapNoGoZone>(
+      if (!_activeAgents.Contains(agent))
+        _activeAgents.Add(agent);
+    }
+
+    internal void Unregister(MovementAgent agent) =>
+      _activeAgents.Remove(agent);
+
+    void IInitializable.Initialize()
+    {
+      SceneManager.sceneLoaded += OnSceneLoaded;
+      RefreshNoGoZones();
+    }
+
+    void ILateTickable.LateTick() =>
+      Step(Time.deltaTime);
+
+    void System.IDisposable.Dispose()
+    {
+      SceneManager.sceneLoaded -= OnSceneLoaded;
+      ClearNoGoZones();
+      _activeAgents.Clear();
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+      RefreshNoGoZones();
+    }
+
+    private void RefreshNoGoZones()
+    {
+      ClearNoGoZones();
+
+      var noGoZones = Object.FindObjectsByType<FlowMapNoGoZone>(
         FindObjectsInactive.Include,
         FindObjectsSortMode.None);
       for (var i = 0; i < noGoZones.Length; i++)
@@ -62,19 +77,7 @@ namespace Movement
       }
     }
 
-    private void OnEnable()
-    {
-      if (_activeUpdater == null)
-        _activeUpdater = this;
-    }
-
-    private void OnDisable()
-    {
-      if (_activeUpdater == this)
-        _activeUpdater = null;
-    }
-
-    private void OnDestroy()
+    private void ClearNoGoZones()
     {
       for (var i = 0; i < _knownNoGoZones.Count; i++)
       {
@@ -85,22 +88,15 @@ namespace Movement
           zone.Destroyed -= OnNoGoZoneDestroyed;
         }
       }
-    }
 
-    private void LateUpdate()
-    {
-      if (_activeUpdater == null)
-        _activeUpdater = this;
-
-      if (_activeUpdater != this)
-        return;
-
-      Step(Time.deltaTime);
+      _knownNoGoZones.Clear();
+      _noGoZones.Clear();
+      _noGoZoneRevision++;
     }
 
     private void Step(float deltaTime)
     {
-      var agents = MovementAgent.ActiveAgents;
+      var agents = _activeAgents;
       if (agents.Count == 0)
         return;
 
@@ -114,7 +110,7 @@ namespace Movement
 
         agent.ReadTransform();
         if (agent.Controller != null)
-          flowClearance = Mathf.Max(flowClearance, agent.Controller.Radius + _wallSkin);
+          flowClearance = Mathf.Max(flowClearance, agent.Controller.Radius + _settings.WallSkin);
 
         if (player == null && agent.CompareTag(PlayerTag))
           player = agent;
@@ -131,13 +127,13 @@ namespace Movement
           _noGoZones,
           _noGoZoneRevision,
           flowClearance,
-          _flowCellSize,
-          _flowPadding,
-          _flowTargetCellDeviation,
-          _maxFlowCellCount);
+          _settings.FlowCellSize,
+          _settings.FlowPadding,
+          _settings.FlowTargetCellDeviation,
+          _settings.MaxFlowCellCount);
       }
 
-      _spatialMap.Rebuild(agents, _spatialCellSize);
+      _spatialMap.Rebuild(agents, _settings.SpatialCellSize);
 
       for (var i = 0; i < agents.Count; i++)
       {
@@ -246,7 +242,7 @@ namespace Movement
       var radius = Mathf.Max(0.01f, agent.Controller.Radius);
       position = ResolveWallOverlaps(agent, position, radius);
 
-      for (var iteration = 0; iteration < _wallSlideIterations; iteration++)
+      for (var iteration = 0; iteration < _settings.WallSlideIterations; iteration++)
       {
         var distance = remaining.magnitude;
         if (distance <= 0.0001f)
@@ -259,7 +255,7 @@ namespace Movement
           break;
         }
 
-        var travelDistance = Mathf.Max(0f, hit.distance - _wallSkin);
+        var travelDistance = Mathf.Max(0f, hit.distance - _settings.WallSkin);
         position += direction * travelDistance;
         remaining -= direction * travelDistance;
 
@@ -283,11 +279,11 @@ namespace Movement
       Vector3 position,
       float radius)
     {
-      for (var iteration = 0; iteration < _wallSlideIterations; iteration++)
+      for (var iteration = 0; iteration < _settings.WallSlideIterations; iteration++)
       {
         var overlapCount = Physics.OverlapSphereNonAlloc(
           position,
-          radius + _wallSkin,
+          radius + _settings.WallSkin,
           _wallOverlaps,
           Physics.DefaultRaycastLayers,
           QueryTriggerInteraction.Ignore);
@@ -306,15 +302,15 @@ namespace Movement
           var distance = away.magnitude;
           var push = Vector2.zero;
 
-          if (distance > 0.0001f && distance < radius + _wallSkin)
+          if (distance > 0.0001f && distance < radius + _settings.WallSkin)
           {
-            push = away / distance * (radius + _wallSkin - distance);
+            push = away / distance * (radius + _settings.WallSkin - distance);
           }
           else if (distance <= 0.0001f)
           {
             var zone = wall.GetComponentInParent<FlowMapNoGoZone>();
             if (zone == null
-                || !zone.TryGetCirclePushOut(center, radius + _wallSkin, out push))
+                || !zone.TryGetCirclePushOut(center, radius + _settings.WallSkin, out push))
               continue;
           }
 
@@ -343,7 +339,7 @@ namespace Movement
         radius,
         direction,
         _wallHits,
-        distance + _wallSkin,
+        distance + _settings.WallSkin,
         Physics.DefaultRaycastLayers,
         QueryTriggerInteraction.Ignore);
       var closestDistance = float.PositiveInfinity;
@@ -389,12 +385,12 @@ namespace Movement
       {
         var targetDistanceSq = (playerPosition - agent.Position).sqrMagnitude - radius * radius;
         distanceFactor = Mathf.Clamp01(
-          targetDistanceSq / (_avoidanceTargetDistance * _avoidanceTargetDistance));
+          targetDistanceSq / (_settings.AvoidanceTargetDistance * _settings.AvoidanceTargetDistance));
       }
 
       var radiusModifier = isStanding
         ? 1f
-        : 1f + (SelfRadiusModifier + _avoidanceSpread) * distanceFactor;
+        : 1f + (_settings.SelfRadiusModifier + _settings.AvoidanceSpread) * distanceFactor;
       var queryRadius = radius * radiusModifier;
 
       _spatialMap.QueryCircle(agent, queryRadius, controller.CollidesWith, _neighbors);
@@ -436,17 +432,5 @@ namespace Movement
       return new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
     }
 
-    private void OnValidate()
-    {
-      _spatialCellSize = Mathf.Max(0.01f, _spatialCellSize);
-      _flowCellSize = Mathf.Max(0.01f, _flowCellSize);
-      _flowPadding = Mathf.Max(0f, _flowPadding);
-      _flowTargetCellDeviation = Mathf.Max(0, _flowTargetCellDeviation);
-      _maxFlowCellCount = Mathf.Max(1, _maxFlowCellCount);
-      _wallSkin = Mathf.Max(0f, _wallSkin);
-      _wallSlideIterations = Mathf.Clamp(_wallSlideIterations, 1, 4);
-      _avoidanceSpread = Mathf.Max(0f, _avoidanceSpread);
-      _avoidanceTargetDistance = Mathf.Max(0.01f, _avoidanceTargetDistance);
-    }
   }
 }

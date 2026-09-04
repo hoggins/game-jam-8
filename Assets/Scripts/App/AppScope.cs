@@ -48,6 +48,14 @@ namespace App
       builder.Register<CharacterService>(Lifetime.Singleton).AsSelf();
       builder.Register<MainMenuService>(Lifetime.Singleton).AsSelf();
       builder.Register<PauseMenuService>(Lifetime.Singleton).AsSelf();
+
+      var movementSettings = Resources.Load<Movement.MovementSettings>("MovementSettings");
+      if (movementSettings == null)
+        throw new System.InvalidOperationException("MovementSettings asset was not found in Resources.");
+
+      builder.RegisterInstance(movementSettings);
+      builder.RegisterEntryPoint<Movement.MovementUpdater>(Lifetime.Singleton)
+        .AsSelf();
     }
   }
 }

@@ -1,9 +1,10 @@
+using App;
 using UnityEngine;
+using VContainer;
 
 namespace Movement
 {
   [DisallowMultipleComponent]
-  [RequireComponent(typeof(MovementUpdater))]
   public sealed class FlowMapVisualizer : MonoBehaviour
   {
     [SerializeField] private bool _drawBlockedCells = true;
@@ -11,11 +12,16 @@ namespace Movement
     [SerializeField, Min(1)] private int _maxDirectionArrows = 4096;
     [SerializeField, Min(0f)] private float _heightOffset = 0.1f;
 
-    private MovementUpdater _movementUpdater;
+    [Inject] private MovementUpdater _movementUpdater;
+
+    private void Awake() =>
+      this.AsInjected();
 
     private void OnDrawGizmos()
     {
-      _movementUpdater ??= GetComponent<MovementUpdater>();
+      if (_movementUpdater == null && Application.isPlaying)
+        this.AsInjected();
+
       if (_movementUpdater == null)
         return;
 

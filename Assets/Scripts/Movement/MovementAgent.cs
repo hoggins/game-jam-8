@@ -1,14 +1,13 @@
-using System.Collections.Generic;
+using App;
 using UnityEngine;
+using VContainer;
 
 namespace Movement
 {
   [DisallowMultipleComponent]
   public sealed class MovementAgent : MonoBehaviour
   {
-    private static readonly List<MovementAgent> ActiveAgentsInternal = new();
-
-    internal static IReadOnlyList<MovementAgent> ActiveAgents => ActiveAgentsInternal;
+    [Inject] private MovementUpdater _movementUpdater;
 
     internal IMovementController Controller { get; private set; }
     internal Vector3 Position { get; set; }
@@ -17,12 +16,9 @@ namespace Movement
     internal Vector3 DesiredVelocity { get; set; }
     internal Quaternion Rotation { get; set; }
 
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    private static void ResetStatics() =>
-      ActiveAgentsInternal.Clear();
-
     private void Awake()
     {
+      this.AsInjected();
       Controller = GetComponent<IMovementController>();
       Position = transform.position;
       Rotation = transform.rotation;
@@ -31,14 +27,11 @@ namespace Movement
         Debug.LogError($"{name} needs a PlayerMovement or MobMovement component.", this);
     }
 
-    private void OnEnable()
-    {
-      if (!ActiveAgentsInternal.Contains(this))
-        ActiveAgentsInternal.Add(this);
-    }
+    private void OnEnable() =>
+      _movementUpdater.Register(this);
 
     private void OnDisable() =>
-      ActiveAgentsInternal.Remove(this);
+      _movementUpdater.Unregister(this);
 
     internal void ReadTransform()
     {

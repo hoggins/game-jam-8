@@ -5,7 +5,6 @@ namespace Movement
 {
   [DisallowMultipleComponent]
   [RequireComponent(typeof(MovementAgent))]
-  [RequireComponent(typeof(MovementUpdater))]
   public sealed class PlayerMovement : MonoBehaviour, IMovementController
   {
     [Header("Input")]
