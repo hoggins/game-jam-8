@@ -8,6 +8,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -8938765112351895326, guid: 208dac2293f004745999f92738b4a8d5, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 208dac2293f004745999f92738b4a8d5, type: 3}
       propertyPath: m_LocalPosition.x
       value: 22.6
@@ -48,9 +52,57 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -8626244017970689424, guid: 208dac2293f004745999f92738b4a8d5, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: -7512962469406372097, guid: 208dac2293f004745999f92738b4a8d5, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: -7104828924328450367, guid: 208dac2293f004745999f92738b4a8d5, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: -6957020551732307109, guid: 208dac2293f004745999f92738b4a8d5, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: -6341719467454211984, guid: 208dac2293f004745999f92738b4a8d5, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: -5328178090829609205, guid: 208dac2293f004745999f92738b4a8d5, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: -3710568415268956439, guid: 208dac2293f004745999f92738b4a8d5, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: -2525282553224116615, guid: 208dac2293f004745999f92738b4a8d5, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 208dac2293f004745999f92738b4a8d5, type: 3}
       propertyPath: m_Name
       value: House01_Physics
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 208dac2293f004745999f92738b4a8d5, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 2187734615552427934, guid: 208dac2293f004745999f92738b4a8d5, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 4333420616004033374, guid: 208dac2293f004745999f92738b4a8d5, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 4339571110108116843, guid: 208dac2293f004745999f92738b4a8d5, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
