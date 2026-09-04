@@ -123,6 +123,24 @@ namespace Model
       BattleDefeated?.Invoke();
     }
 
+    /// Leaving a battle without winning or losing it — quitting to the main menu. Clears the
+    /// state so the next StartBattle is not swallowed by the IsBattleActive guard, and fires no
+    /// win/defeat event because neither happened.
+    public void AbandonBattle()
+    {
+      if (!IsBattleActive)
+        return;
+
+      IsBattleActive = false;
+      IsTimerDestroyed = false;
+      IsCombatSuspended = false;
+      _defeatDelay = 0f;
+      Timer = BattleBalance.BattleDuration;
+      Time.timeScale = 1f;
+      foreach (IBattleEnd handler in _battleEndHandlers)
+        handler.OnBattleEnd();
+    }
+
     public void DestroyTimer()
     {
       IsTimerDestroyed = true;

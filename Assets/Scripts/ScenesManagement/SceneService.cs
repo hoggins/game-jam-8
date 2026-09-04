@@ -33,6 +33,10 @@ namespace ScenesManagement
 
     public void LoadMainMenuScene()
     {
+      // A battle left through the pause menu never ends on its own, and BattleService is an app
+      // singleton: without this the stale IsBattleActive makes the next StartBattle a no-op and
+      // the new battle inherits the old timer.
+      _battleService.AbandonBattle();
       LoadScene(MainMenuSceneName);
     }
 
