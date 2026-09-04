@@ -99,16 +99,8 @@ namespace Combat
     {
       _isDying = true;
       _characterService?.RegisterDuckKill();
-
-      if (_attachCoroutine != null)
-      {
-        StopCoroutine(_attachCoroutine);
-        _attachCoroutine = null;
-      }
-
-      if (_movementAgent != null)
-        _movementAgent.enabled = false;
-
+      // Movement and any in-flight attach animation keep running: a dying duck walks
+      // out its dissolve. The IsAlive guard in Update is what stops it dealing damage.
       _deathCoroutine = StartCoroutine(PlayDeath());
     }
 
