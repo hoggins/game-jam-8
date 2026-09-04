@@ -1,4 +1,5 @@
 using System;
+using Balance;
 using App;
 using Combat;
 using Model;
@@ -11,7 +12,7 @@ namespace Destruction
   [RequireComponent(typeof(DestructibleObject))]
   public sealed class DestructibleHealth : MonoBehaviour, IImpactDamageable
   {
-    [SerializeField, Min(1)] private int _maxHealth = 1;
+    [SerializeField] private DestructibleObjectType _objectType;
 
     [Inject] private CharacterService _characterService;
 
@@ -25,7 +26,7 @@ namespace Destruction
     {
       this.AsInjected();
       _destructibleObject = GetComponent<DestructibleObject>();
-      CurrentHealth = _maxHealth;
+      CurrentHealth = BattleBalance.GetDestructibleMaxHealth(_objectType);
     }
 
     public void TakeDamage(int damage) =>
@@ -47,8 +48,5 @@ namespace Destruction
         _destructibleObject.Break(origin);
       }
     }
-
-    private void OnValidate() =>
-      _maxHealth = Mathf.Max(1, _maxHealth);
   }
 }
