@@ -17,6 +17,14 @@ namespace Combat
     [SerializeField, Min(0f)] private float _deathDissolveDuration = 1f;
     [SerializeField] private AnimationCurve _deathDissolveCurve = DefaultDissolveCurve();
 
+    [Header("Throw (death while attached)")]
+    [SerializeField, Min(0f)] private float _throwDistance = 10f;
+    [SerializeField, Min(0f)] private float _throwLaunchAngle = 45f;
+    [SerializeField, Min(0f)] private float _throwSpinTorque = 5f;
+    [SerializeField, Min(0f)] private float _throwColliderRadius = 0.5f;
+    [SerializeField, Min(0f)] private float _throwColliderHeight = 1.5f;
+    [SerializeField, Min(0f)] private float _throwSettleDuration = 0.5f;
+
     [Header("Attach")]
     [SerializeField, Min(0f)] private float _attachDuration = 0.35f;
     [SerializeField] private AnimationCurve _attachPositionCurve = DefaultAttachCurve();
@@ -39,6 +47,8 @@ namespace Combat
     private Transform _player;
     private Coroutine _deathCoroutine;
     private Coroutine _attachCoroutine;
+    private Rigidbody _throwRigidbody;
+    private Collider _throwCollider;
     private bool _isDying;
     private bool _hasAttacked;
     private bool _isAttached;
@@ -308,6 +318,12 @@ namespace Combat
 
     private IEnumerator PlayDeath()
     {
+      if (_isAttached)
+      {
+        ThrowOffPlayer();
+        yield return new WaitForSeconds(_throwSettleDuration);
+      }
+
       var elapsed = 0f;
       while (elapsed < _deathDissolveDuration)
       {
@@ -321,7 +337,57 @@ namespace Combat
 
       _deathCoroutine = null;
       DetachFromPlayer();
+      RemoveThrowPhysics();
       _pool?.Release(gameObject);
+    }
+
+    // A duck that died mid-attach gets knocked off the player instead of just
+    // dissolving in place. Rigidbody/Collider are added only for this instant,
+    // since most ducks never attach and don't need to carry physics components.
+    private void ThrowOffPlayer()
+    {
+      var throwOrigin = _player != null ? _player.position : transform.position;
+      DetachFromPlayer();
+
+      if (_movementAgent != null)
+        _movementAgent.enabled = false;
+
+      var direction = transform.position - throwOrigin;
+      direction.y = 0f;
+      if (direction.sqrMagnitude < 0.0001f)
+        direction = UnityEngine.Random.insideUnitSphere;
+      direction.Normalize();
+
+      var capsule = gameObject.AddComponent<CapsuleCollider>();
+      capsule.radius = _throwColliderRadius;
+      capsule.height = _throwColliderHeight;
+      capsule.center = new Vector3(0f, _throwColliderHeight * 0.5f, 0f);
+      _throwCollider = capsule;
+
+      var rigidbody = gameObject.AddComponent<Rigidbody>();
+      var gravity = Mathf.Abs(Physics.gravity.y);
+      var launchSpeed = gravity > 0f ? Mathf.Sqrt(_throwDistance * gravity) : 0f;
+      var angleRad = _throwLaunchAngle * Mathf.Deg2Rad;
+      var launchVelocity = direction * (launchSpeed * Mathf.Cos(angleRad))
+        + Vector3.up * (launchSpeed * Mathf.Sin(angleRad));
+      rigidbody.AddForce(launchVelocity, ForceMode.VelocityChange);
+      rigidbody.AddTorque(UnityEngine.Random.insideUnitSphere * _throwSpinTorque, ForceMode.VelocityChange);
+      _throwRigidbody = rigidbody;
+    }
+
+    private void RemoveThrowPhysics()
+    {
+      if (_throwRigidbody != null)
+      {
+        Destroy(_throwRigidbody);
+        _throwRigidbody = null;
+      }
+
+      if (_throwCollider != null)
+      {
+        Destroy(_throwCollider);
+        _throwCollider = null;
+      }
     }
 
     private void SetDissolve(float value)
@@ -364,12 +430,19 @@ namespace Combat
       }
 
       _isAttached = false;
+      RemoveThrowPhysics();
     }
 
     private void OnValidate()
     {
       _deathDissolveDuration = Mathf.Max(0f, _deathDissolveDuration);
       _deathDissolveCurve ??= DefaultDissolveCurve();
+      _throwDistance = Mathf.Max(0f, _throwDistance);
+      _throwLaunchAngle = Mathf.Clamp(_throwLaunchAngle, 0f, 90f);
+      _throwSpinTorque = Mathf.Max(0f, _throwSpinTorque);
+      _throwColliderRadius = Mathf.Max(0f, _throwColliderRadius);
+      _throwColliderHeight = Mathf.Max(0f, _throwColliderHeight);
+      _throwSettleDuration = Mathf.Max(0f, _throwSettleDuration);
       _attachDuration = Mathf.Max(0f, _attachDuration);
       _attachPositionCurve ??= DefaultAttachCurve();
       _attachRotationCurve ??= DefaultAttachCurve();
