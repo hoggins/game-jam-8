@@ -1,4 +1,7 @@
-using App.TmpTest;
+using Metagame.MainMenu;
+using Metagame.PauseMenu;
+using Model;
+using ScenesManagement;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -33,9 +36,18 @@ namespace App
     protected override void Configure(IContainerBuilder builder)
     {
       base.Configure(builder);
-      builder.Register<ScopeLogger>(Lifetime.Singleton)
+
+      builder.Register<SceneService>(Lifetime.Singleton)
         .AsSelf()
         .AsImplementedInterfaces();
+
+      builder.Register<Storage>(Lifetime.Singleton)
+        .AsSelf()
+        .AsImplementedInterfaces();
+
+      builder.Register<PlayerService>(Lifetime.Singleton).AsSelf();
+      builder.Register<MainMenuService>(Lifetime.Singleton).AsSelf();
+      builder.Register<PauseMenuService>(Lifetime.Singleton).AsSelf();
     }
   }
 }
