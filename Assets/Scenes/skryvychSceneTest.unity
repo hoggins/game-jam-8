@@ -653,83 +653,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f903e9399414745ada58a14464dc2c85, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Movement.FlowMapNoGoZone
---- !u!1 &570252129
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 570252132}
-  - component: {fileID: 570252130}
-  m_Layer: 0
-  m_Name: MeleeWeapon
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &570252130
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 570252129}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cf79991a47edd4a7a919920a9e8c23bf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Weapons.MeleeWeapon
-  _attackCooldown: 0.5
-  _attackFxPrefab: {fileID: 0}
-  _attackFxPrewarmCount: 8
-  _attackFxPoint: {fileID: 570252132}
-  _attackRadius: 8
-  _hitFxPrefab: {fileID: 0}
-  _hitFxPrewarmCount: 8
---- !u!4 &570252132
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 570252129}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 667697734}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &667697730 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 773140023587785399, guid: 2a61427168126454490fc82a1da79814, type: 3}
-  m_PrefabInstance: {fileID: 5197033119970386117}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &667697734 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7434860180236888473, guid: 2a61427168126454490fc82a1da79814, type: 3}
   m_PrefabInstance: {fileID: 5197033119970386117}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &667697735
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 667697730}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d6a16da18c0b748b4a371a239a4daca3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Movement.FlowMapVisualizer
-  _drawBlockedCells: 1
-  _drawUnreachableCells: 1
-  _maxDirectionArrows: 4096
-  _heightOffset: 0.1
 --- !u!1001 &700516441
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1740,10 +1668,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
-    - target: {fileID: 5472302730410959488, guid: 2a61427168126454490fc82a1da79814, type: 3}
-      propertyPath: _avoidancePower
-      value: 4
-      objectReference: {fileID: 0}
     - target: {fileID: 7434860180236888473, guid: 2a61427168126454490fc82a1da79814, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -1786,14 +1710,8 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects:
-    - targetCorrespondingSourceObject: {fileID: 7434860180236888473, guid: 2a61427168126454490fc82a1da79814, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 570252132}
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 773140023587785399, guid: 2a61427168126454490fc82a1da79814, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 667697735}
+    m_AddedGameObjects: []
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2a61427168126454490fc82a1da79814, type: 3}
 --- !u!1001 &5625740932148047329
 PrefabInstance:
