@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using App;
+using Model;
 using Movement;
 using Pooling;
 using UnityEngine;
@@ -75,6 +76,7 @@ namespace Combat
 
     [Inject] private Pool _pool;
     [Inject] private MovementUpdater _movementUpdater;
+    [Inject] private BattleService _battleService;
 
     private float _elapsedSeconds;
     private int _nextSpawnSide;
@@ -92,6 +94,9 @@ namespace Combat
 
     private void Update()
     {
+      if (_battleService is not { IsBattleActive: true })
+        return;
+
       _elapsedSeconds += Time.deltaTime;
       ResolveSceneReferences();
 

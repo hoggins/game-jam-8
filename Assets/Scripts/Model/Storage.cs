@@ -1,4 +1,5 @@
 using System;
+using Balance;
 using UnityEngine;
 using UnityEngine.Scripting;
 using VContainer.Unity;
@@ -63,8 +64,8 @@ namespace Model
 
     void IInitializable.Initialize()
     {
-      _attackPower = PlayerPrefs.GetInt(AttackPowerKey, 1);
-      _maxHealth = PlayerPrefs.GetInt(MaxHealthKey, 1);
+      _attackPower = PlayerPrefs.GetInt(AttackPowerKey, ProgressionBalance.StartingAttackPower);
+      _maxHealth = PlayerPrefs.GetInt(MaxHealthKey, ProgressionBalance.StartingMaxHealth);
       _ducksKilled = PlayerPrefs.GetInt(DucksKilledKey, 0);
       _buildingsDestroyed = PlayerPrefs.GetInt(BuildingsDestroyedKey, 0);
       _currentCoins = PlayerPrefs.GetInt(CurrentCoinsKey, 0);

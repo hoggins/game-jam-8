@@ -2,6 +2,7 @@ using System.Collections;
 using System;
 using System.Collections.Generic;
 using App;
+using Balance;
 using Model;
 using Movement;
 using Pooling;
@@ -13,7 +14,6 @@ namespace Combat
   [DisallowMultipleComponent]
   public sealed class Mob : MonoBehaviour, IDamageable
   {
-    [SerializeField, Min(1)] private int _maxHealth = 1;
     [SerializeField, Min(0f)] private float _deathDelay = 0.5f;
 
     [Header("Attack")]
@@ -46,7 +46,7 @@ namespace Combat
     {
       this.AsInjected();
       _movementAgent = GetComponent<MovementAgent>();
-      CurrentHealth = _maxHealth;
+      CurrentHealth = BattleBalance.DuckMaxHealth;
     }
 
     private void Start() =>
@@ -54,7 +54,7 @@ namespace Combat
 
     private void OnEnable()
     {
-      CurrentHealth = _maxHealth;
+      CurrentHealth = BattleBalance.DuckMaxHealth;
       _isDying = false;
       _hasAttacked = false;
       _isAttached = false;
@@ -317,7 +317,6 @@ namespace Combat
 
     private void OnValidate()
     {
-      _maxHealth = Mathf.Max(1, _maxHealth);
       _deathDelay = Mathf.Max(0f, _deathDelay);
       _attackDamage = Mathf.Max(1, _attackDamage);
       _attackDistance = Mathf.Max(0f, _attackDistance);
