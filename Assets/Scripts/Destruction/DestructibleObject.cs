@@ -5,7 +5,7 @@ using VContainer;
 
 namespace Destruction
 {
-  public class ImpulseDestructible : MonoBehaviour
+  public class DestructibleObject : MonoBehaviour
   {
     private const string FrictionMaterialPath = "Descructable/FirstHouseFriction";
 
@@ -16,7 +16,7 @@ namespace Destruction
     private Rigidbody[] _bodies;
     private bool _destroyed;
 
-    public event Action<ImpulseDestructible> Destroyed;
+    public event Action<DestructibleObject> Destroyed;
 
     private void Awake()
     {

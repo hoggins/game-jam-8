@@ -12,7 +12,7 @@ namespace Destruction
     [SerializeField, Min(0f)] private float _radius = 3f;
     [SerializeField, Min(0f)] private float _magnitude = 5f;
 
-    private readonly HashSet<ImpulseDestructible> _hit = new();
+    private readonly HashSet<DestructibleObject> _hit = new();
 
     private float _timer;
 
@@ -33,7 +33,7 @@ namespace Destruction
       _hit.Clear();
       foreach (var collider in Physics.OverlapSphere(origin, _radius))
       {
-        var destructible = collider.GetComponentInParent<ImpulseDestructible>();
+        var destructible = collider.GetComponentInParent<DestructibleObject>();
         if (destructible != null)
           _hit.Add(destructible);
       }

@@ -39,7 +39,7 @@ namespace Map
         var instance = Object.Instantiate(placement.House.prefab, position, Quaternion.identity, _container);
         instance.name = placement.House.name;
 
-        var destructible = instance.GetComponentInChildren<ImpulseDestructible>();
+        var destructible = instance.GetComponentInChildren<DestructibleObject>();
         var id = _nextId++;
         var runtimeObject = new RuntimeEnvironmentObject(id, placement.Cell, placement.House.size, destructible);
         _objects.Add(id, runtimeObject);

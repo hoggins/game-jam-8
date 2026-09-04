@@ -65,7 +65,7 @@ namespace Destruction.Editor
 
     private void Pulse()
     {
-      var destructible = _spawned.GetComponent<ImpulseDestructible>();
+      var destructible = _spawned.GetComponent<DestructibleObject>();
       if (destructible == null)
       {
         Debug.LogWarning($"{_spawned.name} has no ImpulseDestructible component.", _spawned);
