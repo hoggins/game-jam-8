@@ -244,7 +244,7 @@ MonoBehaviour:
   _attackFxPrewarmCount: 8
   _attackFxPoint: {fileID: 652812152619922830}
   _attackRadius: 5
-  _hitFxPrefab: {fileID: 169629888940587798, guid: 4ab9f602c20f24c53a8f89ce465a595d, type: 3}
+  _hitFxPrefab: {fileID: 2847630276705505541, guid: 90495a52fe2ab4865b2f3cb56c99a68c, type: 3}
   _hitFxPrewarmCount: 8
 --- !u!1001 &2733658417430417747
 PrefabInstance:

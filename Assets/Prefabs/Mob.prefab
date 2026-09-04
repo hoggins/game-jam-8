@@ -189,4 +189,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5b2b11323224842c1a6661c282f4d24b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Combat.Mob
-  _maxHealth: 15
+  _maxHealth: 2
+  _deathDelay: 0.5

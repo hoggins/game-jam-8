@@ -13,12 +13,10 @@ namespace App
         return;
 
       if (keyboard.equalsKey.wasPressedThisFrame || keyboard.numpadPlusKey.wasPressedThisFrame)
-      {
-        Time.timeScale += 1f;
-      }
+        Time.timeScale *= 2f;
 
       if (keyboard.minusKey.wasPressedThisFrame || keyboard.numpadMinusKey.wasPressedThisFrame)
-        Time.timeScale = Mathf.Max(0f, Time.timeScale - 1f);
+        Time.timeScale *= 0.5f;
     }
   }
 }
