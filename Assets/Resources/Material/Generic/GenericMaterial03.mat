@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Tree01Material01
+  m_Name: GenericMaterial03
   m_Shader: {fileID: 4800000, guid: 66e2bce270a384c75854fe31e53c1e70, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -33,7 +33,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _PrintsNormal:
-        m_Texture: {fileID: 2800000, guid: 9c3278e653ca64f779eabaa05091e3fd, type: 3}
+        m_Texture: {fileID: 2800000, guid: abb7f774cb2544ff881d4e0dbb8cd097, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
@@ -60,7 +60,7 @@ Material:
     - _PannerJitterSteps: 2
     - _PrintsColorAdd: 1
     - _PrintsColorMul: -1.4
-    - _PrintsNormalScale: 0.25
+    - _PrintsNormalScale: 0.5
     - _PrintsScale: 0.1
     - _PrintsSmoothAdd: 0
     - _PrintsSmoothMul: 1
