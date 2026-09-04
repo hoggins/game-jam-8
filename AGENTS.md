@@ -74,7 +74,14 @@ public class HudService : IInitializable, IDisposable
 }
 ```
 
-Subscribing without a matching unsubscribe in `Dispose`/`OnDestroy` is a bug.
+Subscribing without a matching unsubscribe in `Dispose` is a bug.
+
+For `MonoBehaviour` UI components, listener lifetime follows enabled state:
+
+- Inject dependencies in `Awake`.
+- Add button and event listeners in `OnEnable`, then refresh the displayed state there.
+- Remove those same listeners in `OnDisable`.
+- Do not use `Awake`/`OnDestroy` as the subscription lifetime for UI listeners.
 
 ### Injecting outside the container
 
