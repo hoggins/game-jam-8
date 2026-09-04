@@ -1,6 +1,4 @@
 using App;
-using Model;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using VContainer;
@@ -15,12 +13,8 @@ namespace Metagame.MainMenu
     [SerializeField] private Button _progressionButton;
     [SerializeField] private Button _quitButton;
     [SerializeField] private Button _progressionBackButton;
-    [SerializeField] private TMP_Text _ducksKilledValue;
-    [SerializeField] private TMP_Text _buildingsDestroyedValue;
-    [SerializeField] private TMP_Text _coinsValue;
 
     [Inject] private MainMenuService _mainMenuService;
-    [Inject] private Storage _storage;
 
     private void Awake()
     {
@@ -66,9 +60,6 @@ namespace Metagame.MainMenu
 
     private void OpenProgression()
     {
-      SetText(_ducksKilledValue, _storage.DucksKilled);
-      SetText(_buildingsDestroyedValue, _storage.BuildingsDestroyed);
-      SetText(_coinsValue, _storage.CurrentCoins);
       SetActive(_mainMenu, false);
       SetActive(_progressionMenu, true);
     }
@@ -77,12 +68,6 @@ namespace Metagame.MainMenu
     {
       if (target != null)
         target.SetActive(isActive);
-    }
-
-    private static void SetText(TMP_Text target, int value)
-    {
-      if (target != null)
-        target.text = value.ToString();
     }
   }
 }

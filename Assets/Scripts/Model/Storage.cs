@@ -21,6 +21,8 @@ namespace Model
     private int _currentCoins;
     private bool _isInitialized;
 
+    public event Action StatisticsChanged;
+
     public int AttackPower
     {
       get => _attackPower;
@@ -36,13 +38,21 @@ namespace Model
     public int DucksKilled
     {
       get => _ducksKilled;
-      set => SetValue(ref _ducksKilled, value, DucksKilledKey);
+      set
+      {
+        if (SetValue(ref _ducksKilled, value, DucksKilledKey))
+          StatisticsChanged?.Invoke();
+      }
     }
 
     public int BuildingsDestroyed
     {
       get => _buildingsDestroyed;
-      set => SetValue(ref _buildingsDestroyed, value, BuildingsDestroyedKey);
+      set
+      {
+        if (SetValue(ref _buildingsDestroyed, value, BuildingsDestroyedKey))
+          StatisticsChanged?.Invoke();
+      }
     }
 
     public int CurrentCoins
@@ -67,14 +77,16 @@ namespace Model
       _isInitialized = false;
     }
 
-    private void SetValue(ref int field, int value, string key)
+    private bool SetValue(ref int field, int value, string key)
     {
       if (field == value)
-        return;
+        return false;
 
       field = value;
       if (_isInitialized)
         PlayerPrefs.SetInt(key, value);
+
+      return true;
     }
   }
 }

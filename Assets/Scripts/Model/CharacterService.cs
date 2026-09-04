@@ -14,6 +14,7 @@ namespace Model
 
     public int AttackPower => _storage.AttackPower;
     public int MaxHealth => _storage.MaxHealth;
+    public int CurrentCoins => _storage.CurrentCoins;
     public bool CanUpgradeAttackPower => _storage.CurrentCoins >= ProgressionBalance.AttackPowerUpgradeCost;
     public bool CanUpgradeMaxHealth => _storage.CurrentCoins >= ProgressionBalance.MaxHealthUpgradeCost;
 
