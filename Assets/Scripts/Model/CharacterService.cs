@@ -61,13 +61,17 @@ namespace Model
       HealthDestroyed?.Invoke();
     }
 
-    public void RegisterDuckKill()
+    /// Credits the kill and its coin drop immediately, and returns how many coins
+    /// dropped so the caller can spawn that many visual pickups.
+    public int RegisterDuckKill()
     {
       _storage.DucksKilled += 1;
 
       var droppedCoins = BattleBalance.RollDuckCoinDrop();
       if (droppedCoins > 0)
         AddCoins(droppedCoins);
+
+      return droppedCoins;
     }
 
     public void RegisterBuildingDestroyed()

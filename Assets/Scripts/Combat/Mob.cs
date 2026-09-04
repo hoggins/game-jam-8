@@ -28,7 +28,10 @@ namespace Combat
     [Inject] private CharacterService _characterService;
     [Inject] private BattleService _battleService;
 
+    private const string CoinPickupPrefabPath = "Prefabs/Interface/Coin01";
+
     private static readonly int InflateId = Shader.PropertyToID("_Inflate");
+    private static GameObject _coinPickupPrefab;
 
     private MovementAgent _movementAgent;
     private Renderer[] _renderers;
@@ -102,11 +105,29 @@ namespace Combat
     private void BeginDeath()
     {
       _isDying = true;
-      _characterService?.RegisterDuckKill();
+      SpawnCoinPickups(_characterService?.RegisterDuckKill() ?? 0);
       // Movement and any in-flight attach animation keep running: a dying duck walks
       // out its dissolve. The IsAlive guard in Update is what stops it dealing damage.
       _deathCoroutine = StartCoroutine(PlayDeath());
     }
+
+    private void SpawnCoinPickups(int count)
+    {
+      if (count <= 0 || _pool == null)
+        return;
+
+      var prefab = CoinPickupPrefab;
+      if (prefab == null)
+        return;
+
+      for (var i = 0; i < count; i++)
+        _pool.Get(prefab, transform.position, Quaternion.identity);
+    }
+
+    private static GameObject CoinPickupPrefab =>
+      _coinPickupPrefab = _coinPickupPrefab != null
+        ? _coinPickupPrefab
+        : Resources.Load<GameObject>(CoinPickupPrefabPath);
 
     private void AttachToPlayer()
     {

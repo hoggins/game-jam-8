@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 5899980594194442029}
   - component: {fileID: 9148269245489459760}
   - component: {fileID: 7618265991706908571}
+  - component: {fileID: 6193202133253422547}
   m_Layer: 0
   m_Name: Coin01
   m_TagString: Untagged
@@ -90,3 +91,45 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &6193202133253422547
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3702206530065698854}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2e2387f80d274704b420c5d1a6b24d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Combat.CoinPickup
+  _riseDuration: 1
+  _riseHeight: 2
+  _riseCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 4.4799213
+      outSlope: 4.4799213
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.009456263
+    - serializedVersion: 3
+      time: 1
+      value: 0.9988823
+      inSlope: 3.5595386
+      outSlope: 3.5595386
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.012214541
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  _flyDuration: 0.45
+  _flyArcHeight: 2.5
+  _targetHeight: 1
+  _spinDegreesPerSecond: 360
