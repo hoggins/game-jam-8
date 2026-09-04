@@ -10,6 +10,7 @@ namespace Model
 
     public event Action Died;
     public event Action ProgressionChanged;
+    public event Action<int> CoinsChanged;
 
     public int AttackPower => _storage.AttackPower;
     public int MaxHealth => _storage.MaxHealth;
@@ -40,6 +41,12 @@ namespace Model
       Die();
     }
 
+    public void AddCoins(int count)
+    {
+      _storage.CurrentCoins += count;
+      CoinsChanged?.Invoke(_storage.CurrentCoins);
+    }
+
     public void UpgradeAttackPower()
     {
       if (_storage.CurrentCoins < ProgressionBalance.AttackPowerUpgradeCost)
@@ -48,6 +55,7 @@ namespace Model
       _storage.CurrentCoins -= ProgressionBalance.AttackPowerUpgradeCost;
       _storage.AttackPower += ProgressionBalance.AttackPowerUpgradeAmount;
       ProgressionChanged?.Invoke();
+      CoinsChanged?.Invoke(_storage.CurrentCoins);
     }
 
     public void UpgradeMaxHealth()
@@ -58,6 +66,7 @@ namespace Model
       _storage.CurrentCoins -= ProgressionBalance.MaxHealthUpgradeCost;
       _storage.MaxHealth += ProgressionBalance.MaxHealthUpgradeAmount;
       ProgressionChanged?.Invoke();
+      CoinsChanged?.Invoke(_storage.CurrentCoins);
     }
 
     public void Die()
