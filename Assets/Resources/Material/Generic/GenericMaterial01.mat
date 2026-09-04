@@ -53,6 +53,7 @@ Material:
     - _AddPrecomputedVelocity: 1
     - _AnimatePrints: 1
     - _EnvironmentReflections: 1
+    - _Hit: 0
     - _Keyword0: 0
     - _Metal: 0
     - _PannerDuration: 24
