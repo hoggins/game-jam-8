@@ -28,7 +28,7 @@ namespace Combat
     [SerializeField] private Vector3 _attachRotationMax = new(30f, 180f, 30f);
 
     [Inject] private Pool _pool;
-    [Inject] private CharacterService _playerService;
+    [Inject] private CharacterService _characterService;
 
     private MovementAgent _movementAgent;
     private Transform _player;
@@ -74,7 +74,7 @@ namespace Combat
         return;
 
       _hasAttacked = true;
-      _playerService?.TakeDamage(_attackDamage);
+      _characterService?.TakeDamage(_attackDamage);
       AttachToPlayer();
     }
 
@@ -94,6 +94,7 @@ namespace Combat
     private void BeginDeath()
     {
       _isDying = true;
+      _characterService?.RegisterDuckKill();
 
       if (_attachCoroutine != null)
       {

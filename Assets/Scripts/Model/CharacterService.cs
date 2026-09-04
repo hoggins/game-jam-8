@@ -61,6 +61,15 @@ namespace Model
       HealthDestroyed?.Invoke();
     }
 
+    public void RegisterDuckKill()
+    {
+      _storage.DucksKilled += 1;
+
+      var droppedCoins = BattleBalance.RollDuckCoinDrop();
+      if (droppedCoins > 0)
+        AddCoins(droppedCoins);
+    }
+
     public void AddCoins(int count)
     {
       _storage.CurrentCoins += count;
