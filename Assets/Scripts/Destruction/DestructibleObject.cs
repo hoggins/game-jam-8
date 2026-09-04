@@ -16,16 +16,22 @@ namespace Destruction
     [Inject] private EnvironmentDecayManager _decayManager;
 
     private FlowMapNoGoZone _noGoZone;
+     private BoxCollider _navigationCollider;
     private Rigidbody[] _bodies;
     private bool _destroyed;
 
     public event Action<DestructibleObject> Destroyed;
 
+    private static LayerMask? _partLayer;
+
     private void Awake()
     {
       this.AsInjected();
 
+      _partLayer ??= LayerMask.NameToLayer(DestructibleLayers.Parts);
+
       _noGoZone = GetComponent<FlowMapNoGoZone>();
+      _navigationCollider = GetComponent<BoxCollider>();
       _bodies = GetComponentsInChildren<Rigidbody>();
 
       var friction = Resources.Load<PhysicsMaterial>(FrictionMaterialPath);
@@ -48,6 +54,11 @@ namespace Destruction
       _destroyed = true;
       if (_noGoZone != null)
         _noGoZone.enabled = false;
+
+      if (_navigationCollider != null)
+        _navigationCollider.enabled = false;
+
+      gameObject.layer = _partLayer!.Value;
 
       foreach (var body in _bodies)
       {

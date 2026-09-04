@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 7107969219782158665}
   - component: {fileID: 5472302730410959488}
   - component: {fileID: 6603987278544191975}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Player
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -94,7 +94,7 @@ GameObject:
   - component: {fileID: 1138558917480085719}
   - component: {fileID: 8003726410371404064}
   - component: {fileID: 3023919550131260774}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -204,7 +204,7 @@ GameObject:
   m_Component:
   - component: {fileID: 652812152619922830}
   - component: {fileID: 2658548792467257908}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: MeleeWeapon
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -257,6 +257,10 @@ PrefabInstance:
     - target: {fileID: 5271093088594307602, guid: bd54a0201b05a405c9cc2156d1b76858, type: 3}
       propertyPath: m_Name
       value: FxSpinAttack01
+      objectReference: {fileID: 0}
+    - target: {fileID: 5271093088594307602, guid: bd54a0201b05a405c9cc2156d1b76858, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 7979485667643604759, guid: bd54a0201b05a405c9cc2156d1b76858, type: 3}
       propertyPath: m_LocalPosition.x
