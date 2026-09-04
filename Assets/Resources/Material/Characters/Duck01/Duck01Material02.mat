@@ -1,0 +1,91 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Duck01Material02
+  m_Shader: {fileID: 4800000, guid: 227a6f426f5014ec6a62259829d0557e, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _IDMap:
+        m_Texture: {fileID: 2800000, guid: cd8f78c0f0e6e4a53af7f047f23e0a77, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: 3ee3e211296a02940bdf5a1478fc8f03, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _PrintsColor:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _PrintsColorTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _PrintsNormal:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_Lightmaps:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_LightmapsInd:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_ShadowMasks:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _AddPrecomputedVelocity: 1
+    - _AnimatePrints: 1
+    - _EnvironmentReflections: 1
+    - _Keyword0: 0
+    - _MainTexMul: 2
+    - _Metal: 0
+    - _PannerDuration: 24
+    - _PannerJitterAmmount: 1
+    - _PannerJitterSteps: 2
+    - _PrintsColorAdd: 1
+    - _PrintsColorMul: -1.4
+    - _PrintsNormalScale: 0.25
+    - _PrintsScale: 0.1
+    - _PrintsSmoothAdd: 0
+    - _PrintsSmoothMul: 1
+    - _QueueControl: 0
+    - _QueueOffset: 0
+    - _ReceiveShadows: 1
+    - _ScreenSpaceReflections: 1
+    - _ScreenSpaceReflectionsContributeTransparent: 1
+    - _Smoothness: 0.56
+    - _SpecularHighlights: 1
+    - _XRMotionVectorsPass: 1
+    m_Colors:
+    - _Color0: {r: 1, g: 0.42050046, b: 0, a: 0}
+    - _Color1: {r: 0.6378975, g: 0.6792453, b: 0.6311855, a: 0}
+    - _Color2: {r: 0.4056604, g: 0.4056604, b: 0.4056604, a: 0}
+    - _PrintsColor: {r: 1, g: 1, b: 1, a: 0}
+    - _PrintsScale: {r: 0.1, g: 0.1, b: 0, a: 0}
+    - _Vector0: {r: 3, g: 3, b: 3, a: 0}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1
