@@ -60,6 +60,7 @@ Material:
     - _AddPrecomputedVelocity: 1
     - _AnimatePrints: 1
     - _EnvironmentReflections: 1
+    - _Inflate: 0
     - _Keyword0: 0
     - _MainTexMul: 2
     - _Metal: 0
