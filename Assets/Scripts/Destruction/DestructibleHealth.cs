@@ -43,16 +43,16 @@ namespace Destruction
         return;
 
       CurrentHealth = Mathf.Max(0, CurrentHealth - damage);
+
+      if (_hitFx != null)
+        _hitFx.PlayHit();
+
       if (CurrentHealth == 0)
       {
         _isDestroyed = true;
         _characterService?.RegisterBuildingDestroyed();
         _destructibleObject.Break(origin);
-        return;
       }
-
-      if (_hitFx != null)
-        _hitFx.PlayHit();
     }
   }
 }
