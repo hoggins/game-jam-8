@@ -51,6 +51,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fbd91bb7b3c54768a4e20a5c33315c13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Metagame.PauseMenu.PauseMenuUi
+  _cancelAction: {fileID: 7727032971491509709, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   _root: {fileID: 3902424423536799961}
   _resumeButton: {fileID: 8213507138580130354}
   _mainMenuButton: {fileID: 6466403222729363715}

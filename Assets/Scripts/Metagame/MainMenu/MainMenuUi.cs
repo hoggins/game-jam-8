@@ -7,7 +7,7 @@ using VContainer;
 
 namespace Metagame.MainMenu
 {
-  public class MainMenuUi : MonoBehaviour
+  public class MainMenuUi : UiBase
   {
     [SerializeField] private GameObject _mainMenu;
     [SerializeField] private GameObject _progressionMenu;
@@ -27,8 +27,9 @@ namespace Metagame.MainMenu
       this.AsInjected();
     }
 
-    private void OnEnable()
+    protected override void OnEnable()
     {
+      base.OnEnable();
       _playButton.onClick.AddListener(Play);
       _progressionButton.onClick.AddListener(OpenProgression);
       _quitButton.onClick.AddListener(Quit);
@@ -36,12 +37,13 @@ namespace Metagame.MainMenu
       ShowMainMenu();
     }
 
-    private void OnDisable()
+    protected override void OnDisable()
     {
       _playButton.onClick.RemoveListener(Play);
       _progressionButton.onClick.RemoveListener(OpenProgression);
       _quitButton.onClick.RemoveListener(Quit);
       _progressionBackButton.onClick.RemoveListener(ShowMainMenu);
+      base.OnDisable();
     }
 
     private void Play() =>
@@ -49,6 +51,12 @@ namespace Metagame.MainMenu
 
     private void Quit() =>
       _mainMenuService.Quit();
+
+    protected override void OnCancel()
+    {
+      if (_progressionMenu != null && _progressionMenu.activeSelf)
+        ShowMainMenu();
+    }
 
     private void ShowMainMenu()
     {

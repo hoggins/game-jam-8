@@ -440,6 +440,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bff1fc9f08884e868f077d23a92603a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Metagame.MainMenu.MainMenuUi
+  _cancelAction: {fileID: 7727032971491509709, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   _mainMenu: {fileID: 1079633993739943900}
   _progressionMenu: {fileID: 6873200542130762963}
   _playButton: {fileID: 6768697361408593848}

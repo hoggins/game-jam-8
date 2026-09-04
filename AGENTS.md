@@ -78,9 +78,12 @@ Subscribing without a matching unsubscribe in `Dispose` is a bug.
 
 For `MonoBehaviour` UI components, listener lifetime follows enabled state:
 
+- Screens that handle the `UI/Cancel` action inherit from `UiBase` and override `OnCancel`.
+  Small UI items and passive overlays stay plain `MonoBehaviour`s.
 - Inject dependencies in `Awake`.
-- Add button and event listeners in `OnEnable`, then refresh the displayed state there.
+- Override `OnEnable`, call `base.OnEnable()`, add button/event listeners, then refresh the displayed state.
 - Remove those same listeners in `OnDisable`.
+- Override `OnDisable` and call `base.OnDisable()` after removing the UI's own listeners.
 - Do not use `Awake`/`OnDestroy` as the subscription lifetime for UI listeners.
 
 ### Injecting outside the container
