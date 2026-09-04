@@ -84,7 +84,10 @@ namespace Movement
         for (var i = 0; i < entries.Count; i++)
         {
           var other = entries[i];
-          if (other == self || !_seen.Add(other) || other.Controller == null)
+          if (other == self
+              || !other.isActiveAndEnabled
+              || !_seen.Add(other)
+              || other.Controller == null)
             continue;
 
           if ((collisionMask & other.Controller.Layer) == 0)

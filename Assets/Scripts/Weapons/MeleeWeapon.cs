@@ -16,6 +16,7 @@ namespace Weapons
     [Inject] private MovementUpdater _movementUpdater;
 
     private readonly List<MovementAgent> _targets = new(16);
+    private readonly HashSet<Mob> _hitMobs = new();
 
     protected override void Awake()
     {
@@ -25,31 +26,62 @@ namespace Weapons
 
     protected override void Attack(int damage)
     {
-      if (_movementUpdater == null)
-        return;
+      _hitMobs.Clear();
 
-      _movementUpdater.QueryCircle(
-        transform.position,
-        _attackRadius,
-        MovementLayer.Mob,
-        _targets);
-
-      for (var i = 0; i < _targets.Count; i++)
+      if (_movementUpdater != null)
       {
-        var target = _targets[i];
-        if (target == null)
-          continue;
+        _movementUpdater.QueryCircle(
+          transform.position,
+          _attackRadius,
+          MovementLayer.Mob,
+          _targets);
 
-        var components = target.GetComponents<MonoBehaviour>();
-        for (var j = 0; j < components.Length; j++)
+        for (var i = 0; i < _targets.Count; i++)
         {
-          if (components[j] is not IDamageable damageable || !damageable.IsAlive)
+          var target = _targets[i];
+          if (target == null || !target.isActiveAndEnabled)
             continue;
 
-          damageable.TakeDamage(damage);
-          SpawnFx(_hitFxPrefab, target.transform.position, target.transform.rotation);
-          break;
+          DamageTarget(target, damage);
         }
+      }
+
+      var attachedMobs = Object.FindObjectsByType<Mob>(
+        FindObjectsInactive.Exclude,
+        FindObjectsSortMode.None);
+      for (var i = 0; i < attachedMobs.Length; i++)
+      {
+        var mob = attachedMobs[i];
+        if (mob == null || !mob.IsAttached || !mob.IsAlive || !_hitMobs.Add(mob))
+          continue;
+
+        mob.TakeDamage(damage);
+        SpawnFx(_hitFxPrefab, mob.transform.position, mob.transform.rotation);
+      }
+    }
+
+    private void DamageTarget(MovementAgent target, int damage)
+    {
+      var mob = target.GetComponent<Mob>();
+      if (mob != null)
+      {
+        if (!mob.IsAlive || !_hitMobs.Add(mob))
+          return;
+
+        mob.TakeDamage(damage);
+        SpawnFx(_hitFxPrefab, target.transform.position, target.transform.rotation);
+        return;
+      }
+
+      var components = target.GetComponents<MonoBehaviour>();
+      for (var i = 0; i < components.Length; i++)
+      {
+        if (components[i] is not IDamageable damageable || !damageable.IsAlive)
+          continue;
+
+        damageable.TakeDamage(damage);
+        SpawnFx(_hitFxPrefab, target.transform.position, target.transform.rotation);
+        break;
       }
     }
 
