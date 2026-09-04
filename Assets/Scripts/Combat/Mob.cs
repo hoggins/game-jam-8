@@ -14,11 +14,8 @@ namespace Combat
   [DisallowMultipleComponent]
   public sealed class Mob : MonoBehaviour, IDamageable
   {
-    [SerializeField, Min(0f)] private float _deathDelay = 0.5f;
-
-    [Header("Attack")]
-    [SerializeField, Min(1)] private int _attackDamage = 1;
-    [SerializeField, Min(0f)] private float _attackDistance = 1.05f;
+    [SerializeField, Min(0f)] private float _deathDissolveDuration = 1f;
+    [SerializeField] private AnimationCurve _deathDissolveCurve = DefaultDissolveCurve();
 
     [Header("Attach")]
     [SerializeField, Min(0f)] private float _attachDuration = 0.35f;
@@ -30,7 +27,11 @@ namespace Combat
     [Inject] private Pool _pool;
     [Inject] private CharacterService _characterService;
 
+    private static readonly int InflateId = Shader.PropertyToID("_Inflate");
+
     private MovementAgent _movementAgent;
+    private Renderer[] _renderers;
+    private MaterialPropertyBlock _propertyBlock;
     private Transform _player;
     private Coroutine _deathCoroutine;
     private Coroutine _attachCoroutine;
@@ -46,6 +47,8 @@ namespace Combat
     {
       this.AsInjected();
       _movementAgent = GetComponent<MovementAgent>();
+      _renderers = GetComponentsInChildren<Renderer>(true);
+      _propertyBlock = new MaterialPropertyBlock();
       CurrentHealth = BattleBalance.DuckMaxHealth;
     }
 
@@ -59,6 +62,7 @@ namespace Combat
       _hasAttacked = false;
       _isAttached = false;
       _player = null;
+      SetDissolve(0f);
 
       if (_movementAgent != null)
         _movementAgent.enabled = true;
@@ -74,7 +78,7 @@ namespace Combat
         return;
 
       _hasAttacked = true;
-      _characterService?.TakeDamage(_attackDamage);
+      _characterService?.TakeDamage(BattleBalance.DuckAttackDamage);
       AttachToPlayer();
     }
 
@@ -105,7 +109,7 @@ namespace Combat
       if (_movementAgent != null)
         _movementAgent.enabled = false;
 
-      _deathCoroutine = StartCoroutine(ReturnToPoolAfterDelay());
+      _deathCoroutine = StartCoroutine(PlayDeath());
     }
 
     private void AttachToPlayer()
@@ -177,7 +181,7 @@ namespace Combat
     {
       var offset = transform.position - _player.position;
       offset.y = 0f;
-      return offset.sqrMagnitude <= _attackDistance * _attackDistance;
+      return offset.sqrMagnitude <= BattleBalance.DuckAttackDistance * BattleBalance.DuckAttackDistance;
     }
 
     private void ResolvePlayer()
@@ -282,13 +286,42 @@ namespace Combat
     private static AnimationCurve DefaultAttachCurve() =>
       AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
 
-    private IEnumerator ReturnToPoolAfterDelay()
+    private static AnimationCurve DefaultDissolveCurve() =>
+      AnimationCurve.Linear(0f, 0f, 1f, 1f);
+
+    private IEnumerator PlayDeath()
     {
-      yield return new WaitForSeconds(_deathDelay);
+      var elapsed = 0f;
+      while (elapsed < _deathDissolveDuration)
+      {
+        elapsed += Time.deltaTime;
+        var progress = Mathf.Clamp01(elapsed / _deathDissolveDuration);
+        SetDissolve(Mathf.Clamp01(Evaluate(_deathDissolveCurve, progress)));
+        yield return null;
+      }
+
+      SetDissolve(1f);
 
       _deathCoroutine = null;
       DetachFromPlayer();
       _pool?.Release(gameObject);
+    }
+
+    private void SetDissolve(float value)
+    {
+      if (_renderers == null || _propertyBlock == null)
+        return;
+
+      for (var i = 0; i < _renderers.Length; i++)
+      {
+        var renderer = _renderers[i];
+        if (renderer == null)
+          continue;
+
+        renderer.GetPropertyBlock(_propertyBlock);
+        _propertyBlock.SetFloat(InflateId, value);
+        renderer.SetPropertyBlock(_propertyBlock);
+      }
     }
 
     private void DetachFromPlayer()
@@ -318,9 +351,8 @@ namespace Combat
 
     private void OnValidate()
     {
-      _deathDelay = Mathf.Max(0f, _deathDelay);
-      _attackDamage = Mathf.Max(1, _attackDamage);
-      _attackDistance = Mathf.Max(0f, _attackDistance);
+      _deathDissolveDuration = Mathf.Max(0f, _deathDissolveDuration);
+      _deathDissolveCurve ??= DefaultDissolveCurve();
       _attachDuration = Mathf.Max(0f, _attachDuration);
       _attachPositionCurve ??= DefaultAttachCurve();
       _attachRotationCurve ??= DefaultAttachCurve();

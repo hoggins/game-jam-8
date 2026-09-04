@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0f717f278c7704d99b5579a6984c5a14, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Movement.MovementAgent
 --- !u!114 &2925691346927250991
 MonoBehaviour:
@@ -57,7 +57,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bf8069812c98f471aa4769c742b5d633, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Movement.MobMovement
   _speed: 4
   _radius: 0.5
@@ -75,11 +75,51 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5b2b11323224842c1a6661c282f4d24b, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Combat.Mob
-  _deathDelay: 0.5
-  _attackDamage: 1
-  _attackDistance: 3
+  _deathDissolveDuration: 0.3
+  _deathDissolveCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0.34932876
+      outSlope: 0.34932876
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.12283552
+      value: 0.04290998
+      inSlope: 0.34913823
+      outSlope: 0.34913823
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.69402105
+      value: 0.24222386
+      inSlope: 1.6138659
+      outSlope: 1.6138659
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.029710235
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 1
+      outSlope: 1
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   _attachDuration: 0.35
   _attachPositionCurve:
     serializedVersion: 2
@@ -181,7 +221,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -7511558181221131132, guid: 2b21d467b247e564ba3252f0bc75f4de, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
-      value:
+      value: 
       objectReference: {fileID: 2100000, guid: 731d5a1ae52e0c84ab8f02126a396a70, type: 2}
     - target: {fileID: 919132149155446097, guid: 2b21d467b247e564ba3252f0bc75f4de, type: 3}
       propertyPath: m_Name
@@ -215,7 +255,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b2f8eaf00001c4ff9ab8fbefaaaabaf6, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Combat.MobAnimator
   _durationMin: 0.15
   _durationMax: 0.25

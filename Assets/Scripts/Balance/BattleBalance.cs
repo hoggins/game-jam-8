@@ -4,6 +4,8 @@ namespace Balance
   {
     public static float BattleDuration => 10f;
     public static int DuckMaxHealth => 2;
+    public static int DuckAttackDamage => 1;
+    public static float DuckAttackDistance => 3f;
 
     /// Chance of dropping N coins on a duck kill, indexed by coin count. Must sum to 1.
     private static readonly float[] DuckCoinDropChances = { 0.6f, 0.3f, 0.1f };
