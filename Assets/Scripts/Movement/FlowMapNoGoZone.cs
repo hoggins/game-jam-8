@@ -30,14 +30,24 @@ namespace Movement
     private void OnDisable() =>
       ActiveChanged?.Invoke(this, false);
 
-    internal void Initialize() =>
-      Collider ??= GetComponent<Collider>();
+    internal void Initialize()
+    {
+      if (Collider == null)
+        Collider = GetComponent<Collider>();
+    }
 
     internal bool OverlapsCircle(Vector2 center, float radius) =>
       TryGetCirclePushOut(center, radius, out _);
 
     internal bool TryGetCirclePushOut(Vector2 center, float radius, out Vector2 push)
     {
+      Initialize();
+      if (Collider == null)
+      {
+        push = Vector2.zero;
+        return false;
+      }
+
       if (_boxFootprintCount < 3)
         return TryGetBoundsPushOut(center, radius, out push);
 
