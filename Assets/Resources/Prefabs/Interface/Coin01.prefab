@@ -129,6 +129,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  _spreadRadius: 0.35
   _flyDuration: 0.45
   _flyArcHeight: 2.5
   _targetHeight: 1

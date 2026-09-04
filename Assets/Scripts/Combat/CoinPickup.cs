@@ -15,6 +15,8 @@ namespace Combat
     [SerializeField, Min(0f)] private float _riseDuration = 0.6f;
     [SerializeField, Min(0f)] private float _riseHeight = 0.9f;
     [SerializeField] private AnimationCurve _riseCurve = DefaultRiseCurve();
+    [Tooltip("How far the apex drifts sideways, so coins from one kill do not stack.")]
+    [SerializeField, Min(0f)] private float _spreadRadius = 0.35f;
 
     [Header("Flight")]
     [SerializeField, Min(0f)] private float _flyDuration = 0.45f;
@@ -24,6 +26,10 @@ namespace Combat
     [SerializeField] private float _spinDegreesPerSecond = 360f;
 
     [Inject] private Pool _pool;
+
+    /// Fans consecutive spawns by the golden angle: coins dropped by the same kill are
+    /// spawned back to back, so successive indices never land on top of each other.
+    private static int _spawnIndex;
 
     private Transform _player;
     private Coroutine _flightCoroutine;
@@ -48,7 +54,7 @@ namespace Combat
 
     private IEnumerator Fly(Vector3 origin)
     {
-      var apex = origin + Vector3.up * _riseHeight;
+      var apex = origin + Vector3.up * _riseHeight + GetSpreadOffset();
 
       yield return Rise(origin, apex);
       yield return ArcToPlayer(apex);
@@ -101,6 +107,16 @@ namespace Combat
       }
     }
 
+    private Vector3 GetSpreadOffset()
+    {
+      if (_spreadRadius <= 0f)
+        return Vector3.zero;
+
+      const float goldenAngleDegrees = 137.5f;
+      var angle = _spawnIndex++ * goldenAngleDegrees * Mathf.Deg2Rad;
+      return new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * _spreadRadius;
+    }
+
     private Vector3 ResolveTarget(Vector3 fallback)
     {
       if (_player == null)
@@ -126,6 +142,7 @@ namespace Combat
       _riseDuration = Mathf.Max(0f, _riseDuration);
       _riseHeight = Mathf.Max(0f, _riseHeight);
       _riseCurve ??= DefaultRiseCurve();
+      _spreadRadius = Mathf.Max(0f, _spreadRadius);
       _flyDuration = Mathf.Max(0f, _flyDuration);
       _flyArcHeight = Mathf.Max(0f, _flyArcHeight);
     }
