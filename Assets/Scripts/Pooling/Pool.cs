@@ -10,6 +10,16 @@ namespace Pooling
     private readonly Dictionary<GameObject, int> _prewarmCountByPrefab = new();
     private readonly HashSet<GameObject> _availableInstances = new();
     private readonly HashSet<GameObject> _instances = new();
+    private readonly HashSet<GameObject> _createdInstances = new();
+
+    public void Register(GameObject instance)
+    {
+      if (instance == null || !_instances.Add(instance))
+        return;
+
+      _prefabByInstance.Add(instance, instance);
+      instance.GetComponent<PoolInSeconds>()?.SetPool(this);
+    }
 
     public void Prewarm(GameObject prefab, int count)
     {
@@ -60,7 +70,7 @@ namespace Pooling
 
     public void Dispose()
     {
-      foreach (var instance in _instances)
+      foreach (var instance in _createdInstances)
       {
         if (instance != null)
           Object.Destroy(instance.gameObject);
@@ -71,6 +81,7 @@ namespace Pooling
       _prewarmCountByPrefab.Clear();
       _availableInstances.Clear();
       _instances.Clear();
+      _createdInstances.Clear();
     }
 
     public void Release(GameObject instance)
@@ -91,7 +102,8 @@ namespace Pooling
       instance.gameObject.SetActive(false);
       instance.GetComponent<PoolInSeconds>()?.SetPool(this);
       _instances.Add(instance);
-      _prefabByInstance.Add(instance, prefab);
+      _createdInstances.Add(instance);
+      _prefabByInstance[instance] = prefab;
       return instance;
     }
 

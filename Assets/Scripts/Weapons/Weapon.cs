@@ -28,7 +28,7 @@ namespace Weapons
       this.AsInjected();
 
       if (_attackFxPrefab != null)
-        _pool.Prewarm(_attackFxPrefab, _attackFxPrewarmCount);
+        PrewarmFx(_attackFxPrefab, _attackFxPrewarmCount);
     }
 
     private void Update()
@@ -55,7 +55,20 @@ namespace Weapons
         return;
 
       var point = _attackFxPoint != null ? _attackFxPoint : transform;
-      _pool.Get(_attackFxPrefab, point.position, point.rotation);
+      SpawnFx(_attackFxPrefab, point.position, point.rotation);
+    }
+
+    protected void PrewarmFx(GameObject prefab, int count)
+    {
+      _pool?.Prewarm(prefab, count);
+    }
+
+    protected void SpawnFx(GameObject prefab, Vector3 position, Quaternion rotation)
+    {
+      if (_pool == null || prefab == null)
+        return;
+
+      _pool.Get(prefab, position, rotation);
     }
 
     private void OnValidate()

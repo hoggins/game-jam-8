@@ -26,6 +26,10 @@ namespace Movement
 
     internal FlowMap FlowMap => _flowMap;
     internal IReadOnlyList<MovementAgent> ActiveAgents => _activeAgents;
+    internal bool HasWalkableFlowMap => _flowMap.HasField;
+
+    internal bool IsWalkable(Vector3 position) =>
+      _flowMap.IsWalkable(position);
 
     internal void Register(MovementAgent agent)
     {

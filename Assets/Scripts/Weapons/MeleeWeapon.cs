@@ -10,10 +10,18 @@ namespace Weapons
   public sealed class MeleeWeapon : Weapon
   {
     [SerializeField, Min(0f)] private float _attackRadius = 2f;
+    [SerializeField] private GameObject _hitFxPrefab;
+    [SerializeField, Min(0)] private int _hitFxPrewarmCount = 8;
 
     [Inject] private MovementUpdater _movementUpdater;
 
     private readonly List<MovementAgent> _targets = new(16);
+
+    protected override void Awake()
+    {
+      base.Awake();
+      PrewarmFx(_hitFxPrefab, _hitFxPrewarmCount);
+    }
 
     protected override void Attack(int damage)
     {
@@ -39,6 +47,7 @@ namespace Weapons
             continue;
 
           damageable.TakeDamage(damage);
+          SpawnFx(_hitFxPrefab, target.transform.position, target.transform.rotation);
           break;
         }
       }
@@ -47,6 +56,7 @@ namespace Weapons
     private void OnValidate()
     {
       _attackRadius = Mathf.Max(0f, _attackRadius);
+      _hitFxPrewarmCount = Mathf.Max(0, _hitFxPrewarmCount);
     }
   }
 }

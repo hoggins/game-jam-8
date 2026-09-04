@@ -153,6 +153,18 @@ namespace Movement
     internal bool IsCellReachable(int x, int y) =>
       _costs[x + y * _width] < float.PositiveInfinity;
 
+    internal bool IsWalkable(Vector3 position)
+    {
+      if (!_hasField)
+        return false;
+
+      var cell = PositionToCell(position, _offset, _cellSize);
+      if (!TryGetIndex(cell, out var index))
+        return false;
+
+      return !_blocked[index] && _costs[index] < float.PositiveInfinity;
+    }
+
     private void Recalculate(
       Vector3 targetPosition,
       IReadOnlyList<MovementAgent> agents,
