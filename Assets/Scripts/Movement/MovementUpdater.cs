@@ -31,6 +31,7 @@ namespace Movement
     private readonly FlowMap _flowMap = new();
     private readonly SpatialMap _spatialMap = new();
     private readonly List<MovementAgent> _neighbors = new(16);
+    private readonly List<FlowMapNoGoZone> _knownNoGoZones = new();
     private readonly List<FlowMapNoGoZone> _noGoZones = new();
     private readonly RaycastHit[] _wallHits = new RaycastHit[64];
     private readonly Collider[] _wallOverlaps = new Collider[64];
@@ -45,12 +46,19 @@ namespace Movement
 
     private void Awake()
     {
-      var noGoZones = FindObjectsByType<FlowMapNoGoZone>(FindObjectsSortMode.None);
+      var noGoZones = FindObjectsByType<FlowMapNoGoZone>(
+        FindObjectsInactive.Include,
+        FindObjectsSortMode.None);
       for (var i = 0; i < noGoZones.Length; i++)
       {
         var zone = noGoZones[i];
-        _noGoZones.Add(zone);
+        zone.Initialize();
+        _knownNoGoZones.Add(zone);
+        zone.ActiveChanged += OnNoGoZoneActiveChanged;
         zone.Destroyed += OnNoGoZoneDestroyed;
+
+        if (zone.isActiveAndEnabled)
+          _noGoZones.Add(zone);
       }
     }
 
@@ -68,11 +76,14 @@ namespace Movement
 
     private void OnDestroy()
     {
-      for (var i = 0; i < _noGoZones.Count; i++)
+      for (var i = 0; i < _knownNoGoZones.Count; i++)
       {
-        var zone = _noGoZones[i];
+        var zone = _knownNoGoZones[i];
         if (zone != null)
+        {
+          zone.ActiveChanged -= OnNoGoZoneActiveChanged;
           zone.Destroyed -= OnNoGoZoneDestroyed;
+        }
       }
     }
 
@@ -157,10 +168,31 @@ namespace Movement
 
     private void OnNoGoZoneDestroyed(FlowMapNoGoZone zone)
     {
-      if (!_noGoZones.Remove(zone))
-        return;
+      zone.ActiveChanged -= OnNoGoZoneActiveChanged;
+      zone.Destroyed -= OnNoGoZoneDestroyed;
+      _knownNoGoZones.Remove(zone);
 
-      _noGoZoneRevision++;
+      if (_noGoZones.Remove(zone))
+        _noGoZoneRevision++;
+    }
+
+    private void OnNoGoZoneActiveChanged(FlowMapNoGoZone zone, bool isActive)
+    {
+      var changed = isActive
+        ? AddNoGoZone(zone)
+        : _noGoZones.Remove(zone);
+
+      if (changed)
+        _noGoZoneRevision++;
+    }
+
+    private bool AddNoGoZone(FlowMapNoGoZone zone)
+    {
+      if (_noGoZones.Contains(zone))
+        return false;
+
+      _noGoZones.Add(zone);
+      return true;
     }
 
     private void CalculateResult(

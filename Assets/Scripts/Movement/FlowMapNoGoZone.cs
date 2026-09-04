@@ -12,15 +12,26 @@ namespace Movement
 
     private int _boxFootprintCount;
 
+    internal event Action<FlowMapNoGoZone, bool> ActiveChanged;
     internal event Action<FlowMapNoGoZone> Destroyed;
 
     internal Collider Collider { get; private set; }
 
-    private void Awake()
+    private void Awake() =>
+      Initialize();
+
+    private void OnEnable()
     {
-      Collider = GetComponent<Collider>();
+      Initialize();
       CacheBoxFootprint();
+      ActiveChanged?.Invoke(this, true);
     }
+
+    private void OnDisable() =>
+      ActiveChanged?.Invoke(this, false);
+
+    internal void Initialize() =>
+      Collider ??= GetComponent<Collider>();
 
     internal bool OverlapsCircle(Vector2 center, float radius) =>
       TryGetCirclePushOut(center, radius, out _);
@@ -122,6 +133,7 @@ namespace Movement
 
     private void CacheBoxFootprint()
     {
+      _boxFootprintCount = 0;
       if (Collider is not BoxCollider boxCollider)
         return;
 
