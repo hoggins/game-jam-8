@@ -21,6 +21,7 @@ namespace Metagame.MainMenu
     [SerializeField] private Button _progressionButton;
     [SerializeField] private Button _quitButton;
     [SerializeField] private Button _progressionBackButton;
+    [SerializeField] private Button _progressionPlayButton;
 
     [Inject] private SceneService _sceneService;
 
@@ -36,6 +37,8 @@ namespace Metagame.MainMenu
       _progressionButton.onClick.AddListener(OpenProgression);
       _quitButton.onClick.AddListener(Quit);
       _progressionBackButton.onClick.AddListener(ShowMainMenu);
+      if (_progressionPlayButton != null)
+        _progressionPlayButton.onClick.AddListener(Play);
 
       if (ConsumeOpenProgressionRequest())
         OpenProgression();
@@ -49,6 +52,8 @@ namespace Metagame.MainMenu
       _progressionButton.onClick.RemoveListener(OpenProgression);
       _quitButton.onClick.RemoveListener(Quit);
       _progressionBackButton.onClick.RemoveListener(ShowMainMenu);
+      if (_progressionPlayButton != null)
+        _progressionPlayButton.onClick.RemoveListener(Play);
       base.OnDisable();
     }
 

@@ -1,6 +1,9 @@
 using System;
+using App;
 using Combat;
+using Model;
 using UnityEngine;
+using VContainer;
 
 namespace Destruction
 {
@@ -10,6 +13,8 @@ namespace Destruction
   {
     [SerializeField, Min(1)] private int _maxHealth = 1;
 
+    [Inject] private CharacterService _characterService;
+
     private DestructibleObject _destructibleObject;
     private bool _isDestroyed;
 
@@ -18,6 +23,7 @@ namespace Destruction
 
     private void Awake()
     {
+      this.AsInjected();
       _destructibleObject = GetComponent<DestructibleObject>();
       CurrentHealth = _maxHealth;
     }
@@ -37,6 +43,7 @@ namespace Destruction
       if (CurrentHealth == 0)
       {
         _isDestroyed = true;
+        _characterService?.RegisterBuildingDestroyed();
         _destructibleObject.Break(origin);
       }
     }

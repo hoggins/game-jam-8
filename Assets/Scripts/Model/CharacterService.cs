@@ -70,6 +70,11 @@ namespace Model
         AddCoins(droppedCoins);
     }
 
+    public void RegisterBuildingDestroyed()
+    {
+      _storage.BuildingsDestroyed += 1;
+    }
+
     public void AddCoins(int count)
     {
       _storage.CurrentCoins += count;
