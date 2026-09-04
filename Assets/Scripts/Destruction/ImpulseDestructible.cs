@@ -7,6 +7,7 @@ namespace Destruction
     private const string FrictionMaterialPath = "Descructable/FirstHouseFriction";
 
     private Rigidbody[] _bodies;
+    private bool _destroyed;
 
     private void Awake()
     {
@@ -23,6 +24,11 @@ namespace Destruction
 
     public void Impulse(Vector3 origin, float magnitude)
     {
+      if (_destroyed)
+        return;
+
+      _destroyed = true;
+
       foreach (var body in _bodies)
       {
         body.isKinematic = false;
