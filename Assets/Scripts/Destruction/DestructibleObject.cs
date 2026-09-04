@@ -1,18 +1,19 @@
 using System;
 using App;
+using Movement;
 using UnityEngine;
 using VContainer;
 
 namespace Destruction
 {
+  [RequireComponent(typeof(FlowMapNoGoZone))]
   public class DestructibleObject : MonoBehaviour
   {
     private const string FrictionMaterialPath = "Descructable/FirstHouseFriction";
 
-    [SerializeField] private PartDecaySettings decaySettings = new();
-
     [Inject] private EnvironmentDecayManager _decayManager;
 
+    private FlowMapNoGoZone _noGoZone;
     private Rigidbody[] _bodies;
     private bool _destroyed;
 
@@ -22,6 +23,7 @@ namespace Destruction
     {
       this.AsInjected();
 
+      _noGoZone = GetComponent<FlowMapNoGoZone>();
       _bodies = GetComponentsInChildren<Rigidbody>();
 
       var friction = Resources.Load<PhysicsMaterial>(FrictionMaterialPath);
@@ -39,6 +41,8 @@ namespace Destruction
         return;
 
       _destroyed = true;
+      if (_noGoZone != null)
+        _noGoZone.enabled = false;
 
       foreach (var body in _bodies)
       {
@@ -48,10 +52,18 @@ namespace Destruction
         var direction = (hitPoint - origin).normalized;
         body.AddForceAtPosition(direction * magnitude, hitPoint, ForceMode.Impulse);
 
-        _decayManager.RegisterPart(body, decaySettings);
+        if (Application.isPlaying)
+        {
+          var decayPart = body.GetComponent<DecayPart>();
+          var settings = decayPart != null ? decayPart.Settings : new PartDecaySettings();
+          _decayManager.RegisterPart(this, body, settings);
+        }
       }
 
       Destroyed?.Invoke(this);
+
+      if (_bodies.Length == 0 && Application.isPlaying)
+        Destroy(gameObject);
     }
 
     private static Vector3 ClosestPoint(Rigidbody body, Vector3 origin)
