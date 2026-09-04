@@ -12,27 +12,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3b49ddbcc6df41e09798a6f945cb42b, type: 3}
   m_Name: HitFxSettings
   m_EditorClassIdentifier: Assembly-CSharp::Destruction.HitFxSettings
-  duration: 0.25
+  duration: 0.15
   curve:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
       time: 0
       value: 1
-      inSlope: 0
-      outSlope: 0
+      inSlope: -0.0059496756
+      outSlope: -0.0059496756
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0
-      outWeight: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
     - serializedVersion: 3
-      time: 1
-      value: 0
-      inSlope: 0
-      outSlope: 0
+      time: 0.99113405
+      value: -0.003931284
+      inSlope: -2.1680984
+      outSlope: -2.1680984
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0
+      inWeight: 0.07499999
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2

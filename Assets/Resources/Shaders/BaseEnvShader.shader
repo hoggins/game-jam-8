@@ -477,7 +477,7 @@ Shader "Env/BaseEnvShader"
 				float temp_output_93_0 = ( ( saturate( ( sin( mulTime89 ) * cos( mulTime89 ) ) ) + _AnimSinAdd ) * _AnimSinMul );
 				float3 appendResult108 = (float3(input.positionOS.xyz.x , ( input.positionOS.xyz.y + ( input.positionOS.xyz.y * temp_output_93_0 * _VertexAnimAmplitude ) ) , input.positionOS.xyz.z));
 				float3 break84 = appendResult108;
-				float3 appendResult75 = (float3(break84.x , ( break84.y + ( _Hit * 0.3 ) ) , break84.z));
+				float3 appendResult75 = (float3(break84.x , ( break84.y + ( _Hit * 0.15 ) ) , break84.z));
 				
 				output.ase_color = input.ase_color;
 
@@ -487,7 +487,7 @@ Shader "Env/BaseEnvShader"
 					float3 defaultVertexValue = float3(0, 0, 0);
 				#endif
 
-				float3 vertexValue = ( ( input.normalOS * _Hit * 0.2 ) + appendResult75 );
+				float3 vertexValue = ( ( input.normalOS * _Hit * 0.1 ) + appendResult75 );
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
 					input.positionOS.xyz = vertexValue;
@@ -1133,7 +1133,7 @@ Shader "Env/BaseEnvShader"
 				float temp_output_93_0 = ( ( saturate( ( sin( mulTime89 ) * cos( mulTime89 ) ) ) + _AnimSinAdd ) * _AnimSinMul );
 				float3 appendResult108 = (float3(input.positionOS.xyz.x , ( input.positionOS.xyz.y + ( input.positionOS.xyz.y * temp_output_93_0 * _VertexAnimAmplitude ) ) , input.positionOS.xyz.z));
 				float3 break84 = appendResult108;
-				float3 appendResult75 = (float3(break84.x , ( break84.y + ( _Hit * 0.3 ) ) , break84.z));
+				float3 appendResult75 = (float3(break84.x , ( break84.y + ( _Hit * 0.15 ) ) , break84.z));
 				
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
@@ -1142,7 +1142,7 @@ Shader "Env/BaseEnvShader"
 					float3 defaultVertexValue = float3(0, 0, 0);
 				#endif
 
-				float3 vertexValue = ( ( input.normalOS * _Hit * 0.2 ) + appendResult75 );
+				float3 vertexValue = ( ( input.normalOS * _Hit * 0.1 ) + appendResult75 );
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
 					input.positionOS.xyz = vertexValue;
 				#else
@@ -1492,7 +1492,7 @@ Shader "Env/BaseEnvShader"
 				float temp_output_93_0 = ( ( saturate( ( sin( mulTime89 ) * cos( mulTime89 ) ) ) + _AnimSinAdd ) * _AnimSinMul );
 				float3 appendResult108 = (float3(input.positionOS.xyz.x , ( input.positionOS.xyz.y + ( input.positionOS.xyz.y * temp_output_93_0 * _VertexAnimAmplitude ) ) , input.positionOS.xyz.z));
 				float3 break84 = appendResult108;
-				float3 appendResult75 = (float3(break84.x , ( break84.y + ( _Hit * 0.3 ) ) , break84.z));
+				float3 appendResult75 = (float3(break84.x , ( break84.y + ( _Hit * 0.15 ) ) , break84.z));
 				
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
 					float3 defaultVertexValue = input.positionOS.xyz;
@@ -1500,7 +1500,7 @@ Shader "Env/BaseEnvShader"
 					float3 defaultVertexValue = float3(0, 0, 0);
 				#endif
 
-				float3 vertexValue = ( ( input.normalOS * _Hit * 0.2 ) + appendResult75 );
+				float3 vertexValue = ( ( input.normalOS * _Hit * 0.1 ) + appendResult75 );
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
 					input.positionOS.xyz = vertexValue;
@@ -1987,7 +1987,7 @@ Shader "Env/BaseEnvShader"
 				float temp_output_93_0 = ( ( saturate( ( sin( mulTime89 ) * cos( mulTime89 ) ) ) + _AnimSinAdd ) * _AnimSinMul );
 				float3 appendResult108 = (float3(input.positionOS.xyz.x , ( input.positionOS.xyz.y + ( input.positionOS.xyz.y * temp_output_93_0 * _VertexAnimAmplitude ) ) , input.positionOS.xyz.z));
 				float3 break84 = appendResult108;
-				float3 appendResult75 = (float3(break84.x , ( break84.y + ( _Hit * 0.3 ) ) , break84.z));
+				float3 appendResult75 = (float3(break84.x , ( break84.y + ( _Hit * 0.15 ) ) , break84.z));
 				
 				output.ase_color = input.ase_color;
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
@@ -1996,7 +1996,7 @@ Shader "Env/BaseEnvShader"
 					float3 defaultVertexValue = float3(0, 0, 0);
 				#endif
 
-				float3 vertexValue = ( ( input.normalOS * _Hit * 0.2 ) + appendResult75 );
+				float3 vertexValue = ( ( input.normalOS * _Hit * 0.1 ) + appendResult75 );
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
 					input.positionOS.xyz = vertexValue;
@@ -2412,9 +2412,9 @@ Version=19910
 {"type":"AmplifyShaderEditor.SimpleMultiplyOpNode, AmplifyShaderEditor","id":87,"pos":[304,1504],"params":["Inherit","False","3","3","0","FLOAT","0","False","1","FLOAT","0","False","2","FLOAT","0","False","1","FLOAT","0"]}
 {"type":"AmplifyShaderEditor.SimpleMultiplyOpNode, AmplifyShaderEditor","id":58,"pos":[-272,224],"params":["Inherit","False","2","2","0","FLOAT","0","False","1","FLOAT","0","False","1","FLOAT","0"]}
 {"type":"AmplifyShaderEditor.RangedFloatNode, AmplifyShaderEditor","id":60,"pos":[-336,368],"params":["Inherit","False","Property","_PrintsColorAdd","PrintsColorAdd","11","0","Create","True","0","0","0","False","0","False","Object","-1","","1","0","0","0","0","1","FLOAT","0"]}
-{"type":"AmplifyShaderEditor.RangedFloatNode, AmplifyShaderEditor","id":77,"pos":[776,1888],"params":["Inherit","False","Constant","_Float0","Float 0","18","0","Create","True","0","0","0","False","0","False","Object","-1","","0.3","0","0","0","0","1","FLOAT","0"]}
 {"type":"AmplifyShaderEditor.PosVertexDataNode, AmplifyShaderEditor","id":78,"pos":[216,1176],"params":["Inherit","False","0","0","5","FLOAT3","0","FLOAT","1","FLOAT","2","FLOAT","3","FLOAT","4"]}
 {"type":"AmplifyShaderEditor.SimpleAddOpNode, AmplifyShaderEditor","id":109,"pos":[416,1408],"params":["Inherit","False","2","2","0","FLOAT","0","False","1","FLOAT","0","False","1","FLOAT","0"]}
+{"type":"AmplifyShaderEditor.RangedFloatNode, AmplifyShaderEditor","id":77,"pos":[760,1720],"params":["Inherit","False","Constant","_Float0","Float 0","18","0","Create","True","0","0","0","False","0","False","Object","-1","","0.15","0","0","0","0","1","FLOAT","0"]}
 {"type":"AmplifyShaderEditor.VertexColorNode, AmplifyShaderEditor","id":14,"pos":[-704,32],"params":["Inherit","False","0","5","COLOR","0","FLOAT","1","FLOAT","2","FLOAT","3","FLOAT","4"]}
 {"type":"AmplifyShaderEditor.ColorNode, AmplifyShaderEditor","id":59,"pos":[-304,504],"params":["Inherit","False","Property","_PrintsColor","PrintsColor","12","0","Create","True","0","0","0","False","0","False","Object","-1","","1,1,1,0","0,0,0,0","True","True","0","6","COLOR","0","FLOAT","1","FLOAT","2","FLOAT","3","FLOAT","4","FLOAT3","5"]}
 {"type":"AmplifyShaderEditor.RangedFloatNode, AmplifyShaderEditor","id":67,"pos":[56,456],"params":["Inherit","False","Property","_PrintsSmoothMul","PrintsSmoothMul","14","0","Create","True","0","0","0","False","0","False","Object","-1","","1","0","0","0","0","1","FLOAT","0"]}
@@ -2427,7 +2427,7 @@ Version=19910
 {"type":"AmplifyShaderEditor.SimpleMultiplyOpNode, AmplifyShaderEditor","id":65,"pos":[272,376],"params":["Inherit","False","2","2","0","FLOAT","0","False","1","FLOAT","0","False","1","FLOAT","0"]}
 {"type":"AmplifyShaderEditor.RangedFloatNode, AmplifyShaderEditor","id":68,"pos":[200,520],"params":["Inherit","False","Property","_PrintsSmoothAdd","PrintsSmoothAdd","15","0","Create","True","0","0","0","False","0","False","Object","-1","","0","0","0","0","0","1","FLOAT","0"]}
 {"type":"AmplifyShaderEditor.RangedFloatNode, AmplifyShaderEditor","id":72,"pos":[-136,1456],"params":["Inherit","False","Property","_Hit","Hit","17","0","Create","True","0","0","0","False","0","False","Object","-1","","0","0","0","1","0","1","FLOAT","0"]}
-{"type":"AmplifyShaderEditor.RangedFloatNode, AmplifyShaderEditor","id":73,"pos":[64,1216],"params":["Inherit","False","Constant","_Float0","Float 0","18","0","Create","True","0","0","0","False","0","False","Object","-1","","0.2","0","0","0","0","1","FLOAT","0"]}
+{"type":"AmplifyShaderEditor.RangedFloatNode, AmplifyShaderEditor","id":73,"pos":[64,1216],"params":["Inherit","False","Constant","_Float0","Float 0","18","0","Create","True","0","0","0","False","0","False","Object","-1","","0.1","0","0","0","0","1","FLOAT","0"]}
 {"type":"AmplifyShaderEditor.NormalVertexDataNode, AmplifyShaderEditor","id":71,"pos":[16,1032],"params":["Inherit","False","0","5","FLOAT3","0","FLOAT","1","FLOAT","2","FLOAT","3","FLOAT","4"]}
 {"type":"AmplifyShaderEditor.SimpleAddOpNode, AmplifyShaderEditor","id":74,"pos":[1008,1352],"params":["Inherit","False","2","2","0","FLOAT","0","False","1","FLOAT","0","False","1","FLOAT","0"]}
 {"type":"AmplifyShaderEditor.BreakToComponentsNode, AmplifyShaderEditor","id":84,"pos":[704,1192],"params":["Inherit","False","FLOAT3","1","0","FLOAT3","0,0,0","False","16","FLOAT","0","FLOAT","1","FLOAT","2","FLOAT","3","FLOAT","4","FLOAT","5","FLOAT","6","FLOAT","7","FLOAT","8","FLOAT","9","FLOAT","10","FLOAT","11","FLOAT","12","FLOAT","13","FLOAT","14","FLOAT","15"]}
@@ -2556,4 +2556,4 @@ Version=19910
 {"wire":[1,4,69,0]}
 {"wire":[1,8,79,0]}
 ASEEND*/
-//CHKSM=76D8900C9A79C0DB2C133DBDE02054C0FC09A9ED
+//CHKSM=6DCE1CADE6FAD4EF40B93D1DB6BB360C7915688D
