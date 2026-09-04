@@ -17,6 +17,7 @@ namespace Destruction
     [Inject] private CharacterService _characterService;
 
     private DestructibleObject _destructibleObject;
+    private HitFx _hitFx;
     private bool _isDestroyed;
 
     public int CurrentHealth { get; private set; }
@@ -26,6 +27,7 @@ namespace Destruction
     {
       this.AsInjected();
       _destructibleObject = GetComponent<DestructibleObject>();
+      _hitFx = GetComponent<HitFx>();
       CurrentHealth = BattleBalance.GetDestructibleMaxHealth(_objectType);
     }
 
@@ -46,7 +48,11 @@ namespace Destruction
         _isDestroyed = true;
         _characterService?.RegisterBuildingDestroyed();
         _destructibleObject.Break(origin);
+        return;
       }
+
+      if (_hitFx != null)
+        _hitFx.PlayHit();
     }
   }
 }

@@ -141,6 +141,8 @@ namespace Destruction.Editor
       return worldSize.x * worldSize.y * worldSize.z;
     }
 
+    private const string HitFxMaterialName = "GenericMaterial02";
+
     private static void ConfigureRoot(GameObject root)
     {
       var boxCollider = root.GetComponent<BoxCollider>();
@@ -164,6 +166,25 @@ namespace Destruction.Editor
 
       if (root.GetComponent<DestructibleHealth>() == null)
         root.AddComponent<DestructibleHealth>();
+
+      if (UsesHitFxMaterial(root) && root.GetComponent<HitFx>() == null)
+        root.AddComponent<HitFx>();
+    }
+
+    private static bool UsesHitFxMaterial(GameObject root)
+    {
+      var renderers = root.GetComponentsInChildren<Renderer>(true);
+      foreach (var renderer in renderers)
+      {
+        var materials = renderer.sharedMaterials;
+        foreach (var material in materials)
+        {
+          if (material != null && material.name == HitFxMaterialName)
+            return true;
+        }
+      }
+
+      return false;
     }
 
     private static void SetBounds(BoxCollider collider, GameObject root)

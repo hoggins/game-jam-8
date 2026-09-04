@@ -168,6 +168,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 335ac1de375e442dea3e18adba8cc620, type: 3}
       insertIndex: -1
       addedObject: {fileID: 951639178307291689}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 335ac1de375e442dea3e18adba8cc620, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1827829966781830487}
     - targetCorrespondingSourceObject: {fileID: 2187734615552427934, guid: 335ac1de375e442dea3e18adba8cc620, type: 3}
       insertIndex: -1
       addedObject: {fileID: 5503873397535828164}
@@ -715,8 +718,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 6.500332, y: 4.000001, z: 6.500332}
-  m_Center: {x: 0, y: 1.9999995, z: 0}
+  m_Size: {x: 6.500332, y: 4, z: 6.500332}
+  m_Center: {x: 0, y: 2, z: 0}
 --- !u!114 &6440971891303394401
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -754,7 +757,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2bb62d9dcd49f449fb9f45585be7cb37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Destruction.DestructibleHealth
-  _maxHealth: 1
+  _objectType: 0
+--- !u!114 &1827829966781830487
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6954928472654060805}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 802cd6f481491405aa7b70c12b14dd71, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Destruction.HitFx
 --- !u!1 &7209378505468045860 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -8626244017970689424, guid: 335ac1de375e442dea3e18adba8cc620, type: 3}

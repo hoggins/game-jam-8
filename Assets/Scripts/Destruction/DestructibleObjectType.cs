@@ -2,6 +2,6 @@ namespace Destruction
 {
   public enum DestructibleObjectType
   {
-    House = 1,
+    House = 0,
   }
 }
