@@ -25,6 +25,7 @@ namespace Map
 
     private Transform _container;
     private HouseSet _houseSet;
+    private GroundDamageMask _groundDamageMask;
     private int _cellSize;
     private int _nextId;
     private CullingGroup _cullingGroup;
@@ -58,6 +59,7 @@ namespace Map
       _objects.Clear();
       _occupied.Clear();
       DisposeRenderCulling();
+      _groundDamageMask = GroundDamageMask.Instance;
 
       _container = new GameObject(ContainerName).transform;
       _container.SetParent(parent, false);
@@ -252,6 +254,7 @@ namespace Map
 
       instance = Object.Instantiate(special.prefab, position, rotation, _container);
       instance.name = special.type.ToString();
+      RegisterDamageMaskRenderers(instance.GetComponentsInChildren<Renderer>(true));
 
       var destructible = instance.GetComponentInChildren<DestructibleObject>();
       var id = _nextId++;
@@ -429,10 +432,12 @@ namespace Map
 
     private void RegisterRenderers(int index, GameObject instance)
     {
+      var renderers = instance.GetComponentsInChildren<Renderer>(true);
+      RegisterDamageMaskRenderers(renderers);
+
       if (_cullingGroup == null)
         return;
 
-      var renderers = instance.GetComponentsInChildren<Renderer>(true);
       _renderersByObject[index] = renderers;
       _distanceVisibleByObject[index] = true;
       _frustumVisibleByObject[index] = true;
@@ -446,6 +451,18 @@ namespace Map
       }
 
       _boundingSpheres[index] = new BoundingSphere(bounds.center, bounds.extents.magnitude);
+    }
+
+    private void RegisterDamageMaskRenderers(Renderer[] renderers)
+    {
+      for (var i = 0; i < renderers.Length; i++)
+      {
+        var renderer = renderers[i];
+        if (renderer == null)
+          continue;
+
+        _groundDamageMask?.ApplyDamageMaskToRenderer(renderer);
+      }
     }
 
     private void OnCullingStateChanged(CullingGroupEvent eventData)
@@ -497,7 +514,11 @@ namespace Map
       _hasVisibilityHysteresis = false;
     }
 
-    void System.IDisposable.Dispose() => DisposeRenderCulling();
+    void System.IDisposable.Dispose()
+    {
+      DisposeRenderCulling();
+      _groundDamageMask = null;
+    }
 
     private bool TryReserve(Vector2Int origin, Vector2Int size)
     {

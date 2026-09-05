@@ -46,7 +46,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Weapons.Bullet
   _speed: 20
-  _lifetime: 3
+  _lifetime: 1
   _radius: 0.5
   _hitFxPrefab: {fileID: 785926065466733194, guid: 5354e060c88d746b6a5b3ab00e324978, type: 3}
   _hitFxPrewarmCount: 8

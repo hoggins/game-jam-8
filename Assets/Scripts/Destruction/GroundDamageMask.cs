@@ -15,18 +15,13 @@ namespace Destruction
 
     public static GroundDamageMask Instance { get; private set; }
 
-    [Tooltip("Single renderer that uses GroundEnvShader and receives the generated damage mask.")]
-    [SerializeField] private Renderer _groundRenderer;
-
     [Tooltip("Width and height of the generated square damage mask in pixels.")]
     [SerializeField, Min(1)] private int _textureResolution = 1024;
-
-    [Tooltip("Single ground mesh whose world-space bounds define the active damage area.")]
-    [SerializeField] private MeshFilter _boundsMesh;
 
     [Tooltip("Stores stamp RGB in the mask. The current GroundEnvShader samples only the red channel, so leave this disabled for a grayscale intensity mask.")]
     [SerializeField] private bool _useMultiColorMode;
 
+    private Renderer[] _groundRenderers;
     private Texture2D _damageMask;
     private Color[] _pixels;
     private MaterialPropertyBlock _propertyBlock;
@@ -126,19 +121,14 @@ namespace Destruction
       ReleaseTexture();
 
       _textureResolution = Mathf.Max(1, _textureResolution);
-      if (_boundsMesh == null || _boundsMesh.sharedMesh == null)
+      _groundRenderers = GetComponentsInChildren<Renderer>(true);
+      if (_groundRenderers.Length == 0)
       {
-        Debug.LogError($"{nameof(GroundDamageMask)} on {name} needs one assigned MeshFilter with a mesh.", this);
+        Debug.LogError($"{nameof(GroundDamageMask)} on {name} needs at least one child Renderer.", this);
         return;
       }
 
-      if (_groundRenderer == null)
-      {
-        Debug.LogError($"{nameof(GroundDamageMask)} on {name} needs one assigned ground Renderer.", this);
-        return;
-      }
-
-      _levelWorldBounds = CalculateWorldBounds(_boundsMesh);
+      _levelWorldBounds = CalculateWorldBounds(_groundRenderers);
       var worldSize = _levelWorldBounds.size;
       if (worldSize.x <= 0f || worldSize.z <= 0f)
       {
@@ -161,10 +151,9 @@ namespace Destruction
         anisoLevel = 0,
       };
 
-      UploadTexture();
-
       _propertyBlock ??= new MaterialPropertyBlock();
-      AssignTextureToRenderer();
+      UploadTexture();
+      AssignTextureToRenderers();
     }
 
     private void ReleaseTexture()
@@ -309,32 +298,26 @@ namespace Destruction
       _damageMask.Apply(false, false);
     }
 
-    private static Bounds CalculateWorldBounds(MeshFilter meshFilter)
+    private static Bounds CalculateWorldBounds(Renderer[] renderers)
     {
-      var localBounds = meshFilter.sharedMesh.bounds;
-      var localToWorld = meshFilter.transform.localToWorldMatrix;
-      var worldBounds = new Bounds(localToWorld.MultiplyPoint3x4(localBounds.center), Vector3.zero);
-
-      for (var x = 0; x <= 1; x++)
-      {
-        for (var y = 0; y <= 1; y++)
-        {
-          for (var z = 0; z <= 1; z++)
-          {
-            var corner = new Vector3(
-              x == 0 ? localBounds.min.x : localBounds.max.x,
-              y == 0 ? localBounds.min.y : localBounds.max.y,
-              z == 0 ? localBounds.min.z : localBounds.max.z);
-            worldBounds.Encapsulate(localToWorld.MultiplyPoint3x4(corner));
-          }
-        }
-      }
+      var worldBounds = renderers[0].bounds;
+      for (var i = 1; i < renderers.Length; i++)
+        worldBounds.Encapsulate(renderers[i].bounds);
 
       return worldBounds;
     }
 
-    private void AssignTextureToRenderer()
+    private void AssignTextureToRenderers()
     {
+      for (var rendererIndex = 0; rendererIndex < _groundRenderers.Length; rendererIndex++)
+        ApplyDamageMaskToRenderer(_groundRenderers[rendererIndex]);
+    }
+
+    public void ApplyDamageMaskToRenderer(Renderer renderer)
+    {
+      if (renderer == null || _damageMask == null)
+        return;
+
       var worldSize = _levelWorldBounds.size;
       var worldMin = _levelWorldBounds.min;
       var maskSt = new Vector4(
@@ -342,29 +325,17 @@ namespace Destruction
         1f / worldSize.z,
         -worldMin.x / worldSize.x,
         -worldMin.z / worldSize.z);
-
-      if (!UsesDamageMask(_groundRenderer))
-      {
-        Debug.LogWarning($"{nameof(GroundDamageMask)} renderer on {name} has no _DamageMask property.", this);
-        return;
-      }
-
-      _groundRenderer.GetPropertyBlock(_propertyBlock);
-      _propertyBlock.SetTexture(DamageMaskId, _damageMask);
-      _propertyBlock.SetVector(DamageMaskStId, maskSt);
-      _groundRenderer.SetPropertyBlock(_propertyBlock);
-    }
-
-    private static bool UsesDamageMask(Renderer renderer)
-    {
       var materials = renderer.sharedMaterials;
-      for (var i = 0; i < materials.Length; i++)
-      {
-        if (materials[i] != null && materials[i].HasProperty(DamageMaskId))
-          return true;
-      }
+      _propertyBlock ??= new MaterialPropertyBlock();
 
-      return false;
+      for (var materialIndex = 0; materialIndex < materials.Length; materialIndex++)
+      {
+        _propertyBlock.Clear();
+        renderer.GetPropertyBlock(_propertyBlock, materialIndex);
+        _propertyBlock.SetTexture(DamageMaskId, _damageMask);
+        _propertyBlock.SetVector(DamageMaskStId, maskSt);
+        renderer.SetPropertyBlock(_propertyBlock, materialIndex);
+      }
     }
 
     private enum BrushShape
