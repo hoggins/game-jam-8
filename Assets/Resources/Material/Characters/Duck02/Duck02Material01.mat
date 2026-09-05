@@ -29,11 +29,11 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _IDMap:
-        m_Texture: {fileID: 2800000, guid: cd8f78c0f0e6e4a53af7f047f23e0a77, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 3ee3e211296a02940bdf5a1478fc8f03, type: 3}
+        m_Texture: {fileID: 2800000, guid: ea65379d33effe44d90a435e32f86971, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _PrintsColor:
@@ -91,9 +91,9 @@ Material:
     - _SpecularHighlights: 1
     - _XRMotionVectorsPass: 1
     m_Colors:
-    - _Color0: {r: 0.84, g: 0.58964705, b: 0, a: 0}
-    - _Color1: {r: 0.74213827, g: 0.20762481, b: 0.07234669, a: 0}
-    - _Color2: {r: 0.4056604, g: 0.4056604, b: 0.4056604, a: 0}
+    - _Color0: {r: 1, g: 1, b: 1, a: 0}
+    - _Color1: {r: 0, g: 0, b: 0, a: 0}
+    - _Color2: {r: 0, g: 0, b: 0, a: 0}
     - _PrintsColor: {r: 1, g: 1, b: 1, a: 0}
     - _PrintsScale: {r: 0.1, g: 0.1, b: 0, a: 0}
     - _Vector0: {r: 3, g: 3, b: 3, a: 0}
