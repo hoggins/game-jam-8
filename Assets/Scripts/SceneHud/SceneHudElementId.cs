@@ -14,5 +14,8 @@ namespace SceneHud
 
     /// The player's health bar, standing in the world as 24 smashable pixels.
     Hp = 2,
+
+    /// The static upgrade house display. It is hidden after the house is destroyed.
+    Upgrade = 3,
   }
 }

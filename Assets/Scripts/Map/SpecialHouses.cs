@@ -4,9 +4,9 @@ namespace Map
   {
     Timer = 0,
 
-    /// Placeholder second special used to validate that multiple specials respawn correctly
-    /// alongside the Timer.
-    TestHouse = 1,
+    /// A destructible House01 that opens the in-battle progression screen. It is respawned with the
+    /// Timer and its HUD camera is static once it has been placed.
+    Upgrade = 1,
 
     /// The compass arrow. One per battle: it is moved rather than duplicated, and once smashed it
     /// stays gone until the next battle.
