@@ -87,7 +87,33 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SceneHud.SceneHudElementView
   _id: 0
-  _destroyedImage: {fileID: 0}
+  _enableGroupWhenDestroyed: {fileID: 0}
+  _destroyedFadeDuration: 0.35
+  _destroyedFadeScale: 1.2
+  _destroyedFadeCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!114 &1081077929216310504
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -228,7 +254,33 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SceneHud.SceneHudElementView
   _id: 3
-  _destroyedImage: {fileID: 0}
+  _enableGroupWhenDestroyed: {fileID: 0}
+  _destroyedFadeDuration: 0.35
+  _destroyedFadeScale: 1.2
+  _destroyedFadeCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!114 &4491264373568684425
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -405,7 +457,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.36900002, g: 0.36900002, b: 0.36900002, a: 1}
+  m_Color: {r: 1, g: 0.8011, b: 0.29800004, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -433,13 +485,14 @@ GameObject:
   - component: {fileID: 8939833744044186952}
   - component: {fileID: 1830289564692446357}
   - component: {fileID: 5512888550823899717}
+  - component: {fileID: 5756918992383856924}
   m_Layer: 5
   m_Name: GameObject
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &8939833744044186952
 RectTransform:
   m_ObjectHideFlags: 0
@@ -497,6 +550,18 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!225 &5756918992383856924
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3940751540917077975}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &4411025926251014319
 GameObject:
   m_ObjectHideFlags: 0
@@ -583,7 +648,33 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SceneHud.SceneHudElementView
   _id: 2
-  _destroyedImage: {fileID: 0}
+  _enableGroupWhenDestroyed: {fileID: 0}
+  _destroyedFadeDuration: 0.35
+  _destroyedFadeScale: 1.2
+  _destroyedFadeCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &6236813298546370684
 GameObject:
   m_ObjectHideFlags: 0
@@ -595,13 +686,14 @@ GameObject:
   - component: {fileID: 4605055922014807601}
   - component: {fileID: 6364340998846396181}
   - component: {fileID: 5560282067511169390}
+  - component: {fileID: 5326445219911714726}
   m_Layer: 5
   m_Name: GameObject
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &4605055922014807601
 RectTransform:
   m_ObjectHideFlags: 0
@@ -659,6 +751,18 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!225 &5326445219911714726
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6236813298546370684}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &7079076702177242776
 GameObject:
   m_ObjectHideFlags: 0
@@ -746,7 +850,33 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SceneHud.SceneHudElementView
   _id: 4
-  _destroyedImage: {fileID: 5560282067511169390}
+  _enableGroupWhenDestroyed: {fileID: 5326445219911714726}
+  _destroyedFadeDuration: 0.2
+  _destroyedFadeScale: 1.5
+  _destroyedFadeCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!114 &6157416612268486140
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -962,7 +1092,33 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SceneHud.SceneHudElementView
   _id: 1
-  _destroyedImage: {fileID: 5512888550823899717}
+  _enableGroupWhenDestroyed: {fileID: 5756918992383856924}
+  _destroyedFadeDuration: 0.2
+  _destroyedFadeScale: 1.5
+  _destroyedFadeCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!114 &6710668932931835229
 MonoBehaviour:
   m_ObjectHideFlags: 0
