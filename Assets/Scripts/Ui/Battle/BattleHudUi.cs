@@ -28,7 +28,10 @@ namespace Battle
       base.OnEnable();
 
       if (_battleService != null)
+      {
         _battleService.BattleStarted += OnBattleStarted;
+        _battleService.BattleWinStarted += OnBattleWinStarted;
+      }
 
       if (_upgradeButton != null)
       {
@@ -48,7 +51,10 @@ namespace Battle
     protected override void OnDisable()
     {
       if (_battleService != null)
+      {
         _battleService.BattleStarted -= OnBattleStarted;
+        _battleService.BattleWinStarted -= OnBattleWinStarted;
+      }
 
       if (_upgradeButton != null)
         _upgradeButton.onClick.RemoveListener(ToggleProgression);
@@ -88,6 +94,9 @@ namespace Battle
         return;
       }
 
+      if (_battleService != null && _battleService.IsWinning)
+        return;
+
       if (_pauseMenuUi != null)
         _pauseMenuUi.TogglePause();
     }
@@ -99,7 +108,9 @@ namespace Battle
 
     private void ToggleProgression()
     {
-      if (!_progressionInputEnabled || _progressionUi == null)
+      if (!_progressionInputEnabled
+          || _progressionUi == null
+          || (_battleService != null && _battleService.IsWinning))
         return;
 
       if (_pauseMenuUi != null && _pauseMenuUi.IsPaused)
@@ -113,6 +124,15 @@ namespace Battle
       _progressionInputEnabled = true;
       if (_upgradeButton != null)
         _upgradeButton.interactable = true;
+
+      ApplyProgressionInputState();
+    }
+
+    private void OnBattleWinStarted()
+    {
+      _progressionInputEnabled = false;
+      if (_upgradeButton != null)
+        _upgradeButton.interactable = false;
 
       ApplyProgressionInputState();
     }

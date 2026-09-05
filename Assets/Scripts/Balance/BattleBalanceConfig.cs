@@ -17,6 +17,7 @@ namespace Balance
   {
     [Header("Timing")]
     [SerializeField, Min(0f)] private float _battleDuration = 90f;
+    [SerializeField, Min(0f)] private float _winGraceDuration = 2f;
 
     [Header("Special Object Respawn")]
     [Tooltip("Beyond this distance from the player, a non-Timer special respawns somewhere between "
@@ -65,6 +66,7 @@ namespace Balance
     };
 
     public float BattleDuration => _battleDuration;
+    public float WinGraceDuration => _winGraceDuration;
     public float SpecialBetweenMaxDistance => _specialBetweenMaxDistance;
     public float SpecialBetweenMinDistance => _specialBetweenMinDistance;
     public float SpecialFenceStartDistance => _specialFenceStartDistance;
@@ -111,6 +113,7 @@ namespace Balance
     private void OnValidate()
     {
       _battleDuration = Mathf.Max(0f, _battleDuration);
+      _winGraceDuration = Mathf.Max(0f, _winGraceDuration);
       _specialBetweenMaxDistance = Mathf.Max(0f, _specialBetweenMaxDistance);
       _specialBetweenMinDistance = Mathf.Max(0f, _specialBetweenMinDistance);
       _specialFenceStartDistance = Mathf.Max(0f, _specialFenceStartDistance);

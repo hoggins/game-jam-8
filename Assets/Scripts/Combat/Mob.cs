@@ -39,8 +39,12 @@ namespace Combat
     [SerializeField] private Vector3 _attachRotationMin = new(-30f, -180f, -30f);
     [SerializeField] private Vector3 _attachRotationMax = new(30f, 180f, 30f);
 
+    [Header("Victory")]
+    [SerializeField, Min(0f)] private float _flyUpSpeed = 12f;
+
     [Inject] private Pool _pool;
     [Inject] private CharacterService _characterService;
+    [Inject] private BattleService _battleService;
     [Inject] private BattleBalanceConfig _battleBalance;
 
     private const string CoinPickupPrefabPath = "Prefabs/Interface/Coin01";
@@ -62,6 +66,7 @@ namespace Combat
     private bool _isDying;
     private bool _hasAttacked;
     private bool _isAttached;
+    private bool _isFlyingUp;
 
     public int CurrentHealth { get; private set; }
     public bool IsAlive => CurrentHealth > 0 && !_isDying;
@@ -87,16 +92,26 @@ namespace Combat
       _isDying = false;
       _hasAttacked = false;
       _isAttached = false;
+      _isFlyingUp = false;
       _player = null;
       ApplyRandomAppearance();
       _death?.ResetVisual();
 
       if (_movementAgent != null)
         _movementAgent.enabled = true;
+
+      if (_battleService != null)
+        _battleService.BattleWinStarted += FlyUp;
     }
 
     private void Update()
     {
+      if (_isFlyingUp)
+      {
+        transform.position += Vector3.up * (_flyUpSpeed * Time.deltaTime);
+        return;
+      }
+
       if (!IsAlive || _hasAttacked)
         return;
 
@@ -114,7 +129,7 @@ namespace Combat
       if (damage < 0)
         throw new ArgumentOutOfRangeException(nameof(damage), damage, "Damage cannot be negative.");
 
-      if (!IsAlive)
+      if (!IsAlive || _isFlyingUp)
         return;
 
       CurrentHealth = Mathf.Max(0, CurrentHealth - damage);
@@ -147,6 +162,25 @@ namespace Combat
       // MobDeath detaches attached mobs while preserving their current world position, then plays
       // the detach throw from that position.
       _death?.Play(_isAttached ? _player : null, _movementAgent, OnDeathPlayed);
+    }
+
+    private void FlyUp()
+    {
+      if (!IsAlive || _isFlyingUp)
+        return;
+
+      _isFlyingUp = true;
+      _hasAttacked = true;
+
+      if (_attachCoroutine != null)
+      {
+        StopCoroutine(_attachCoroutine);
+        _attachCoroutine = null;
+      }
+
+      DetachFromPlayer();
+      if (_movementAgent != null)
+        _movementAgent.enabled = false;
     }
 
     private void OnDeathPlayed()
@@ -469,6 +503,9 @@ namespace Combat
 
     private void OnDisable()
     {
+      if (_battleService != null)
+        _battleService.BattleWinStarted -= FlyUp;
+
       if (_attachCoroutine != null)
       {
         StopCoroutine(_attachCoroutine);
@@ -482,6 +519,7 @@ namespace Combat
     private void OnValidate()
     {
       _attachDuration = Mathf.Max(0f, _attachDuration);
+      _flyUpSpeed = Mathf.Max(0f, _flyUpSpeed);
       _attachPositionCurve ??= DefaultAttachCurve();
       _attachRotationCurve ??= DefaultAttachCurve();
 

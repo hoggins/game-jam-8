@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: BattleBalanceConfig
   m_EditorClassIdentifier: Assembly-CSharp::Balance.BattleBalanceConfig
   _battleDuration: 90
+  _winGraceDuration: 5
   _specialBetweenMaxDistance: 50
   _specialBetweenMinDistance: 40
   _specialFenceStartDistance: 35

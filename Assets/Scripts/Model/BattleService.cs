@@ -19,8 +19,10 @@ namespace Model
     private readonly BattleBalanceConfig _battleBalance;
 
     private float _defeatDelay;
+    private float _winGraceDelay;
 
     public event Action BattleStarted;
+    public event Action BattleWinStarted;
     public event Action BattleWon;
     public event Action BattleDefeated;
     public event Action TimerDestroyed;
@@ -36,6 +38,10 @@ namespace Model
     /// True while the clock sits on 00:00, blinking, waiting for the timeout defeat. Combat keeps
     /// running during this window — it is bonus time, not a pause.
     public bool IsTimingOut { get; private set; }
+
+    /// True while the goal has been destroyed and the battlefield is playing its victory
+    /// animation. The win screen is shown after this window, not before it.
+    public bool IsWinning { get; private set; }
 
     public float Timer { get; private set; }
 
@@ -73,6 +79,15 @@ namespace Model
 
     void ITickable.Tick()
     {
+      if (IsWinning)
+      {
+        _winGraceDelay -= Time.deltaTime;
+        if (_winGraceDelay <= 0f)
+          CompleteWinBattle();
+
+        return;
+      }
+
       if (!IsBattleActive)
         return;
 
@@ -123,7 +138,9 @@ namespace Model
       IsTimerDestroyed = false;
       IsTimerInfinite = false;
       IsTimingOut = false;
+      IsWinning = false;
       _defeatDelay = 0f;
+      _winGraceDelay = 0f;
       Timer = StartingDuration;
       Time.timeScale = 1f;
       foreach (var handler in _battleStartedHandlers)
@@ -138,6 +155,22 @@ namespace Model
         return;
 
       IsBattleActive = false;
+      IsWinning = true;
+      _winGraceDelay = _battleBalance.WinGraceDuration;
+      Time.timeScale = 1f;
+      BattleWinStarted?.Invoke();
+
+      if (_winGraceDelay <= 0f)
+        CompleteWinBattle();
+    }
+
+    private void CompleteWinBattle()
+    {
+      if (!IsWinning)
+        return;
+
+      IsWinning = false;
+      _winGraceDelay = 0f;
       HandleBattleEnd();
       BattleWon?.Invoke();
     }
@@ -157,14 +190,16 @@ namespace Model
     /// win/defeat event because neither happened.
     public void AbandonBattle()
     {
-      if (!IsBattleActive)
+      if (!IsBattleActive && !IsWinning)
         return;
 
       IsBattleActive = false;
       IsTimerDestroyed = false;
       IsTimerInfinite = false;
       IsTimingOut = false;
+      IsWinning = false;
       _defeatDelay = 0f;
+      _winGraceDelay = 0f;
       Timer = StartingDuration;
       Time.timeScale = 1f;
       foreach (IBattleEnd handler in _battleEndHandlers)

@@ -84,6 +84,7 @@ namespace Combat
     private float _elapsedSeconds;
     private int _nextSpawnSide;
     private int _repositionFrame;
+    private bool _isSpawning;
 
     private void Awake() =>
       this.AsInjected();
@@ -93,13 +94,23 @@ namespace Combat
       _elapsedSeconds = 0f;
       _nextSpawnSide = 0;
       _repositionFrame = 0;
+      _isSpawning = true;
       for (var i = 0; i < _mobs.Count; i++)
         _mobs[i]?.ResetRuntime();
+
+      if (_battleService != null)
+        _battleService.BattleWinStarted += StopSpawning;
+    }
+
+    private void OnDisable()
+    {
+      if (_battleService != null)
+        _battleService.BattleWinStarted -= StopSpawning;
     }
 
     private void Update()
     {
-      if (_battleService is not { IsBattleActive: true })
+      if (!_isSpawning || _battleService is not { IsBattleActive: true })
         return;
 
       _elapsedSeconds += Time.deltaTime;
@@ -283,6 +294,9 @@ namespace Combat
       if (_camera == null)
         _camera = Camera.main;
     }
+
+    private void StopSpawning() =>
+      _isSpawning = false;
 
     private void OnValidate()
     {
