@@ -49,6 +49,7 @@ MonoBehaviour:
   _attackFxPrewarmCount: 8
   _attackFxPoint: {fileID: 2403819526801905520}
   _attachAttackFxToPlayer: 1
+  _hitFxOffset: {x: 0, y: 1, z: 0}
   _attackRadius: 5
   _attackConeAngle: 120
   _alternateAttackFx: 1

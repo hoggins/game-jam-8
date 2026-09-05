@@ -34,6 +34,9 @@ namespace Balance
     [SerializeField, Min(0f)] private float _duckAttackDistance = 3f;
     [SerializeField, Min(0f)] private float _duckRepositionDistance = 40f;
 
+    [Header("Weapons")]
+    [SerializeField, Min(0f)] private float _meleeAttackRadius = 2f;
+
     [Tooltip("Chance of dropping N coins on a duck kill, indexed by coin count. Must sum to 1.")]
     [SerializeField] private float[] _duckCoinDropChances = { 0.6f, 0.3f, 0.1f };
 
@@ -53,6 +56,7 @@ namespace Balance
     public int DuckAttackDamage => _duckAttackDamage;
     public float DuckAttackDistance => _duckAttackDistance;
     public float DuckRepositionDistance => _duckRepositionDistance;
+    public float MeleeAttackRadius => _meleeAttackRadius;
 
     public int GetDestructibleMaxHealth(DestructibleObjectType type)
     {
@@ -87,6 +91,7 @@ namespace Balance
       _duckAttackDamage = Mathf.Max(0, _duckAttackDamage);
       _duckAttackDistance = Mathf.Max(0f, _duckAttackDistance);
       _duckRepositionDistance = Mathf.Max(0f, _duckRepositionDistance);
+      _meleeAttackRadius = Mathf.Max(0f, _meleeAttackRadius);
 
       for (var i = 0; i < _destructibleMaxHealth.Count; i++)
       {

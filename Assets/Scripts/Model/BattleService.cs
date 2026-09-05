@@ -24,6 +24,7 @@ namespace Model
 
     public bool IsBattleActive { get; private set; }
     public bool IsTimerDestroyed { get; private set; }
+    public bool IsTimerInfinite { get; private set; }
 
     /// True while the clock sits on 00:00 waiting for the timeout defeat. Nothing deals damage in
     /// that window, so the player can read the zero instead of being hit during it.
@@ -66,6 +67,9 @@ namespace Model
     void ITickable.Tick()
     {
       if (!IsBattleActive)
+        return;
+
+      if (IsTimerInfinite)
         return;
 
       if (IsCombatSuspended)
@@ -115,6 +119,7 @@ namespace Model
 
       IsBattleActive = true;
       IsTimerDestroyed = false;
+      IsTimerInfinite = false;
       IsCombatSuspended = false;
       _defeatDelay = 0f;
       Timer = StartingDuration;
@@ -155,6 +160,7 @@ namespace Model
 
       IsBattleActive = false;
       IsTimerDestroyed = false;
+      IsTimerInfinite = false;
       IsCombatSuspended = false;
       _defeatDelay = 0f;
       Timer = StartingDuration;
@@ -175,6 +181,16 @@ namespace Model
     {
       IsTimerDestroyed = false;
       Timer = _battleBalance.BattleDuration;
+    }
+
+    public void EnableInfiniteTimer()
+    {
+      IsTimerInfinite = true;
+      IsCombatSuspended = false;
+      _defeatDelay = 0f;
+
+      if (Timer <= 0f)
+        Timer = StartingDuration;
     }
 
     /// Overwrites the remaining time. Used when part of the in-world timer is destroyed and the

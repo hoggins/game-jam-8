@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using VContainer;
+using Model;
 
 namespace App
 {
@@ -8,6 +10,11 @@ namespace App
   {
     [Header("Player Teleport")]
     [SerializeField] private Vector3 _teleportPosition;
+
+    [Inject] private CharacterService _characterService;
+    [Inject] private BattleService _battleService;
+
+    private void Awake() => this.AsInjected();
 
     private void Update()
     {
@@ -26,6 +33,34 @@ namespace App
 
       if (keyboard.f9Key.wasPressedThisFrame)
         TeleportPlayer(Vector3.zero);
+
+      if (keyboard.f10Key.wasPressedThisFrame)
+        EnablePlayerInvincibility();
+
+      if (keyboard.f11Key.wasPressedThisFrame)
+        EnableInfiniteTimer();
+    }
+
+    /// <summary>Enables the player invincibility cheat. Press F10 during a battle.</summary>
+    public bool EnablePlayerInvincibility()
+    {
+      if (_characterService == null)
+        return false;
+
+      _characterService.DestroyHealth();
+      Debug.Log("Player invincibility enabled.", this);
+      return true;
+    }
+
+    /// <summary>Enables the infinite battle timer cheat. Press F11 during a battle.</summary>
+    public bool EnableInfiniteTimer()
+    {
+      if (_battleService == null)
+        return false;
+
+      _battleService.EnableInfiniteTimer();
+      Debug.Log("Infinite battle timer enabled.", this);
+      return true;
     }
 
     /// <summary>

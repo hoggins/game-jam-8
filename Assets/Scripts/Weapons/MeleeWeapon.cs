@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Balance;
 using Combat;
 using Destruction;
 using Movement;
@@ -10,20 +11,35 @@ namespace Weapons
   [DisallowMultipleComponent]
   public sealed class MeleeWeapon : Weapon
   {
-    [SerializeField, Min(0f)] private float _attackRadius = 2f;
+    private const string BattleBalanceResourcePath = "BattleBalanceConfig";
+
     [SerializeField, Range(0f, 360f)] private float _attackConeAngle = 90f;
     [SerializeField] private bool _alternateAttackFx;
     [SerializeField] private GameObject _hitFxPrefab;
     [SerializeField, Min(0)] private int _hitFxPrewarmCount = 8;
 
     [Inject] private MovementUpdater _movementUpdater;
+    [Inject] private BattleBalanceConfig _battleBalance;
 
     private readonly List<MovementAgent> _targets = new(16);
     private readonly HashSet<Mob> _hitMobs = new();
     private readonly Collider[] _destructibleHits = new Collider[16];
 
+    private static BattleBalanceConfig _resourcesBattleBalance;
+
     private int _damagableLayerMask;
     private bool _nextAttackFxMirrored = true;
+
+    // Falls back to a direct Resources load so the radius still shows correctly for OnValidate
+    // and the gizmo, which run in the editor outside of play mode where DI has not injected
+    // _battleBalance yet.
+    private float AttackRadius =>
+      (_battleBalance != null
+        ? _battleBalance
+        : _resourcesBattleBalance = _resourcesBattleBalance != null
+          ? _resourcesBattleBalance
+          : Resources.Load<BattleBalanceConfig>(BattleBalanceResourcePath))
+      ?.MeleeAttackRadius ?? 0f;
 
     protected override void SpawnAttackFx()
     {
@@ -47,7 +63,7 @@ namespace Weapons
       {
         _movementUpdater.QueryCircle(
           transform.position,
-          _attackRadius,
+          AttackRadius,
           MovementLayer.Mob,
           _targets);
 
@@ -79,7 +95,7 @@ namespace Weapons
 
       var hitCount = Physics.OverlapSphereNonAlloc(
         transform.position,
-        _attackRadius,
+        AttackRadius,
         _destructibleHits,
         _damagableLayerMask);
 
@@ -136,7 +152,6 @@ namespace Weapons
 
     private void OnValidate()
     {
-      _attackRadius = Mathf.Max(0f, _attackRadius);
       _attackConeAngle = Mathf.Clamp(_attackConeAngle, 0f, 360f);
       _hitFxPrewarmCount = Mathf.Max(0, _hitFxPrewarmCount);
     }
@@ -162,7 +177,8 @@ namespace Weapons
 
     private void OnDrawGizmosSelected()
     {
-      if (_attackRadius <= 0f)
+      var attackRadius = AttackRadius;
+      if (attackRadius <= 0f)
         return;
 
       var origin = transform.position + Vector3.up * 0.05f;
@@ -170,7 +186,7 @@ namespace Weapons
       var halfAngle = _attackConeAngle * 0.5f;
       var segmentCount = Mathf.Max(4, Mathf.CeilToInt(_attackConeAngle / 10f));
       var previousPoint = origin
-        + (Quaternion.AngleAxis(-halfAngle, Vector3.up) * forward) * _attackRadius;
+        + (Quaternion.AngleAxis(-halfAngle, Vector3.up) * forward) * attackRadius;
 
       Gizmos.color = new Color(1f, 0.65f, 0.1f, 0.9f);
       Gizmos.DrawLine(origin, previousPoint);
@@ -179,13 +195,13 @@ namespace Weapons
       {
         var angle = Mathf.Lerp(-halfAngle, halfAngle, i / (float)segmentCount);
         var point = origin
-          + (Quaternion.AngleAxis(angle, Vector3.up) * forward) * _attackRadius;
+          + (Quaternion.AngleAxis(angle, Vector3.up) * forward) * attackRadius;
         Gizmos.DrawLine(previousPoint, point);
         previousPoint = point;
       }
 
       Gizmos.DrawLine(origin, previousPoint);
-      Gizmos.DrawLine(origin, origin + forward * _attackRadius);
+      Gizmos.DrawLine(origin, origin + forward * attackRadius);
     }
   }
 }
