@@ -139,7 +139,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1026408992024880840}
   - component: {fileID: 8808333422512147067}
-  - component: {fileID: 7807380531395331237}
   - component: {fileID: 8166871031735688173}
   - component: {fileID: 5940097023192660865}
   - component: {fileID: 269150871703130915}
@@ -187,18 +186,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 6, y: 1.5858635, z: 2.3458138}
   m_Center: {x: 0.0000009536743, y: 0.79293174, z: 0.000005722046}
---- !u!114 &7807380531395331237
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6789860627743719226}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f903e9399414745ada58a14464dc2c85, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Movement.FlowMapNoGoZone
 --- !u!114 &8166871031735688173
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -213,6 +200,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Destruction.DestructibleObject
   _breakMagnitude: 10
   _spawnDestructionFx: 0
+  _houseDifficultyLevel: 1
 --- !u!114 &5940097023192660865
 MonoBehaviour:
   m_ObjectHideFlags: 0
