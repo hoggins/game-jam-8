@@ -119,7 +119,18 @@ namespace Movement
         return Vector3.zero;
 
       var input = Vector2.ClampMagnitude(action.ReadValue<Vector2>(), 1f);
-      return new Vector3(input.x, 0f, input.y) * Speed;
+      var camera = Camera.main;
+      if (camera == null)
+        return new Vector3(input.x, 0f, input.y) * Speed;
+
+      var cameraForward = Vector3.ProjectOnPlane(camera.transform.forward, Vector3.up);
+      if (cameraForward.sqrMagnitude < 0.000001f)
+        cameraForward = Vector3.ProjectOnPlane(camera.transform.up, Vector3.up);
+
+      cameraForward.Normalize();
+      var cameraRight = Vector3.ProjectOnPlane(camera.transform.right, Vector3.up).normalized;
+      var movement = cameraRight * input.x + cameraForward * input.y;
+      return movement * Speed;
     }
 
     private void OnValidate()
