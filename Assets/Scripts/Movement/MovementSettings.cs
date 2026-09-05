@@ -10,6 +10,8 @@ namespace Movement
 
     [Header("Flow Map")]
     [SerializeField, Min(0.01f)] private float _flowCellSize = 1f;
+    [Tooltip("Half-width of the local flow field around the target. Agents outside it use direct movement until they enter the field.")]
+    [SerializeField, Min(0f)] private float _flowRadius = 48f;
     [SerializeField, Min(0f)] private float _flowPadding = 15f;
     [SerializeField, Min(0)] private int _flowTargetCellDeviation = 2;
     [SerializeField, Min(1)] private int _maxFlowCellCount = 262144;
@@ -25,6 +27,7 @@ namespace Movement
 
     internal float SpatialCellSize => _spatialCellSize;
     internal float FlowCellSize => _flowCellSize;
+    internal float FlowRadius => _flowRadius;
     internal float FlowPadding => _flowPadding;
     internal int FlowTargetCellDeviation => _flowTargetCellDeviation;
     internal int MaxFlowCellCount => _maxFlowCellCount;
@@ -38,6 +41,7 @@ namespace Movement
     {
       _spatialCellSize = Mathf.Max(0.01f, _spatialCellSize);
       _flowCellSize = Mathf.Max(0.01f, _flowCellSize);
+      _flowRadius = Mathf.Max(0f, _flowRadius);
       _flowPadding = Mathf.Max(0f, _flowPadding);
       _flowTargetCellDeviation = Mathf.Max(0, _flowTargetCellDeviation);
       _maxFlowCellCount = Mathf.Max(1, _maxFlowCellCount);

@@ -207,11 +207,11 @@ namespace Movement
       {
         _flowMap.Update(
           playerPosition,
-          agents,
           _noGoZones,
           _noGoZoneRevision,
           flowClearance,
           _settings.FlowCellSize,
+          _settings.FlowRadius,
           _settings.FlowPadding,
           _settings.FlowTargetCellDeviation,
           _settings.MaxFlowCellCount);

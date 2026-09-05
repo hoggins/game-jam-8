@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Movement.MovementSettings
   _spatialCellSize: 2
   _flowCellSize: 1
+  _flowRadius: 48
   _flowPadding: 15
   _flowTargetCellDeviation: 2
   _maxFlowCellCount: 262144

@@ -31,6 +31,8 @@ namespace Movement
     private Vector2 _offset;
     private Vector2Int _targetCell;
     private float _cellSize;
+    private float _radius;
+    private float _padding;
     private int _width;
     private int _height;
     private bool _hasField;
@@ -47,37 +49,40 @@ namespace Movement
 
     public void Update(
       Vector3 targetPosition,
-      IReadOnlyList<MovementAgent> agents,
       IReadOnlyList<FlowMapNoGoZone> noGoZones,
       int noGoZoneRevision,
       float clearance,
       float cellSize,
+      float radius,
       float padding,
       int targetCellDeviation,
       int maxCellCount)
     {
       cellSize = Mathf.Max(0.01f, cellSize);
+      radius = Mathf.Max(0f, radius);
       padding = Mathf.Max(0f, padding);
       clearance = Mathf.Max(0f, clearance);
 
       var targetCell = PositionToCell(targetPosition, _offset, cellSize);
       var targetMoved = (!_hasField && !_overflowed)
                         || _cellSize != cellSize
+                        || _radius != radius
+                        || _padding != padding
                         || _clearance != clearance
                         || _noGoZoneRevision != noGoZoneRevision
                         || Mathf.Abs(targetCell.x - _targetCell.x) > targetCellDeviation
                         || Mathf.Abs(targetCell.y - _targetCell.y) > targetCellDeviation;
 
-      if (!targetMoved && ContainsAllActiveAgents(agents))
+      if (!targetMoved)
         return;
 
       Recalculate(
         targetPosition,
-        agents,
         noGoZones,
         noGoZoneRevision,
         clearance,
         cellSize,
+        radius,
         padding,
         maxCellCount);
     }
@@ -172,6 +177,11 @@ namespace Movement
       var minCell = PositionToCell(position - new Vector3(radius, 0f, radius), _offset, _cellSize);
       var maxCell = PositionToCell(position + new Vector3(radius, 0f, radius), _offset, _cellSize);
 
+      // Agents outside the local field use direct-target fallback. Keep them on the safe physics
+      // path until the field is rebuilt around the player; otherwise they could pass through a wall.
+      if (minCell.x < 0 || minCell.y < 0 || maxCell.x >= _width || maxCell.y >= _height)
+        return true;
+
       for (var y = minCell.y; y <= maxCell.y; y++)
       for (var x = minCell.x; x <= maxCell.x; x++)
         if (TryGetIndex(new Vector2Int(x, y), out var index) && _blocked[index])
@@ -203,99 +213,92 @@ namespace Movement
 
     private void Recalculate(
       Vector3 targetPosition,
-      IReadOnlyList<MovementAgent> agents,
       IReadOnlyList<FlowMapNoGoZone> noGoZones,
       int noGoZoneRevision,
       float clearance,
       float cellSize,
+      float radius,
       float padding,
       int maxCellCount)
     {
       RecalculateMarker.Begin();
       try
       {
-        var min = new Vector2(targetPosition.x, targetPosition.z);
-        var max = min;
+        var center = new Vector2(targetPosition.x, targetPosition.z);
+        var halfSize = radius + padding;
+        var extent = Vector2.one * halfSize;
+        var min = center - extent;
+        var max = center + extent;
 
-      for (var i = 0; i < agents.Count; i++)
-      {
-        var agent = agents[i];
-        if (agent == null || !agent.isActiveAndEnabled)
-          continue;
+        // Keep the field local to the target. Agents outside this window use direct-target fallback
+        // instead of expanding the grid and making every spawn or teleport trigger a rebuild.
+        _cellSize = cellSize;
+        _radius = radius;
+        _padding = padding;
+        _clearance = clearance;
+        _noGoZoneRevision = noGoZoneRevision;
+        _offset = new Vector2(
+          Mathf.Floor(min.x / cellSize) * cellSize,
+          Mathf.Floor(min.y / cellSize) * cellSize);
+        _width = Mathf.Max(1, Mathf.CeilToInt((max.x - _offset.x) / cellSize) + 1);
+        _height = Mathf.Max(1, Mathf.CeilToInt((max.y - _offset.y) / cellSize) + 1);
+        _targetCell = PositionToCell(targetPosition, _offset, cellSize);
 
-        var point = new Vector2(agent.Position.x, agent.Position.z);
-        min = Vector2.Min(min, point);
-        max = Vector2.Max(max, point);
-      }
-
-      min -= Vector2.one * padding;
-      max += Vector2.one * padding;
-
-      _cellSize = cellSize;
-      _clearance = clearance;
-      _noGoZoneRevision = noGoZoneRevision;
-      _offset = new Vector2(
-        Mathf.Floor(min.x / cellSize) * cellSize,
-        Mathf.Floor(min.y / cellSize) * cellSize);
-      _width = Mathf.Max(1, Mathf.CeilToInt((max.x - _offset.x) / cellSize) + 1);
-      _height = Mathf.Max(1, Mathf.CeilToInt((max.y - _offset.y) / cellSize) + 1);
-      _targetCell = PositionToCell(targetPosition, _offset, cellSize);
-
-      var cellCount = (long)_width * _height;
-      if (cellCount > Mathf.Max(1, maxCellCount))
-      {
-        _hasField = false;
-        _overflowed = true;
-        return;
-      }
-
-      _overflowed = false;
-      EnsureCapacity((int)cellCount);
-      for (var i = 0; i < cellCount; i++)
-      {
-        _directions[i] = Vector2.zero;
-        _costs[i] = float.PositiveInfinity;
-        _blocked[i] = false;
-      }
-
-      MarkBlockedCells(noGoZones);
-
-      if (!TryGetIndex(_targetCell, out var targetIndex))
-      {
-        _hasField = false;
-        return;
-      }
-
-      _blocked[targetIndex] = false;
-      _candidates.Clear();
-      _costs[targetIndex] = 0f;
-      _candidates.Push(0f, targetIndex);
-
-      while (_candidates.Count > 0)
-      {
-        _candidates.Pop(out var currentCost, out var currentIndex);
-        if (currentCost > _costs[currentIndex])
-          continue;
-
-        var currentCell = IndexToCell(currentIndex);
-        for (var i = 0; i < NeighborOffsets.Length; i++)
+        var cellCount = (long)_width * _height;
+        if (cellCount > Mathf.Max(1, maxCellCount))
         {
-          var neighborCell = currentCell + NeighborOffsets[i];
-          if (!TryGetIndex(neighborCell, out var neighborIndex))
-            continue;
-
-          if (_blocked[neighborIndex] || CutsBlockedCorner(currentCell, NeighborOffsets[i]))
-            continue;
-
-          var nextCost = currentCost + (i < 4 ? 1f : 1.41421356f);
-          if (nextCost >= _costs[neighborIndex])
-            continue;
-
-          _costs[neighborIndex] = nextCost;
-          _directions[neighborIndex] = -NeighborOffsets[i];
-          _candidates.Push(nextCost, neighborIndex);
+          _hasField = false;
+          _overflowed = true;
+          return;
         }
-      }
+
+        _overflowed = false;
+        EnsureCapacity((int)cellCount);
+        for (var i = 0; i < cellCount; i++)
+        {
+          _directions[i] = Vector2.zero;
+          _costs[i] = float.PositiveInfinity;
+          _blocked[i] = false;
+        }
+
+        MarkBlockedCells(noGoZones);
+
+        if (!TryGetIndex(_targetCell, out var targetIndex))
+        {
+          _hasField = false;
+          return;
+        }
+
+        _blocked[targetIndex] = false;
+        _candidates.Clear();
+        _costs[targetIndex] = 0f;
+        _candidates.Push(0f, targetIndex);
+
+        while (_candidates.Count > 0)
+        {
+          _candidates.Pop(out var currentCost, out var currentIndex);
+          if (currentCost > _costs[currentIndex])
+            continue;
+
+          var currentCell = IndexToCell(currentIndex);
+          for (var i = 0; i < NeighborOffsets.Length; i++)
+          {
+            var neighborCell = currentCell + NeighborOffsets[i];
+            if (!TryGetIndex(neighborCell, out var neighborIndex))
+              continue;
+
+            if (_blocked[neighborIndex] || CutsBlockedCorner(currentCell, NeighborOffsets[i]))
+              continue;
+
+            var nextCost = currentCost + (i < 4 ? 1f : 1.41421356f);
+            if (nextCost >= _costs[neighborIndex])
+              continue;
+
+            _costs[neighborIndex] = nextCost;
+            _directions[neighborIndex] = -NeighborOffsets[i];
+            _candidates.Push(nextCost, neighborIndex);
+          }
+        }
 
         _hasField = true;
       }
@@ -363,21 +366,6 @@ namespace Movement
 
     private bool IsBlocked(Vector2Int cell) =>
       TryGetIndex(cell, out var index) && _blocked[index];
-
-    private bool ContainsAllActiveAgents(IReadOnlyList<MovementAgent> agents)
-    {
-      for (var i = 0; i < agents.Count; i++)
-      {
-        var agent = agents[i];
-        if (agent == null || !agent.isActiveAndEnabled)
-          continue;
-
-        if (!TryGetIndex(PositionToCell(agent.Position, _offset, _cellSize), out _))
-          return false;
-      }
-
-      return true;
-    }
 
     private void EnsureCapacity(int count)
     {
