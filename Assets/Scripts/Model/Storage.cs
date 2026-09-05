@@ -14,12 +14,16 @@ namespace Model
     private const string DucksKilledKey = "Player.DucksKilled";
     private const string BuildingsDestroyedKey = "Player.BuildingsDestroyed";
     private const string CurrentCoinsKey = "Player.CurrentCoins";
+    private const string SpeedKey = "Player.Speed";
+    private const string GunPowerKey = "Player.GunPower";
 
     private int _attackPower;
     private int _maxHealth;
     private int _ducksKilled;
     private int _buildingsDestroyed;
     private int _currentCoins;
+    private int _speed;
+    private int _gunPower;
     private bool _isInitialized;
 
     public event Action StatisticsChanged;
@@ -62,6 +66,18 @@ namespace Model
       set => SetValue(ref _currentCoins, value, CurrentCoinsKey);
     }
 
+    public int Speed
+    {
+      get => _speed;
+      set => SetValue(ref _speed, value, SpeedKey);
+    }
+
+    public int GunPower
+    {
+      get => _gunPower;
+      set => SetValue(ref _gunPower, value, GunPowerKey);
+    }
+
     void IInitializable.Initialize()
     {
       _attackPower = PlayerPrefs.GetInt(AttackPowerKey, ProgressionBalance.StartingAttackPower);
@@ -69,6 +85,8 @@ namespace Model
       _ducksKilled = PlayerPrefs.GetInt(DucksKilledKey, 0);
       _buildingsDestroyed = PlayerPrefs.GetInt(BuildingsDestroyedKey, 0);
       _currentCoins = PlayerPrefs.GetInt(CurrentCoinsKey, 0);
+      _speed = PlayerPrefs.GetInt(SpeedKey, ProgressionBalance.StartingSpeed);
+      _gunPower = PlayerPrefs.GetInt(GunPowerKey, ProgressionBalance.StartingGunPower);
       _isInitialized = true;
     }
 

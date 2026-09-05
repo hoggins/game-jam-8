@@ -1,5 +1,9 @@
+using App;
+using Balance;
+using Model;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using VContainer;
 
 namespace Movement
 {
@@ -12,7 +16,6 @@ namespace Movement
     [SerializeField] private InputActionReference _moveAction;
 
     [Header("Movement")]
-    [SerializeField, Min(0f)] private float _speed = 6f;
     [SerializeField, Min(0f)] private float _radius = 0.5f;
     [SerializeField, Min(0f)] private float _rotationSpeed = 12f;
 
@@ -20,15 +23,23 @@ namespace Movement
     [SerializeField, Min(0f)] private float _avoidancePower = 2.5f;
     [SerializeField] private MovementLayer _collidesWith = MovementLayer.Mob;
 
+    [Inject] private CharacterService _characterService;
+
     private bool _enabledMoveAction;
+
+    /// Movement speed is a character stat; the service is missing only before the
+    /// container exists, so fall back to the starting value then.
+    private float Speed => _characterService?.Speed ?? ProgressionBalance.StartingSpeed;
 
     private void Awake()
     {
+      this.AsInjected();
+
       if (GetComponent<PlayerAnimator>() == null)
         gameObject.AddComponent<PlayerAnimator>();
     }
 
-    float IMovementController.Speed => _speed;
+    float IMovementController.Speed => Speed;
     float IMovementController.Radius => _radius;
     float IMovementController.AvoidancePower => _avoidancePower;
     float IMovementController.VelocitySmoothing => 0f;
@@ -65,12 +76,11 @@ namespace Movement
         return Vector3.zero;
 
       var input = Vector2.ClampMagnitude(action.ReadValue<Vector2>(), 1f);
-      return new Vector3(input.x, 0f, input.y) * _speed;
+      return new Vector3(input.x, 0f, input.y) * Speed;
     }
 
     private void OnValidate()
     {
-      _speed = Mathf.Max(0f, _speed);
       _radius = Mathf.Max(0f, _radius);
       _rotationSpeed = Mathf.Max(0f, _rotationSpeed);
       _avoidancePower = Mathf.Max(0f, _avoidancePower);

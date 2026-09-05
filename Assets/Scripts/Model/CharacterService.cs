@@ -16,11 +16,15 @@ namespace Model
 
     public int AttackPower => _storage.AttackPower;
     public int MaxHealth => _storage.MaxHealth;
+    public int Speed => _storage.Speed;
+    public int GunPower => _storage.GunPower;
     public int CurrentCoins => _storage.CurrentCoins;
     public bool IsAlive => CurrentHealth > 0;
     public bool IsInvincible { get; private set; }
     public bool CanUpgradeAttackPower => _storage.CurrentCoins >= ProgressionBalance.AttackPowerUpgradeCost;
     public bool CanUpgradeMaxHealth => _storage.CurrentCoins >= ProgressionBalance.MaxHealthUpgradeCost;
+    public bool CanUpgradeSpeed => _storage.CurrentCoins >= ProgressionBalance.SpeedUpgradeCost;
+    public bool CanUpgradeGunPower => _storage.CurrentCoins >= ProgressionBalance.GunPowerUpgradeCost;
 
     public int CurrentHealth { get; private set; }
 
@@ -103,6 +107,28 @@ namespace Model
 
       _storage.CurrentCoins -= ProgressionBalance.MaxHealthUpgradeCost;
       _storage.MaxHealth += ProgressionBalance.MaxHealthUpgradeAmount;
+      ProgressionChanged?.Invoke();
+      CoinsChanged?.Invoke(_storage.CurrentCoins);
+    }
+
+    public void UpgradeSpeed()
+    {
+      if (_storage.CurrentCoins < ProgressionBalance.SpeedUpgradeCost)
+        throw new InvalidOperationException($"Not enough coins to upgrade speed. Current coins: {_storage.CurrentCoins}, required: {ProgressionBalance.SpeedUpgradeCost}");
+
+      _storage.CurrentCoins -= ProgressionBalance.SpeedUpgradeCost;
+      _storage.Speed += ProgressionBalance.SpeedUpgradeAmount;
+      ProgressionChanged?.Invoke();
+      CoinsChanged?.Invoke(_storage.CurrentCoins);
+    }
+
+    public void UpgradeGunPower()
+    {
+      if (_storage.CurrentCoins < ProgressionBalance.GunPowerUpgradeCost)
+        throw new InvalidOperationException($"Not enough coins to upgrade gun power. Current coins: {_storage.CurrentCoins}, required: {ProgressionBalance.GunPowerUpgradeCost}");
+
+      _storage.CurrentCoins -= ProgressionBalance.GunPowerUpgradeCost;
+      _storage.GunPower += ProgressionBalance.GunPowerUpgradeAmount;
       ProgressionChanged?.Invoke();
       CoinsChanged?.Invoke(_storage.CurrentCoins);
     }
