@@ -2,12 +2,16 @@ using System.Collections.Generic;
 using Map;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Unity.Profiling;
 using VContainer.Unity;
 
 namespace Movement
 {
   public sealed class MovementUpdater : IInitializable, ILateTickable, System.IDisposable
   {
+    private static readonly ProfilerMarker RefreshNoGoZonesMarker =
+      new("MovementUpdater.RefreshNoGoZones");
+
     private const string PlayerTag = "Player";
 
     // Houses use the Damagable layer for their movement-blocking collider. Visual child meshes
@@ -131,21 +135,29 @@ namespace Movement
 
     internal void RefreshNoGoZones()
     {
-      ClearNoGoZones();
-
-      var noGoZones = Object.FindObjectsByType<FlowMapNoGoZone>(
-        FindObjectsInactive.Include,
-        FindObjectsSortMode.None);
-      for (var i = 0; i < noGoZones.Length; i++)
+      RefreshNoGoZonesMarker.Begin();
+      try
       {
-        var zone = noGoZones[i];
-        zone.Initialize();
-        _knownNoGoZones.Add(zone);
-        zone.ActiveChanged += OnNoGoZoneActiveChanged;
-        zone.Destroyed += OnNoGoZoneDestroyed;
+        ClearNoGoZones();
 
-        if (zone.isActiveAndEnabled)
-          _noGoZones.Add(zone);
+        var noGoZones = Object.FindObjectsByType<FlowMapNoGoZone>(
+          FindObjectsInactive.Include,
+          FindObjectsSortMode.None);
+        for (var i = 0; i < noGoZones.Length; i++)
+        {
+          var zone = noGoZones[i];
+          zone.Initialize();
+          _knownNoGoZones.Add(zone);
+          zone.ActiveChanged += OnNoGoZoneActiveChanged;
+          zone.Destroyed += OnNoGoZoneDestroyed;
+
+          if (zone.isActiveAndEnabled)
+            _noGoZones.Add(zone);
+        }
+      }
+      finally
+      {
+        RefreshNoGoZonesMarker.End();
       }
     }
 

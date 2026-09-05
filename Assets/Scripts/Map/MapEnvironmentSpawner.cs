@@ -3,11 +3,31 @@ using System.Collections.Generic;
 using Destruction;
 using Movement;
 using UnityEngine;
+using Unity.Profiling;
 
 namespace Map
 {
   public class MapEnvironmentSpawner : System.IDisposable
   {
+    private static readonly ProfilerMarker TryArrangeSpecialFenceMarker =
+      new("MapEnvironmentSpawner.TryArrangeSpecialFence");
+    private static readonly ProfilerMarker TrySpawnSpecialMarker =
+      new("MapEnvironmentSpawner.TrySpawnSpecial");
+    private static readonly ProfilerMarker TryMoveSpecialMarker =
+      new("MapEnvironmentSpawner.TryMoveSpecial");
+    private static readonly ProfilerMarker TrySpawnSpecialAtMarker =
+      new("MapEnvironmentSpawner.TrySpawnSpecialAt");
+    private static readonly ProfilerMarker TryMoveSpecialAtMarker =
+      new("MapEnvironmentSpawner.TryMoveSpecialAt");
+    private static readonly ProfilerMarker TryPickPlacementMarker =
+      new("MapEnvironmentSpawner.TryPickNonOverlappingPlacement");
+    private static readonly ProfilerMarker ClearOverlappingMarker =
+      new("MapEnvironmentSpawner.ClearOverlapping");
+    private static readonly ProfilerMarker SpawnSpecialInstanceMarker =
+      new("MapEnvironmentSpawner.SpawnSpecialInstance");
+    private static readonly ProfilerMarker InstantiateSpecialMarker =
+      new("MapEnvironmentSpawner.InstantiateSpecialPrefab");
+
     private readonly struct PlannedSpecialPlacement
     {
       public readonly SpecialHouses Type;
@@ -107,6 +127,12 @@ namespace Map
       return false;
     }
     public HouseSet CurrentHouseSet => _houseSet;
+
+    /// Refreshes movement blockers after a batch of special placements has completed.
+    /// Individual spawn/move operations intentionally do not call this because a timer respawn can
+    /// place several specials in one transaction.
+    internal void RefreshNoGoZones() =>
+      _movementUpdater.RefreshNoGoZones();
 
     public void Spawn(MapData mapData, HouseSet houseSet, RoadSet roadSet, SidewalkSet sidewalkSet, int seed, Transform parent)
     {
@@ -216,9 +242,8 @@ namespace Map
       // bookkeeping. Clear only the generated houses around it so map generation cannot bury the
       // objective or make it impossible to reach.
       ClearSceneGoalFootprint();
-      _movementUpdater.RefreshNoGoZones();
-
       SpawnInitialSpecials(parent);
+      RefreshNoGoZones();
     }
 
     /// <summary>
@@ -313,8 +338,11 @@ namespace Map
     /// </summary>
     public bool TryArrangeSpecialFence(Vector3 timerPosition, Vector3 playerPosition, Transform lookTarget)
     {
-      if (_battleBalance == null)
-        return false;
+      TryArrangeSpecialFenceMarker.Begin();
+      try
+      {
+        if (_battleBalance == null)
+          return false;
 
       var timerToPlayer = playerPosition - timerPosition;
       timerToPlayer.y = 0f;
@@ -405,8 +433,12 @@ namespace Map
           ignoredSpecialIds.Add(current.id);
       }
 
-      _movementUpdater.RefreshNoGoZones();
-      return true;
+        return true;
+      }
+      finally
+      {
+        TryArrangeSpecialFenceMarker.End();
+      }
     }
 
     private List<SpecialHouses> CollectFenceSpecialTypes()
@@ -502,71 +534,103 @@ namespace Map
     public bool TrySpawnSpecial(
       SpecialHouses type, Vector3 anchor, Transform lookTarget, float minDistance, float maxDistance, out GameObject instance)
     {
-      instance = null;
+      TrySpawnSpecialMarker.Begin();
+      try
+      {
+        instance = null;
 
-      if (!TryResolveSpecial(type, "TrySpawnSpecial", out var special))
-        return false;
+        if (!TryResolveSpecial(type, "TrySpawnSpecial", out var special))
+          return false;
 
-      var worldHalfExtents = SpecialHalfExtents(special);
-      var previousInstance = TryGetCurrentSpecial(type, out var currentInstance) ? currentInstance : null;
-      var excludedTransform = previousInstance != null ? previousInstance.transform : null;
+        var worldHalfExtents = SpecialHalfExtents(special);
+        var previousInstance = TryGetCurrentSpecial(type, out var currentInstance) ? currentInstance : null;
+        var excludedTransform = previousInstance != null ? previousInstance.transform : null;
 
       // Keep the old instance in place until a valid replacement has been found. It is excluded from
       // the overlap test, so the replacement may occupy its old footprint, but a failed placement
       // cannot leave the world without this special at all.
-      if (!TryPickNonOverlappingPlacement(anchor, lookTarget, minDistance, maxDistance, worldHalfExtents, excludedTransform, out var position, out var rotation))
-      {
-        Debug.LogWarning($"MapEnvironmentSpawner.TrySpawnSpecial: '{type}' found no placement clear of other specials after {MaxPlacementAttempts} attempts; spawn skipped.");
-        return false;
+        if (!TryPickNonOverlappingPlacement(anchor, lookTarget, minDistance, maxDistance, worldHalfExtents, excludedTransform, out var position, out var rotation))
+        {
+          Debug.LogWarning($"MapEnvironmentSpawner.TrySpawnSpecial: '{type}' found no placement clear of other specials after {MaxPlacementAttempts} attempts; spawn skipped.");
+          return false;
+        }
+
+        ClearOverlapping(position, rotation, worldHalfExtents + ClearMargin, excludedTransform);
+
+        DespawnCurrentSpecial(type);
+
+        instance = SpawnSpecialInstance(special, type, position, rotation, worldHalfExtents);
+        return true;
       }
-
-      ClearOverlapping(position, rotation, worldHalfExtents + ClearMargin, excludedTransform);
-
-      DespawnCurrentSpecial(type);
-
-      instance = SpawnSpecialInstance(special, type, position, rotation, worldHalfExtents);
-      _movementUpdater.RefreshNoGoZones();
-      return true;
+      finally
+      {
+        TrySpawnSpecialMarker.End();
+      }
     }
 
     private bool TrySpawnSpecialAt(
       SpecialHouses type, Vector3 position, Quaternion rotation, Vector2 worldHalfExtents,
       ISet<int> ignoredSpecialIds, out GameObject instance)
     {
-      instance = null;
-      if (!TryResolveSpecial(type, "TryArrangeSpecialFence", out var special)
-          || HasSpecialOverlap(position, rotation, worldHalfExtents, null, ignoredSpecialIds))
-        return false;
+      TrySpawnSpecialAtMarker.Begin();
+      try
+      {
+        instance = null;
+        if (!TryResolveSpecial(type, "TryArrangeSpecialFence", out var special)
+            || HasSpecialOverlap(position, rotation, worldHalfExtents, null, ignoredSpecialIds))
+          return false;
 
-      ClearOverlapping(position, rotation, worldHalfExtents + ClearMargin, null);
-      DespawnCurrentSpecial(type);
-      instance = SpawnSpecialInstance(special, type, position, rotation, worldHalfExtents);
-      _movementUpdater.RefreshNoGoZones();
-      return true;
+        ClearOverlapping(position, rotation, worldHalfExtents + ClearMargin, null);
+        DespawnCurrentSpecial(type);
+        instance = SpawnSpecialInstance(special, type, position, rotation, worldHalfExtents);
+        return true;
+      }
+      finally
+      {
+        TrySpawnSpecialAtMarker.End();
+      }
     }
 
     private GameObject SpawnSpecialInstance(
       SpecialHouseObject special, SpecialHouses type, Vector3 position, Quaternion rotation, Vector2 worldHalfExtents)
     {
-      var instance = Object.Instantiate(special.prefab, position, rotation, _container);
-      instance.name = special.type.ToString();
-      RegisterDamageMaskRenderers(instance.GetComponentsInChildren<Renderer>(true));
+      SpawnSpecialInstanceMarker.Begin();
+      try
+      {
+        InstantiateSpecialMarker.Begin();
+        GameObject instance = null;
+        try
+        {
+          instance = Object.Instantiate(special.prefab, position, rotation, _container);
+        }
+        finally
+        {
+          InstantiateSpecialMarker.End();
+        }
 
-      var destructible = instance.GetComponentInChildren<DestructibleObject>();
-      var id = _nextId++;
-      // Vector2Int.zero: a freely-placed special never reserves grid cells via TryReserve, so it
-      // must not claim a grid Size either — Release would otherwise free cells on the grid that
-      // happen to fall under its footprint but were never its own.
-      var runtimeObject = new RuntimeEnvironmentObject(
-        id, CellOf(position), Vector2Int.zero, destructible, position, worldHalfExtents, rotation);
-      _objects.Add(id, runtimeObject);
-      _specialIds.Add(id);
-      _currentSpecial[type] = (id, instance);
+        instance.name = special.type.ToString();
+        RegisterDamageMaskRenderers(instance.GetComponentsInChildren<Renderer>(true));
 
-      if (destructible != null)
-        destructible.Destroyed += _ => Release(id);
+        var destructible = instance.GetComponentInChildren<DestructibleObject>();
+        var id = _nextId++;
+        // Vector2Int.zero: a freely-placed special never reserves grid cells via TryReserve, so it
+        // must not claim a grid Size either — Release would otherwise free cells on the grid that
+        // happen to fall under its footprint but were never its own.
+        var runtimeObject = new RuntimeEnvironmentObject(
+          id, CellOf(position), Vector2Int.zero, destructible, position, worldHalfExtents, rotation);
+        _objects.Add(id, runtimeObject);
+        _specialIds.Add(id);
+        _currentSpecial[type] = (id, instance);
 
-      return instance;
+        if (destructible != null)
+          destructible.Destroyed += _ => Release(id);
+
+        return instance;
+      }
+      finally
+      {
+        SpawnSpecialInstanceMarker.End();
+      }
     }
 
     /// <summary>
@@ -594,49 +658,64 @@ namespace Map
     public bool TryMoveSpecial(
       SpecialHouses type, GameObject instance, Vector3 anchor, Transform lookTarget, float minDistance, float maxDistance)
     {
-      if (instance == null)
-        return false;
-
-      if (!_currentSpecial.TryGetValue(type, out var current)
-          || current.instance != instance
-          || !_objects.ContainsKey(current.id))
-        return false;
-
-      if (!TryResolveSpecial(type, "TryMoveSpecial", out var special))
-        return false;
-
-      var worldHalfExtents = SpecialHalfExtents(special);
-
-      if (!TryPickNonOverlappingPlacement(anchor, lookTarget, minDistance, maxDistance, worldHalfExtents, instance.transform, out var position, out var rotation))
+      TryMoveSpecialMarker.Begin();
+      try
       {
-        Debug.LogWarning($"MapEnvironmentSpawner.TryMoveSpecial: '{type}' found no placement clear of other specials after {MaxPlacementAttempts} attempts; move skipped.");
-        return false;
-      }
+        if (instance == null)
+          return false;
 
-      return TryMoveSpecialAt(type, instance, position, rotation, worldHalfExtents, null);
+        if (!_currentSpecial.TryGetValue(type, out var current)
+            || current.instance != instance
+            || !_objects.ContainsKey(current.id))
+          return false;
+
+        if (!TryResolveSpecial(type, "TryMoveSpecial", out var special))
+          return false;
+
+        var worldHalfExtents = SpecialHalfExtents(special);
+
+        if (!TryPickNonOverlappingPlacement(anchor, lookTarget, minDistance, maxDistance, worldHalfExtents, instance.transform, out var position, out var rotation))
+        {
+          Debug.LogWarning($"MapEnvironmentSpawner.TryMoveSpecial: '{type}' found no placement clear of other specials after {MaxPlacementAttempts} attempts; move skipped.");
+          return false;
+        }
+
+        return TryMoveSpecialAt(type, instance, position, rotation, worldHalfExtents, null);
+      }
+      finally
+      {
+        TryMoveSpecialMarker.End();
+      }
     }
 
     private bool TryMoveSpecialAt(
       SpecialHouses type, GameObject instance, Vector3 position, Quaternion rotation, Vector2 worldHalfExtents,
       ISet<int> ignoredSpecialIds)
     {
-      if (instance == null
-          || !_currentSpecial.TryGetValue(type, out var current)
-          || current.instance != instance
-          || !_objects.ContainsKey(current.id)
-          || HasSpecialOverlap(position, rotation, worldHalfExtents, instance.transform, ignoredSpecialIds))
-        return false;
+      TryMoveSpecialAtMarker.Begin();
+      try
+      {
+        if (instance == null
+            || !_currentSpecial.TryGetValue(type, out var current)
+            || current.instance != instance
+            || !_objects.ContainsKey(current.id)
+            || HasSpecialOverlap(position, rotation, worldHalfExtents, instance.transform, ignoredSpecialIds))
+          return false;
 
-      // Excluded from the sweep, or an object whose new footprint overlaps its old one would break
-      // itself on arrival.
-      ClearOverlapping(position, rotation, worldHalfExtents + ClearMargin, instance.transform);
+        // Excluded from the sweep, or an object whose new footprint overlaps its old one would break
+        // itself on arrival.
+        ClearOverlapping(position, rotation, worldHalfExtents + ClearMargin, instance.transform);
 
-      Debug.Log($"Moving special {type} to {position}");
-      instance.transform.SetPositionAndRotation(position, rotation);
-      Reseat(instance.transform, position, rotation, worldHalfExtents);
+        Debug.Log($"Moving special {type} to {position}");
+        instance.transform.SetPositionAndRotation(position, rotation);
+        Reseat(instance.transform, position, rotation, worldHalfExtents);
 
-      _movementUpdater.RefreshNoGoZones();
-      return true;
+        return true;
+      }
+      finally
+      {
+        TryMoveSpecialAtMarker.End();
+      }
     }
 
     /// <summary>
@@ -700,22 +779,30 @@ namespace Map
     /// </summary>
     private void ClearOverlapping(Vector3 position, Quaternion rotation, Vector2 worldHalfExtents, Transform exclude)
     {
-      // Snapshot first: removing a house fires its Destroyed event synchronously, which removes it
-      // from _objects via Release and would otherwise mutate the dictionary mid-enumeration.
-      var standingObjects = new List<RuntimeEnvironmentObject>(_objects.Values);
-      foreach (var standing in standingObjects)
+      ClearOverlappingMarker.Begin();
+      try
       {
-        // This pass is for grid houses only. Specials are kept separate because an inaccurate
-        // footprint must never turn a placement attempt into destruction of another objective.
-        if (_specialIds.Contains(standing.Id))
-          continue;
+        // Snapshot first: removing a house fires its Destroyed event synchronously, which removes it
+        // from _objects via Release and would otherwise mutate the dictionary mid-enumeration.
+        var standingObjects = new List<RuntimeEnvironmentObject>(_objects.Values);
+        foreach (var standing in standingObjects)
+        {
+          // This pass is for grid houses only. Specials are kept separate because an inaccurate
+          // footprint must never turn a placement attempt into destruction of another objective.
+          if (_specialIds.Contains(standing.Id))
+            continue;
 
-        if (standing.Destructible != null
-            && (exclude == null || !standing.Destructible.transform.IsChildOf(exclude))
-            && RectanglesOverlap(
-              position, rotation.eulerAngles.y, worldHalfExtents,
-              standing.WorldCenter, standing.WorldRotation.eulerAngles.y, standing.WorldHalfExtents))
-          standing.Destructible.DestroyInstant();
+          if (standing.Destructible != null
+              && (exclude == null || !standing.Destructible.transform.IsChildOf(exclude))
+              && RectanglesOverlap(
+                position, rotation.eulerAngles.y, worldHalfExtents,
+                standing.WorldCenter, standing.WorldRotation.eulerAngles.y, standing.WorldHalfExtents))
+            standing.Destructible.DestroyInstant();
+        }
+      }
+      finally
+      {
+        ClearOverlappingMarker.End();
       }
     }
 
@@ -728,16 +815,24 @@ namespace Map
       Vector3 anchor, Transform lookTarget, float minDistance, float maxDistance, Vector2 worldHalfExtents, Transform exclude,
       out Vector3 position, out Quaternion rotation)
     {
-      for (var attempt = 0; attempt < MaxPlacementAttempts; attempt++)
+      TryPickPlacementMarker.Begin();
+      try
       {
-        PickPlacement(anchor, lookTarget, minDistance, maxDistance, out position, out rotation);
-        if (!HasSpecialOverlap(position, rotation, worldHalfExtents, exclude, null))
-          return true;
-      }
+        for (var attempt = 0; attempt < MaxPlacementAttempts; attempt++)
+        {
+          PickPlacement(anchor, lookTarget, minDistance, maxDistance, out position, out rotation);
+          if (!HasSpecialOverlap(position, rotation, worldHalfExtents, exclude, null))
+            return true;
+        }
 
-      position = default;
-      rotation = default;
-      return false;
+        position = default;
+        rotation = default;
+        return false;
+      }
+      finally
+      {
+        TryPickPlacementMarker.End();
+      }
     }
 
     /// <summary>

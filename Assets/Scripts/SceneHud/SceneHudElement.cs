@@ -1,5 +1,6 @@
 using App;
 using UnityEngine;
+using Unity.Profiling;
 using VContainer;
 
 namespace SceneHud
@@ -19,6 +20,11 @@ namespace SceneHud
   [RequireComponent(typeof(UnityEngine.Camera))]
   public sealed class SceneHudElement : MonoBehaviour
   {
+    private static readonly ProfilerMarker EnableMarker =
+      new("SceneHudElement.OnEnable");
+    private static readonly ProfilerMarker DisableMarker =
+      new("SceneHudElement.OnDisable");
+
     [Tooltip("Which HUD widget this element feeds.")]
     [SerializeField] private SceneHudElementId _id;
 
@@ -38,30 +44,46 @@ namespace SceneHud
 
     private void OnEnable()
     {
-      _texture = new RenderTexture(
-        Mathf.Max(1, _resolution.x),
-        Mathf.Max(1, _resolution.y),
-        16,
-        RenderTextureFormat.ARGB32)
+      EnableMarker.Begin();
+      try
       {
-        name = $"SceneHud_{_id}",
-      };
+        _texture = new RenderTexture(
+          Mathf.Max(1, _resolution.x),
+          Mathf.Max(1, _resolution.y),
+          16,
+          RenderTextureFormat.ARGB32)
+        {
+          name = $"SceneHud_{_id}",
+        };
 
-      _camera.targetTexture = _texture;
-      _sceneHud.Register(_id, _texture);
+        _camera.targetTexture = _texture;
+        _sceneHud.Register(_id, _texture);
+      }
+      finally
+      {
+        EnableMarker.End();
+      }
     }
 
     private void OnDisable()
     {
-      _sceneHud.Unregister(_id, _texture);
+      DisableMarker.Begin();
+      try
+      {
+        _sceneHud.Unregister(_id, _texture);
 
-      _camera.targetTexture = null;
-      if (_texture == null)
-        return;
+        _camera.targetTexture = null;
+        if (_texture == null)
+          return;
 
-      _texture.Release();
-      Destroy(_texture);
-      _texture = null;
+        _texture.Release();
+        Destroy(_texture);
+        _texture = null;
+      }
+      finally
+      {
+        DisableMarker.End();
+      }
     }
   }
 }

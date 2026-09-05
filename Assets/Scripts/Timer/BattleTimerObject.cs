@@ -2,6 +2,7 @@ using App;
 using Destruction;
 using Model;
 using UnityEngine;
+using Unity.Profiling;
 using VContainer;
 
 namespace Timer
@@ -21,6 +22,9 @@ namespace Timer
   [DisallowMultipleComponent]
   public sealed class BattleTimerObject : MonoBehaviour
   {
+    private static readonly ProfilerMarker DigitDestroyedMarker =
+      new("BattleTimerObject.OnDigitDestroyed");
+
     private const int PlaceCount = 4;
 
     /// Seconds contributed by one unit in each place, most significant first.
@@ -139,8 +143,11 @@ namespace Timer
 
     private void OnDigitDestroyed(DestructibleObject destroyed)
     {
-      if (_battleService == null)
-        return;
+      DigitDestroyedMarker.Begin();
+      try
+      {
+        if (_battleService == null)
+          return;
 
       // Snapshot what each surviving digit currently reads, derived from the authoritative time
       // rather than from the digits themselves: they only catch up in Update, and this fires
@@ -179,8 +186,13 @@ namespace Timer
       // together and this husk can retire.
       BreakRemainingParts();
 
-      if (_hudCamera != null)
-        _hudCamera.SetActive(false);
+        if (_hudCamera != null)
+          _hudCamera.SetActive(false);
+      }
+      finally
+      {
+        DigitDestroyedMarker.End();
+      }
     }
 
     /// <summary>

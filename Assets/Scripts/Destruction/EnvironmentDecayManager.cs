@@ -1,12 +1,16 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Profiling;
 using VContainer.Unity;
 
 namespace Destruction
 {
   public class EnvironmentDecayManager : ITickable
   {
+    private static readonly ProfilerMarker TickMarker =
+      new("EnvironmentDecayManager.Tick");
+
     private class DecayingPart
     {
       public DestructibleObject Owner;
@@ -57,39 +61,47 @@ namespace Destruction
       if (!Application.isPlaying)
         return;
 
-      for (var i = _parts.Count - 1; i >= 0; i--)
+      TickMarker.Begin();
+      try
       {
-        var part = _parts[i];
-
-        if (part.Body == null)
+        for (var i = _parts.Count - 1; i >= 0; i--)
         {
-          _parts.RemoveAt(i);
-          CompletePart(part.Owner);
-          continue;
-        }
+          var part = _parts[i];
 
-        part.DecayStartTimer += Time.deltaTime;
+          if (part.Body == null)
+          {
+            _parts.RemoveAt(i);
+            CompletePart(part.Owner);
+            continue;
+          }
 
-        if (!part.Sinking)
-        {
-          if (part.DecayStartTimer < _settings.DecayStartDelay)
+          part.DecayStartTimer += Time.deltaTime;
+
+          if (!part.Sinking)
+          {
+            if (part.DecayStartTimer < _settings.DecayStartDelay)
+              continue;
+
+            part.GroundY = SampleGround(part.Body.position);
+            part.Sinking = true;
+
+            // Ignore physics from here on: other debris should pass through as this part sinks, not rest on top of it.
+            foreach (var partCollider in part.Body.GetComponentsInChildren<Collider>())
+              partCollider.enabled = false;
+          }
+
+          var bounds = GetBounds(part.Body.transform);
+          if (!IsUnderground(bounds, part.GroundY, _settings.SinkDepth))
             continue;
 
-          part.GroundY = SampleGround(part.Body.position);
-          part.Sinking = true;
-
-          // Ignore physics from here on: other debris should pass through as this part sinks, not rest on top of it.
-          foreach (var partCollider in part.Body.GetComponentsInChildren<Collider>())
-            partCollider.enabled = false;
+          Remove(part.Body.gameObject);
+          _parts.RemoveAt(i);
+          CompletePart(part.Owner);
         }
-
-        var bounds = GetBounds(part.Body.transform);
-        if (!IsUnderground(bounds, part.GroundY, _settings.SinkDepth))
-          continue;
-
-        Remove(part.Body.gameObject);
-        _parts.RemoveAt(i);
-        CompletePart(part.Owner);
+      }
+      finally
+      {
+        TickMarker.End();
       }
     }
 

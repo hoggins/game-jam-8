@@ -7,6 +7,7 @@ using Model;
 using Movement;
 using Pooling;
 using UnityEngine;
+using Unity.Profiling;
 using VContainer;
 
 namespace Destruction
@@ -14,6 +15,9 @@ namespace Destruction
   [RequireComponent(typeof(FlowMapNoGoZone))]
   public class DestructibleObject : MonoBehaviour
   {
+    private static readonly ProfilerMarker ImpulseMarker =
+      new("DestructibleObject.Impulse");
+
     private const string FrictionMaterialPath = "Descructable/FirstHouseFriction";
     private const string DestructionFxPath = "Fx/Prefabs/FxBuildingDucksDestruction01";
     private const string CoinPickupPrefabPath = "Prefabs/Interface/Coin01";
@@ -118,35 +122,43 @@ namespace Destruction
       if (_destroyed)
         return;
 
-      _destroyed = true;
-      if (_noGoZone != null)
-        _noGoZone.enabled = false;
-
-      if (_navigationCollider != null)
-        _navigationCollider.enabled = false;
-
-      ApplyGroundDamage();
-      if (_spawnDestructionFx)
-        SpawnDestructionFx();
-      SpawnBuildingCoinPickups();
-
-      gameObject.layer = _partLayer!.Value;
-
-      for (var i = _parts.Count - 1; i >= 0; i--)
+      ImpulseMarker.Begin();
+      try
       {
-        var part = _parts[i];
-        _parts.RemoveAt(i);
-        DetachPart(part, origin, magnitude);
+        _destroyed = true;
+        if (_noGoZone != null)
+          _noGoZone.enabled = false;
+
+        if (_navigationCollider != null)
+          _navigationCollider.enabled = false;
+
+        ApplyGroundDamage();
+        if (_spawnDestructionFx)
+          SpawnDestructionFx();
+        SpawnBuildingCoinPickups();
+
+        gameObject.layer = _partLayer!.Value;
+
+        for (var i = _parts.Count - 1; i >= 0; i--)
+        {
+          var part = _parts[i];
+          _parts.RemoveAt(i);
+          DetachPart(part, origin, magnitude);
+        }
+
+        Destroyed?.Invoke(this);
+
+        if (Application.isPlaying)
+        {
+          if (_decayManager != null)
+            _decayManager.MarkForDestruction(this);
+          else if (_parts.Count == 0)
+            Destroy(gameObject);
+        }
       }
-
-      Destroyed?.Invoke(this);
-
-      if (Application.isPlaying)
+      finally
       {
-        if (_decayManager != null)
-          _decayManager.MarkForDestruction(this);
-        else if (_parts.Count == 0)
-          Destroy(gameObject);
+        ImpulseMarker.End();
       }
     }
 

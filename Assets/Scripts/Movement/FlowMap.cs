@@ -1,10 +1,16 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Profiling;
 
 namespace Movement
 {
   internal sealed class FlowMap
   {
+    private static readonly ProfilerMarker RecalculateMarker =
+      new("FlowMap.Recalculate");
+    private static readonly ProfilerMarker MarkBlockedCellsMarker =
+      new("FlowMap.MarkBlockedCells");
+
     private static readonly Vector2Int[] NeighborOffsets =
     {
       new(0, -1),
@@ -205,8 +211,11 @@ namespace Movement
       float padding,
       int maxCellCount)
     {
-      var min = new Vector2(targetPosition.x, targetPosition.z);
-      var max = min;
+      RecalculateMarker.Begin();
+      try
+      {
+        var min = new Vector2(targetPosition.x, targetPosition.z);
+        var max = min;
 
       for (var i = 0; i < agents.Count; i++)
       {
@@ -288,17 +297,25 @@ namespace Movement
         }
       }
 
-      _hasField = true;
+        _hasField = true;
+      }
+      finally
+      {
+        RecalculateMarker.End();
+      }
     }
 
     private void MarkBlockedCells(IReadOnlyList<FlowMapNoGoZone> noGoZones)
     {
-      for (var i = 0; i < noGoZones.Count; i++)
+      MarkBlockedCellsMarker.Begin();
+      try
       {
-        var zone = noGoZones[i];
-        var collider = zone != null ? zone.Collider : null;
-        if (collider == null || !collider.enabled || !collider.gameObject.activeInHierarchy)
-          continue;
+        for (var i = 0; i < noGoZones.Count; i++)
+        {
+          var zone = noGoZones[i];
+          var collider = zone != null ? zone.Collider : null;
+          if (collider == null || !collider.enabled || !collider.gameObject.activeInHierarchy)
+            continue;
 
         var bounds = collider.bounds;
         var minCell = PositionToCell(
@@ -314,15 +331,20 @@ namespace Movement
         var maxX = Mathf.Min(_width - 1, maxCell.x);
         var maxY = Mathf.Min(_height - 1, maxCell.y);
 
-        for (var y = minY; y <= maxY; y++)
-        for (var x = minX; x <= maxX; x++)
-        {
-          var cellCenter = new Vector2(
-            _offset.x + (x + 0.5f) * _cellSize,
-            _offset.y + (y + 0.5f) * _cellSize);
-          if (zone.OverlapsCircle(cellCenter, _clearance))
-            _blocked[x + y * _width] = true;
+          for (var y = minY; y <= maxY; y++)
+          for (var x = minX; x <= maxX; x++)
+          {
+            var cellCenter = new Vector2(
+              _offset.x + (x + 0.5f) * _cellSize,
+              _offset.y + (y + 0.5f) * _cellSize);
+            if (zone.OverlapsCircle(cellCenter, _clearance))
+              _blocked[x + y * _width] = true;
+          }
         }
+      }
+      finally
+      {
+        MarkBlockedCellsMarker.End();
       }
     }
 

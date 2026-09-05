@@ -3,6 +3,7 @@ using Arrow;
 using Map;
 using Model;
 using UnityEngine;
+using Unity.Profiling;
 using UnityEngine.Scripting;
 using VContainer.Unity;
 
@@ -18,6 +19,11 @@ namespace Timer
   [Preserve]
   public sealed class TimerRespawnService : IInitializable, IDisposable
   {
+    private static readonly ProfilerMarker RespawnMarker = new("TimerRespawnService.Respawn");
+    private static readonly ProfilerMarker SpawnTimerMarker = new("TimerRespawnService.SpawnTimer");
+    private static readonly ProfilerMarker ArrangeFenceMarker = new("TimerRespawnService.ArrangeFence");
+    private static readonly ProfilerMarker OtherSpecialsMarker = new("TimerRespawnService.OtherSpecials");
+
     private readonly BattleService _battleService;
     private readonly MapEnvironmentSpawner _spawner;
     private readonly SpecialSpawnSettings _spawnSettings;
@@ -48,62 +54,101 @@ namespace Timer
 
     private void OnTimerDestroyed()
     {
-      var player = GameObject.FindGameObjectWithTag("Player");
-      if (player == null)
-        return;
+      RespawnMarker.Begin();
+      try
+      {
+        var player = GameObject.FindGameObjectWithTag("Player");
+        if (player == null)
+          return;
 
-      if (_spawnSettings == null || !_spawnSettings.TryGetRespawnDistance(SpecialHouses.Timer, _respawnCount, out var minDistance, out var maxDistance))
-        return;
+        if (_spawnSettings == null || !_spawnSettings.TryGetRespawnDistance(SpecialHouses.Timer, _respawnCount, out var minDistance, out var maxDistance))
+          return;
 
-      if (!_spawner.TrySpawnSpecial(SpecialHouses.Timer, player.transform.position, player.transform, minDistance, maxDistance, out var timerInstance))
-        return;
+        GameObject timerInstance = null;
+        SpawnTimerMarker.Begin();
+        try
+        {
+          if (!_spawner.TrySpawnSpecial(SpecialHouses.Timer, player.transform.position, player.transform, minDistance, maxDistance, out timerInstance))
+            return;
+        }
+        finally
+        {
+          SpawnTimerMarker.End();
+        }
 
-      _respawnCount++;
-      _battleService.RespawnTimer();
+        _respawnCount++;
+        _battleService.RespawnTimer();
 
-      if (_spawner.TryArrangeSpecialFence(timerInstance.transform.position, player.transform.position, player.transform))
-        return;
+        var arrangedFence = false;
+        ArrangeFenceMarker.Begin();
+        try
+        {
+          arrangedFence = _spawner.TryArrangeSpecialFence(
+            timerInstance.transform.position, player.transform.position, player.transform);
+        }
+        finally
+        {
+          ArrangeFenceMarker.End();
+        }
 
-      RespawnOtherSpecials(player.transform, timerInstance.transform.position);
+        if (!arrangedFence)
+          RespawnOtherSpecials(player.transform, timerInstance.transform.position);
+
+        // All special placement/movement operations are now complete. Refresh once so the newly
+        // spawned timer and any moved specials are visible to the flow map as a single change.
+        _spawner.RefreshNoGoZones();
+      }
+      finally
+      {
+        RespawnMarker.End();
+      }
     }
 
     private void RespawnOtherSpecials(Transform player, Vector3 timerPosition)
     {
-      var houseSet = _spawner.CurrentHouseSet;
-      if (houseSet == null)
-        return;
-
-      _spawner.GetOtherSpecialPlacement(timerPosition, player.position, out var anchor, out var minDistance, out var maxDistance);
-
-      foreach (var special in houseSet.Specials)
+      OtherSpecialsMarker.Begin();
+      try
       {
-        if (special.type == SpecialHouses.Timer || !special.enabled || special.prefab == null)
-          continue;
+        var houseSet = _spawner.CurrentHouseSet;
+        if (houseSet == null)
+          return;
 
-        if (special.type == SpecialHouses.Arrow)
+        _spawner.GetOtherSpecialPlacement(timerPosition, player.position, out var anchor, out var minDistance, out var maxDistance);
+
+        foreach (var special in houseSet.Specials)
         {
-          MoveArrow(SpecialHouses.Arrow, BattleArrowObject.Current, anchor, player, minDistance, maxDistance);
-          continue;
+          if (special.type == SpecialHouses.Timer || !special.enabled || special.prefab == null)
+            continue;
+
+          if (special.type == SpecialHouses.Arrow)
+          {
+            MoveArrow(SpecialHouses.Arrow, BattleArrowObject.Current, anchor, player, minDistance, maxDistance);
+            continue;
+          }
+
+          if (special.type == SpecialHouses.GoalArrow)
+          {
+            MoveArrow(SpecialHouses.GoalArrow, BattleArrowObject.GoalCurrent, anchor, player, minDistance, maxDistance);
+            continue;
+          }
+
+          // The health bar is the player's own health made physical, so the fallback path never
+          // recreates or relocates it. The fence path moves the existing live bar without resetting
+          // its current pixels and makes it the central fence asset.
+          if (special.type == SpecialHouses.Health)
+            continue;
+
+          // A special respawns alongside every Timer death; if one is already standing from an earlier
+          // respawn, relocate it instead of spawning a duplicate on top of the world.
+          if (_spawner.TryGetCurrentSpecial(special.type, out var existing))
+            _spawner.TryMoveSpecial(special.type, existing, anchor, player, minDistance, maxDistance);
+          else
+            _spawner.TrySpawnSpecial(special.type, anchor, player, minDistance, maxDistance, out _);
         }
-
-        if (special.type == SpecialHouses.GoalArrow)
-        {
-          MoveArrow(SpecialHouses.GoalArrow, BattleArrowObject.GoalCurrent, anchor, player, minDistance, maxDistance);
-          continue;
-        }
-
-        // The health bar is the player's own health made physical, so the fallback path never
-        // recreates or relocates it. The fence path moves the existing live bar without resetting
-        // its current pixels and makes it the central fence asset.
-        if (special.type == SpecialHouses.Health)
-          continue;
-
-        // A special respawns alongside every Timer death; if one is already standing from an earlier
-        // respawn, relocate it instead of spawning a duplicate on top of the world.
-        if (_spawner.TryGetCurrentSpecial(special.type, out var existing))
-          _spawner.TryMoveSpecial(special.type, existing, anchor, player, minDistance, maxDistance);
-        else
-          _spawner.TrySpawnSpecial(special.type, anchor, player, minDistance, maxDistance, out _);
+      }
+      finally
+      {
+        OtherSpecialsMarker.End();
       }
     }
 
