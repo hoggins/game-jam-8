@@ -88,6 +88,13 @@ namespace App
 
       builder.RegisterInstance(visibilitySettings);
       builder.Register<MapEnvironmentSpawner>(Lifetime.Singleton).AsSelf();
+
+      var specialSpawnSettings = Resources.Load<Map.SpecialSpawnSettings>("SpecialSpawnSettings");
+      if (specialSpawnSettings == null)
+        throw new System.InvalidOperationException("SpecialSpawnSettings asset was not found in Resources.");
+
+      builder.RegisterInstance(specialSpawnSettings);
+      builder.RegisterEntryPoint<Timer.TimerRespawnService>(Lifetime.Singleton).AsSelf();
     }
   }
 }

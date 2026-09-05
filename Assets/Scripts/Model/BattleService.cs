@@ -19,6 +19,7 @@ namespace Model
     public event Action BattleStarted;
     public event Action BattleWon;
     public event Action BattleDefeated;
+    public event Action TimerDestroyed;
 
     public bool IsBattleActive { get; private set; }
     public bool IsTimerDestroyed { get; private set; }
@@ -161,6 +162,15 @@ namespace Model
     public void DestroyTimer()
     {
       IsTimerDestroyed = true;
+      TimerDestroyed?.Invoke();
+    }
+
+    /// Brings the timer back after <see cref="TimerDestroyed"/>, once a new one has been placed
+    /// in the world. The countdown resumes from the default duration.
+    public void RespawnTimer()
+    {
+      IsTimerDestroyed = false;
+      Timer = BattleBalance.BattleDuration;
     }
 
     /// Overwrites the remaining time. Used when part of the in-world timer is destroyed and the

@@ -8,6 +8,15 @@ namespace Balance
     /// Beat held on 00:00, with damage switched off, before the timeout defeat lands.
     public static float TimerExpiredDefeatDelay => 2f;
     public static float BattleDuration => 90;
+
+    /// Beyond this distance from the player, a non-Timer special respawns somewhere between the
+    /// timer and the player; within it, the special spawns in a band between
+    /// <see cref="SpecialBetweenMinDistance"/> and this distance from the player instead, so it
+    /// never lands right on top of them.
+    public static float SpecialBetweenMaxDistance => 50f;
+
+    /// Lower bound of that near-player band; see <see cref="SpecialBetweenMaxDistance"/>.
+    public static float SpecialBetweenMinDistance => 40f;
     public static int DuckMaxHealth => 2;
     public static int DuckAttackDamage => 1;
     public static float DuckAttackDistance => 3f;

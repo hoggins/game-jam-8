@@ -43,7 +43,7 @@ namespace Map
 
       houses.Sort((a, b) => (b.size.x * b.size.y).CompareTo(a.size.x * a.size.y));
 
-      if (houses.Count == 0 && uniqueHouses.Count == 0 && houseSet.Specials.Count == 0)
+      if (houses.Count == 0 && uniqueHouses.Count == 0)
         return placements;
 
       var housesByLevel = new Dictionary<int, List<HouseObject>>();
@@ -56,25 +56,6 @@ namespace Map
 
       var random = new System.Random(seed);
 
-      var specialHouses = new List<HouseObject>();
-      foreach (var special in houseSet.Specials)
-      {
-        if (!special.enabled || special.prefab == null || special.size.x <= 0 || special.size.y <= 0)
-          continue;
-
-        specialHouses.Add(new HouseObject
-        {
-          name = special.type.ToString(),
-          prefab = special.prefab,
-          size = special.size,
-          enabled = true,
-          unique = true,
-        });
-      }
-
-      // Specials (e.g. the Timer) claim their spot before anything else, so a later regular
-      // house never lands on a cell a special object needs.
-      PlaceUniqueHouses(specialHouses, cells, free, placements, random);
       PlaceUniqueHouses(uniqueHouses, cells, free, placements, random);
 
       if (houses.Count == 0)
