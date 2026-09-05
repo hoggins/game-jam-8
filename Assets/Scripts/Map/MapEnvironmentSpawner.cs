@@ -198,7 +198,8 @@ namespace Map
           0f,
           placement.Cell.y * cellSize + cellSize * 0.5f);
 
-        var instance = Object.Instantiate(placement.Piece.prefab, position, Quaternion.identity, _container);
+        var rotation = Quaternion.Euler(0f, placement.RotationDegrees, 0f);
+        var instance = Object.Instantiate(placement.Piece.prefab, position, rotation, _container);
         instance.name = placement.Piece.name;
         RegisterRenderers(sidewalkCullingStart + placementIndex, instance);
       }

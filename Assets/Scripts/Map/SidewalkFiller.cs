@@ -7,16 +7,28 @@ namespace Map
   {
     public readonly SidewalkPiece Piece;
     public readonly Vector2Int Cell;
+    public readonly float RotationDegrees;
 
-    public SidewalkPlacement(SidewalkPiece piece, Vector2Int cell)
+    public SidewalkPlacement(SidewalkPiece piece, Vector2Int cell, float rotationDegrees)
     {
       Piece = piece;
       Cell = cell;
+      RotationDegrees = rotationDegrees;
     }
   }
 
   public static class SidewalkFiller
   {
+    // Prefer the first direction when a sidewalk touches more than one road. This keeps the
+    // result deterministic while still making the usual single-road sidewalk face the road.
+    private static readonly Vector2Int[] RoadOffsets =
+    {
+      Vector2Int.up,
+      Vector2Int.right,
+      Vector2Int.down,
+      Vector2Int.left,
+    };
+
     public static List<SidewalkPlacement> Fill(MapData mapData, SidewalkSet sidewalkSet, int seed = 0)
     {
       var placements = new List<SidewalkPlacement>();
@@ -54,10 +66,28 @@ namespace Map
           break;
         }
 
-        placements.Add(new SidewalkPlacement(chosen, cell));
+        var rotationDegrees = chosen.facesRoad
+          ? GetRoadFacingRotation(mapData, cell)
+          : 0f;
+
+        placements.Add(new SidewalkPlacement(chosen, cell, rotationDegrees));
       }
 
       return placements;
+    }
+
+    private static float GetRoadFacingRotation(MapData mapData, Vector2Int sidewalkCell)
+    {
+      foreach (var offset in RoadOffsets)
+      {
+        if (!mapData.IsRoad(sidewalkCell + offset))
+          continue;
+
+        // Grid +Y is world +Z, so a road to the east requires a +90 degree yaw, etc.
+        return Mathf.Atan2(offset.x, offset.y) * Mathf.Rad2Deg;
+      }
+
+      return 0f;
     }
   }
 }

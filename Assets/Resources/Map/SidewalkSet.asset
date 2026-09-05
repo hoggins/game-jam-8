@@ -15,6 +15,6 @@ MonoBehaviour:
   pieces:
   - name: Sidewalk Filler
     prefab: {fileID: 1615809237595588145, guid: 283fd76c3e18a4c1a86667395c01ae8a, type: 3}
-    facesRoad: 0
+    facesRoad: 1
     weight: 1
     enabled: 1

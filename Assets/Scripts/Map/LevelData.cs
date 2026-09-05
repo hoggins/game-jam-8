@@ -138,7 +138,8 @@ namespace Map
             0f,
             placement.Cell.y * cellSize + cellSize * 0.5f);
 
-          SpawnInstance(placement.Piece.prefab, placement.Piece.name, position, Quaternion.identity, container);
+          var rotation = Quaternion.Euler(0f, placement.RotationDegrees, 0f);
+          SpawnInstance(placement.Piece.prefab, placement.Piece.name, position, rotation, container);
         }
     }
 
