@@ -60,6 +60,8 @@ namespace Destruction
       if (_navigationCollider != null)
         _navigationCollider.enabled = false;
 
+      ApplyGroundDamage();
+
       gameObject.layer = _partLayer!.Value;
 
       foreach (var part in _parts)
@@ -88,6 +90,30 @@ namespace Destruction
 
       if (_parts.Length == 0 && Application.isPlaying)
         Destroy(gameObject);
+    }
+
+    private void ApplyGroundDamage()
+    {
+      var health = GetComponent<DestructibleHealth>();
+      if (health == null || health.ObjectType != DestructibleObjectType.House)
+        return;
+
+      var groundDamageMask = GroundDamageMask.Instance;
+      if (groundDamageMask == null)
+        return;
+
+      var renderers = GetComponentsInChildren<Renderer>(true);
+      if (renderers.Length == 0)
+        return;
+
+      var bounds = renderers[0].bounds;
+      for (var i = 1; i < renderers.Length; i++)
+        bounds.Encapsulate(renderers[i].bounds);
+
+      var footprintRadius = Mathf.Sqrt(
+        bounds.extents.x * bounds.extents.x
+        + bounds.extents.z * bounds.extents.z);
+      groundDamageMask.ApplyCircleDamage(bounds.center, footprintRadius, Color.white, 1f, 0.5f);
     }
 
     private static Vector3 ClosestPoint(Collider[] colliders, Vector3 origin)

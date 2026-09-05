@@ -22,6 +22,7 @@ namespace Destruction
 
     public int CurrentHealth { get; private set; }
     public bool IsAlive => CurrentHealth > 0 && !_isDestroyed;
+    public DestructibleObjectType ObjectType => _objectType;
 
     private void Awake()
     {

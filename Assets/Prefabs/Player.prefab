@@ -68,6 +68,11 @@ MonoBehaviour:
   _rotationSpeed: 12
   _avoidancePower: 4
   _collidesWith: 2
+  _leaveDamageTrail: 1
+  _damageTrailRadius: 1.5
+  _damageTrailIntensityPerSecond: 1
+  _damageTrailSmoothness: 0.6
+  _damageTrailColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &6603987278544191975
 MonoBehaviour:
   m_ObjectHideFlags: 0
