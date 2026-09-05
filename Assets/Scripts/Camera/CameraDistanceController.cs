@@ -11,7 +11,7 @@ namespace CustomCamera
   [Preserve]
   public sealed class CameraDistanceController : IInitializable, IDisposable
   {
-    private const float AdditionalCameraScaleFactor = 0.5f;
+    private const float AdditionalCameraScaleFactor = -0.7f;
 
     private readonly CharacterService _characterService;
 
