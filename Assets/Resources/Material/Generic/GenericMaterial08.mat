@@ -32,7 +32,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _PrintsNormal:
-        m_Texture: {fileID: 2800000, guid: 422d59e28889843da96e5fc24fb3f87e, type: 3}
+        m_Texture: {fileID: 2800000, guid: bea47f26ee6e24fe29696836d932b1c9, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
@@ -77,7 +77,7 @@ Material:
     - _VertexAnimAmplitude: 1
     - _XRMotionVectorsPass: 1
     m_Colors:
-    - _Color0: {r: 0.104457, g: 0.4339623, b: 0, a: 0}
+    - _Color0: {r: 0.5471698, g: 0.248388, b: 0.16776434, a: 0}
     - _PrintsColor: {r: 1, g: 1, b: 1, a: 0}
     - _PrintsScale: {r: 0.1, g: 0.1, b: 0, a: 0}
     - _Vector0: {r: 3, g: 3, b: 3, a: 0}
