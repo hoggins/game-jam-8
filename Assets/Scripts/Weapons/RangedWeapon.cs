@@ -20,8 +20,18 @@ namespace Weapons
     protected override void Awake()
     {
       base.Awake();
-      _bulletCount = Mathf.Max(0, PlayerService.GunPower);
       PrewarmFx(_bulletPrefab, _bulletPrewarmCount);
+    }
+
+    private void OnEnable()
+    {
+      PlayerService.ProgressionChanged += RefreshStats;
+      RefreshStats();
+    }
+
+    private void OnDisable()
+    {
+      PlayerService.ProgressionChanged -= RefreshStats;
     }
 
     protected override void Attack(int damage)
@@ -58,6 +68,11 @@ namespace Weapons
         throw new ArgumentOutOfRangeException(nameof(amount), amount, "Upgrade amount cannot be negative.");
 
       _bulletCount = checked(_bulletCount + amount);
+    }
+
+    private void RefreshStats()
+    {
+      _bulletCount = Mathf.Max(0, PlayerService.GunPower);
     }
 
     private Vector3 GetBulletDirection(Vector3 forward, int index, int bulletCount)
