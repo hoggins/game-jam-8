@@ -7,16 +7,23 @@ namespace Map
   {
     public readonly HouseObject House;
     public readonly Vector2Int Cell;
+    public readonly int RotationDegrees;
 
-    public HousePlacement(HouseObject house, Vector2Int cell)
+    public HousePlacement(HouseObject house, Vector2Int cell, int rotationDegrees)
     {
       House = house;
       Cell = cell;
+      RotationDegrees = rotationDegrees;
     }
   }
 
   public static class MapFiller
   {
+    /// The house's footprint as occupied on the grid once rotated: a 90/270 rotation swaps which
+    /// axis is which, so a 1x2 house rotated a quarter turn occupies a 2x1 area.
+    public static Vector2Int RotatedSize(Vector2Int size, int rotationDegrees) =>
+      rotationDegrees == 90 || rotationDegrees == 270 ? new Vector2Int(size.y, size.x) : size;
+
     public static List<HousePlacement> Fill(MapData mapData, HouseSet houseSet, Vector2 originCell, int seed = 0)
     {
       var placements = new List<HousePlacement>();
@@ -58,13 +65,19 @@ namespace Map
         var candidates = housesByLevel.TryGetValue(level, out var levelHouses) ? levelHouses : houses;
 
         HouseObject chosen = null;
+        var chosenRotation = 0;
+        var chosenSize = Vector2Int.zero;
         var startIndex = random.Next(candidates.Count);
         for (var i = 0; i < candidates.Count; i++)
         {
           var house = candidates[(startIndex + i) % candidates.Count];
-          if (CanPlace(free, cell, house.size))
+          var rotation = random.Next(4) * 90;
+          var size = RotatedSize(house.size, rotation);
+          if (CanPlace(free, cell, size))
           {
             chosen = house;
+            chosenRotation = rotation;
+            chosenSize = size;
             break;
           }
         }
@@ -72,8 +85,8 @@ namespace Map
         if (chosen == null)
           continue;
 
-        Occupy(free, cell, chosen.size);
-        placements.Add(new HousePlacement(chosen, cell));
+        Occupy(free, cell, chosenSize);
+        placements.Add(new HousePlacement(chosen, cell, chosenRotation));
       }
 
       return placements;

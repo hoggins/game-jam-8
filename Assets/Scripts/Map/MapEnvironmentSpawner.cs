@@ -148,23 +148,25 @@ namespace Map
       for (var placementIndex = 0; placementIndex < housePlacements.Count; placementIndex++)
       {
         var placement = housePlacements[placementIndex];
-        if (!TryReserve(placement.Cell, placement.House.size))
+        var size = MapFiller.RotatedSize(placement.House.size, placement.RotationDegrees);
+        if (!TryReserve(placement.Cell, size))
           continue;
 
         var position = new Vector3(
-          placement.Cell.x * cellSize + placement.House.size.x * cellSize * 0.5f,
+          placement.Cell.x * cellSize + size.x * cellSize * 0.5f,
           0f,
-          placement.Cell.y * cellSize + placement.House.size.y * cellSize * 0.5f);
+          placement.Cell.y * cellSize + size.y * cellSize * 0.5f);
+        var rotation = Quaternion.Euler(0f, placement.RotationDegrees, 0f);
 
-        var instance = Object.Instantiate(placement.House.prefab, position, Quaternion.identity, _container);
+        var instance = Object.Instantiate(placement.House.prefab, position, rotation, _container);
         instance.name = placement.House.name;
         RegisterRenderers(placementIndex, instance);
 
         var destructible = instance.GetComponentInChildren<DestructibleObject>();
         var id = _nextId++;
-        var worldHalfExtents = new Vector2(placement.House.size.x * cellSize * 0.5f, placement.House.size.y * cellSize * 0.5f);
+        var worldHalfExtents = new Vector2(size.x * cellSize * 0.5f, size.y * cellSize * 0.5f);
         var runtimeObject = new RuntimeEnvironmentObject(
-          id, placement.Cell, placement.House.size, destructible, position, worldHalfExtents, Quaternion.identity);
+          id, placement.Cell, size, destructible, position, worldHalfExtents, rotation);
         _objects.Add(id, runtimeObject);
 
         if (destructible != null)

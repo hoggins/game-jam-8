@@ -105,12 +105,14 @@ namespace Map
       if (houseSet != null)
         foreach (var placement in MapFiller.Fill(mapData, houseSet, originCell, seed))
         {
+          var size = MapFiller.RotatedSize(placement.House.size, placement.RotationDegrees);
           var position = new Vector3(
-            placement.Cell.x * cellSize + placement.House.size.x * cellSize * 0.5f,
+            placement.Cell.x * cellSize + size.x * cellSize * 0.5f,
             0f,
-            placement.Cell.y * cellSize + placement.House.size.y * cellSize * 0.5f);
+            placement.Cell.y * cellSize + size.y * cellSize * 0.5f);
+          var rotation = Quaternion.Euler(0f, placement.RotationDegrees, 0f);
 
-          SpawnInstance(placement.House.prefab, placement.House.name, position, Quaternion.identity, container);
+          SpawnInstance(placement.House.prefab, placement.House.name, position, rotation, container);
         }
 
       if (roadSet != null)
