@@ -203,7 +203,7 @@ namespace Destruction.Editor
       if (root.GetComponent<DestructibleHealth>() == null)
         root.AddComponent<DestructibleHealth>();
 
-      if (UsesHitFxMaterial(root) && root.GetComponent<HitFx>() == null)
+      if (root.GetComponent<HitFx>() == null)
         root.AddComponent<HitFx>();
     }
 
