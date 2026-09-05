@@ -1,6 +1,7 @@
 using System;
 using App;
 using Movement;
+using Pooling;
 using UnityEngine;
 using VContainer;
 
@@ -10,14 +11,17 @@ namespace Destruction
   public class DestructibleObject : MonoBehaviour
   {
     private const string FrictionMaterialPath = "Descructable/FirstHouseFriction";
+    private const string DestructionFxPath = "Fx/Prefabs/FxBuildingDucksDestruction01";
 
     [SerializeField, Min(0f)] private float _breakMagnitude = 5f;
 
     [Inject] private EnvironmentDecayManager _decayManager;
+    [Inject] private Pool _pool;
 
     private FlowMapNoGoZone _noGoZone;
     private BoxCollider _navigationCollider;
     private DecayPart[] _parts;
+    private GameObject _destructionFxPrefab;
     private bool _destroyed;
 
     public event Action<DestructibleObject> Destroyed;
@@ -31,6 +35,7 @@ namespace Destruction
 
       _partLayer ??= LayerMask.NameToLayer(DestructibleLayers.Parts);
       _frictionMaterial ??= Resources.Load<PhysicsMaterial>(FrictionMaterialPath);
+      _destructionFxPrefab = Resources.Load<GameObject>(DestructionFxPath);
 
       _noGoZone = GetComponent<FlowMapNoGoZone>();
       _navigationCollider = GetComponent<BoxCollider>();
@@ -61,6 +66,7 @@ namespace Destruction
         _navigationCollider.enabled = false;
 
       ApplyGroundDamage();
+      SpawnDestructionFx();
 
       gameObject.layer = _partLayer!.Value;
 
@@ -90,6 +96,15 @@ namespace Destruction
 
       if (_parts.Length == 0 && Application.isPlaying)
         Destroy(gameObject);
+    }
+
+    private void SpawnDestructionFx()
+    {
+      if (!Application.isPlaying || _pool == null || _destructionFxPrefab == null)
+        return;
+
+      var rotation = transform.rotation * _destructionFxPrefab.transform.localRotation;
+      _pool.Get(_destructionFxPrefab, transform.position, rotation);
     }
 
     private void ApplyGroundDamage()
