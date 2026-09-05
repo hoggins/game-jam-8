@@ -28,6 +28,7 @@ namespace Metagame.Stats
     [SerializeField] private TMP_Text _levelText;
 
     [Inject] private readonly CharacterService _characterService;
+    [Inject] private readonly ProgressionBalanceConfig _progressionBalance;
 
     private void Awake()
     {
@@ -132,22 +133,22 @@ namespace Metagame.Stats
     private int GetStartingValue() =>
       _statType switch
       {
-        CharacterStatType.AttackPower => ProgressionBalance.StartingAttackPower,
-        CharacterStatType.MaxHealth => ProgressionBalance.StartingMaxHealth,
-        CharacterStatType.Speed => ProgressionBalance.StartingSpeed,
-        CharacterStatType.GunPower => ProgressionBalance.StartingGunPower,
-        CharacterStatType.Timer => ProgressionBalance.StartingTimer,
+        CharacterStatType.AttackPower => _progressionBalance.StartingAttackPower,
+        CharacterStatType.MaxHealth => _progressionBalance.StartingMaxHealth,
+        CharacterStatType.Speed => _progressionBalance.StartingSpeed,
+        CharacterStatType.GunPower => _progressionBalance.StartingGunPower,
+        CharacterStatType.Timer => _progressionBalance.StartingTimer,
         _ => 0,
       };
 
     private int GetUpgradeCost() =>
       _statType switch
       {
-        CharacterStatType.AttackPower => ProgressionBalance.AttackPowerUpgradeCost,
-        CharacterStatType.MaxHealth => ProgressionBalance.MaxHealthUpgradeCost,
-        CharacterStatType.Speed => ProgressionBalance.SpeedUpgradeCost,
-        CharacterStatType.GunPower => ProgressionBalance.GunPowerUpgradeCost,
-        CharacterStatType.Timer => ProgressionBalance.TimerUpgradeCost,
+        CharacterStatType.AttackPower => _progressionBalance.AttackPowerUpgradeCost,
+        CharacterStatType.MaxHealth => _progressionBalance.MaxHealthUpgradeCost,
+        CharacterStatType.Speed => _progressionBalance.SpeedUpgradeCost,
+        CharacterStatType.GunPower => _progressionBalance.GunPowerUpgradeCost,
+        CharacterStatType.Timer => _progressionBalance.TimerUpgradeCost,
         _ => 0,
       };
 

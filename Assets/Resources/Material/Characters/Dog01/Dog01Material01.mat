@@ -66,6 +66,7 @@ Material:
     - _AlphaClip: 1
     - _AnimatePrints: 1
     - _EnvironmentReflections: 1
+    - _Hit: 0
     - _Inflate: 0
     - _Keyword0: 0
     - _MainTexMul: 1.3

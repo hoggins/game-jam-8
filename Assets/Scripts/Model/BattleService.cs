@@ -13,12 +13,14 @@ namespace Model
     private readonly IEnumerable<IBattleStarted> _battleStartedHandlers;
     private readonly IEnumerable<IBattleEnd> _battleEndHandlers;
     private readonly CharacterService _characterService;
+    private readonly BattleBalanceConfig _battleBalance;
 
     private float _defeatDelay;
 
     public event Action BattleStarted;
     public event Action BattleWon;
     public event Action BattleDefeated;
+    public event Action TimerDestroyed;
 
     public bool IsBattleActive { get; private set; }
     public bool IsTimerDestroyed { get; private set; }
@@ -27,19 +29,22 @@ namespace Model
     /// that window, so the player can read the zero instead of being hit during it.
     public bool IsCombatSuspended { get; private set; }
 
-    public float Timer { get; private set; } = BattleBalance.BattleDuration;
+    public float Timer { get; private set; }
 
     /// The base clock plus the seconds the character's Timer stat has bought.
-    private float StartingDuration => BattleBalance.BattleDuration + _characterService.Timer;
+    private float StartingDuration => _battleBalance.BattleDuration + _characterService.Timer;
 
     public BattleService(
       IEnumerable<IBattleStarted> battleStartedHandlers,
       IEnumerable<IBattleEnd> battleEndHandlers,
-      CharacterService characterService)
+      CharacterService characterService,
+      BattleBalanceConfig battleBalance)
     {
       _battleStartedHandlers = battleStartedHandlers;
       _battleEndHandlers = battleEndHandlers;
       _characterService = characterService;
+      _battleBalance = battleBalance;
+      Timer = _battleBalance.BattleDuration;
     }
 
     void IInitializable.Initialize()
@@ -87,7 +92,7 @@ namespace Model
     /// </summary>
     private void BeginTimeout()
     {
-      _defeatDelay = BattleBalance.TimerExpiredDefeatDelay;
+      _defeatDelay = _battleBalance.TimerExpiredDefeatDelay;
       if (_defeatDelay <= 0f)
       {
         DefeatBattle();
@@ -161,6 +166,15 @@ namespace Model
     public void DestroyTimer()
     {
       IsTimerDestroyed = true;
+      TimerDestroyed?.Invoke();
+    }
+
+    /// Brings the timer back after <see cref="TimerDestroyed"/>, once a new one has been placed
+    /// in the world. The countdown resumes from the default duration.
+    public void RespawnTimer()
+    {
+      IsTimerDestroyed = false;
+      Timer = _battleBalance.BattleDuration;
     }
 
     /// Overwrites the remaining time. Used when part of the in-world timer is destroyed and the

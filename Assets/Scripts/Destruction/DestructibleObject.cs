@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using App;
 using Movement;
 using Pooling;
@@ -20,7 +21,7 @@ namespace Destruction
 
     private FlowMapNoGoZone _noGoZone;
     private BoxCollider _navigationCollider;
-    private DecayPart[] _parts;
+    private List<DecayPart> _parts;
     private GameObject _destructionFxPrefab;
     private bool _destroyed;
 
@@ -39,7 +40,7 @@ namespace Destruction
 
       _noGoZone = GetComponent<FlowMapNoGoZone>();
       _navigationCollider = GetComponent<BoxCollider>();
-      _parts = GetComponentsInChildren<DecayPart>();
+      _parts = new List<DecayPart>(GetComponentsInChildren<DecayPart>());
 
       // A part only needs a live Rigidbody once it actually breaks off (added in Impulse below);
       // with thousands of houses on a big map, a Rigidbody sitting on every intact part is pure
@@ -52,6 +53,19 @@ namespace Destruction
 
     public void Break(Vector3 origin) =>
       Impulse(origin, _breakMagnitude);
+
+    public bool FallOutRandomPart(Vector3 origin)
+    {
+      RemoveMissingParts();
+      if (_destroyed || _parts.Count == 0)
+        return false;
+
+      var index = UnityEngine.Random.Range(0, _parts.Count);
+      var part = _parts[index];
+      _parts.RemoveAt(index);
+      DetachPart(part, origin, _breakMagnitude);
+      return true;
+    }
 
     public void Impulse(Vector3 origin, float magnitude)
     {
@@ -70,32 +84,56 @@ namespace Destruction
 
       gameObject.layer = _partLayer!.Value;
 
-      foreach (var part in _parts)
+      for (var i = _parts.Count - 1; i >= 0; i--)
       {
-        var colliders = part.GetComponents<Collider>();
-        foreach (var collider in colliders)
-        {
-          collider.enabled = true;
-          collider.material = _frictionMaterial;
-        }
-
-        var body = part.GetComponent<Rigidbody>();
-        if (body == null)
-          body = part.gameObject.AddComponent<Rigidbody>();
-        body.isKinematic = false;
-
-        var hitPoint = ClosestPoint(colliders, origin);
-        var direction = (hitPoint - origin).normalized;
-        body.AddForceAtPosition(direction * magnitude, hitPoint, ForceMode.Impulse);
-
-        if (Application.isPlaying)
-          _decayManager.RegisterPart(this, body, part.Settings);
+        var part = _parts[i];
+        _parts.RemoveAt(i);
+        DetachPart(part, origin, magnitude);
       }
 
       Destroyed?.Invoke(this);
 
-      if (_parts.Length == 0 && Application.isPlaying)
-        Destroy(gameObject);
+      if (Application.isPlaying)
+      {
+        if (_decayManager != null)
+          _decayManager.MarkForDestruction(this);
+        else if (_parts.Count == 0)
+          Destroy(gameObject);
+      }
+    }
+
+    private void DetachPart(DecayPart part, Vector3 origin, float magnitude)
+    {
+      if (part == null)
+        return;
+
+      var colliders = part.GetComponents<Collider>();
+      foreach (var collider in colliders)
+      {
+        collider.enabled = true;
+        collider.material = _frictionMaterial;
+      }
+
+      var body = part.GetComponent<Rigidbody>();
+      if (body == null)
+        body = part.gameObject.AddComponent<Rigidbody>();
+      body.isKinematic = false;
+
+      var hitPoint = ClosestPoint(colliders, origin);
+      var direction = (hitPoint - origin).normalized;
+      body.AddForceAtPosition(direction * magnitude, hitPoint, ForceMode.Impulse);
+
+      if (Application.isPlaying && _decayManager != null)
+        _decayManager.RegisterPart(this, body, part.Settings);
+    }
+
+    private void RemoveMissingParts()
+    {
+      for (var i = _parts.Count - 1; i >= 0; i--)
+      {
+        if (_parts[i] == null)
+          _parts.RemoveAt(i);
+      }
     }
 
     private void SpawnDestructionFx()

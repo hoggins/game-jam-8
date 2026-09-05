@@ -79,6 +79,7 @@ namespace Combat
     [Inject] private Pool _pool;
     [Inject] private MovementUpdater _movementUpdater;
     [Inject] private BattleService _battleService;
+    [Inject] private BattleBalanceConfig _battleBalance;
 
     private float _elapsedSeconds;
     private int _nextSpawnSide;
@@ -136,7 +137,7 @@ namespace Combat
     private void RepositionMobs()
     {
       var agents = _movementUpdater.ActiveAgents;
-      var repositionDistance = BattleBalance.DuckRepositionDistance;
+      var repositionDistance = _battleBalance.DuckRepositionDistance;
       var repositionDistanceSquared = repositionDistance * repositionDistance;
 
       for (var i = 0; i < agents.Count; i++)

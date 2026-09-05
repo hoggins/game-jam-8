@@ -128,7 +128,7 @@ namespace Timer.Editor
       var destructible = digitRoot.AddComponent<DestructibleObject>();
       Apply(destructible, so => so.FindProperty("_breakMagnitude").floatValue = 6f);
 
-      // Health comes from BattleBalance via the type; TimerDigit also keeps digits out of the
+      // Health comes from BattleBalanceConfig via the type; TimerDigit also keeps digits out of the
       // buildings-destroyed statistic.
       var health = digitRoot.AddComponent<DestructibleHealth>();
       Apply(health, so =>

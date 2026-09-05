@@ -20,6 +20,7 @@ namespace Destruction
     private readonly EnvironmentDecaySettings _settings;
     private readonly List<DecayingPart> _parts = new();
     private readonly Dictionary<DestructibleObject, int> _remainingParts = new();
+    private readonly HashSet<DestructibleObject> _ownersPendingDestruction = new();
 
     public EnvironmentDecayManager(EnvironmentDecaySettings settings)
     {
@@ -37,6 +38,19 @@ namespace Destruction
         Body = body,
         Settings = settings,
       });
+    }
+
+    public void MarkForDestruction(DestructibleObject owner)
+    {
+      if (owner == null)
+        return;
+
+      _ownersPendingDestruction.Add(owner);
+      if (_remainingParts.ContainsKey(owner))
+        return;
+
+      _ownersPendingDestruction.Remove(owner);
+      Remove(owner.gameObject);
     }
 
     void ITickable.Tick()
@@ -102,7 +116,7 @@ namespace Destruction
 
       _remainingParts.Remove(owner);
 
-      if (owner != null)
+      if (_ownersPendingDestruction.Remove(owner))
         Remove(owner.gameObject);
     }
 

@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d24dffd7118724dc1b66a231477a79f0, type: 3}
+  m_Name: ProgressionBalanceConfig
+  m_EditorClassIdentifier: Assembly-CSharp::Balance.ProgressionBalanceConfig
+  _startingAttackPower: 1
+  _startingMaxHealth: 300000
+  _startingSpeed: 6
+  _startingGunPower: 1
+  _startingTimer: 0
+  _attackPowerUpgradeCost: 100
+  _maxHealthUpgradeCost: 100
+  _speedUpgradeCost: 100
+  _gunPowerUpgradeCost: 100
+  _timerUpgradeCost: 100
+  _attackPowerUpgradeAmount: 1
+  _maxHealthUpgradeAmount: 1
+  _speedUpgradeAmount: 1
+  _gunPowerUpgradeAmount: 1
+  _timerUpgradeAmount: 1
+  _maxUpgradeLevel: 30
+  _maxHealthScalePerLevel: 0.02
