@@ -19,6 +19,7 @@ namespace Destruction
     private const string CoinPickupPrefabPath = "Prefabs/Interface/Coin01";
 
     [SerializeField, Min(0f)] private float _breakMagnitude = 5f;
+    [SerializeField] private bool _spawnDestructionFx = true;
 
     [Inject] private EnvironmentDecayManager _decayManager;
     [Inject] private Pool _pool;
@@ -125,7 +126,8 @@ namespace Destruction
         _navigationCollider.enabled = false;
 
       ApplyGroundDamage();
-      SpawnDestructionFx();
+      if (_spawnDestructionFx)
+        SpawnDestructionFx();
       SpawnBuildingCoinPickups();
 
       gameObject.layer = _partLayer!.Value;

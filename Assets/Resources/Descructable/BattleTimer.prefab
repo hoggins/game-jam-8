@@ -1487,6 +1487,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Destruction.DestructibleObject
   _breakMagnitude: 6
+  _spawnDestructionFx: 0
 --- !u!114 &9128842591852813388
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1598,6 +1599,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Destruction.DestructibleObject
   _breakMagnitude: 6
+  _spawnDestructionFx: 0
 --- !u!114 &4534774751376587712
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7409,6 +7411,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Destruction.DestructibleObject
   _breakMagnitude: 6
+  _spawnDestructionFx: 0
 --- !u!114 &5266013732636789037
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8654,6 +8657,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Destruction.DestructibleObject
   _breakMagnitude: 6
+  _spawnDestructionFx: 0
 --- !u!114 &8572593337839459793
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10211,6 +10215,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Destruction.DestructibleObject
   _breakMagnitude: 6
+  _spawnDestructionFx: 0
 --- !u!114 &5418043152357378114
 MonoBehaviour:
   m_ObjectHideFlags: 0

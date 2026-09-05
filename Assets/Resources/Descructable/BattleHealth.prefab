@@ -2303,6 +2303,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Destruction.DestructibleObject
   _breakMagnitude: 6
+  _spawnDestructionFx: 0
 --- !u!114 &512069966085279651
 MonoBehaviour:
   m_ObjectHideFlags: 0
