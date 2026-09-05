@@ -53,17 +53,26 @@ namespace Map
 
       foreach (var cell in mapData.SidewalkCells)
       {
-        var roll = (float)random.NextDouble() * totalWeight;
-        var accumulated = 0f;
-        var chosen = pieces[^1];
-        foreach (var candidate in pieces)
+        SidewalkPiece chosen;
+        if (GetRoadNeighbourCount(mapData, cell) > 2)
         {
-          accumulated += candidate.weight;
-          if (roll >= accumulated)
-            continue;
+          // Junction sidewalks stay empty so props do not block the road intersection.
+          chosen = pieces[0];
+        }
+        else
+        {
+          var roll = (float)random.NextDouble() * totalWeight;
+          var accumulated = 0f;
+          chosen = pieces[^1];
+          foreach (var candidate in pieces)
+          {
+            accumulated += candidate.weight;
+            if (roll >= accumulated)
+              continue;
 
-          chosen = candidate;
-          break;
+            chosen = candidate;
+            break;
+          }
         }
 
         var rotationDegrees = GetRoadFacingRotation(mapData, cell);
@@ -86,6 +95,16 @@ namespace Map
       }
 
       return 0f;
+    }
+
+    private static int GetRoadNeighbourCount(MapData mapData, Vector2Int sidewalkCell)
+    {
+      var count = 0;
+      foreach (var offset in RoadOffsets)
+        if (mapData.IsRoad(sidewalkCell + offset))
+          count++;
+
+      return count;
     }
   }
 }
