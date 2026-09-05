@@ -1,3 +1,4 @@
+using System.Collections;
 using App;
 using Metagame.PauseMenu;
 using Model;
@@ -15,13 +16,36 @@ namespace Battle
     [SerializeField] private Button _upgradeButton;
     [SerializeField] private InputActionReference _toggleProgressionAction;
 
+    [Tooltip("Seconds the HUD takes to recede behind a popup, or come back.")]
+    [SerializeField, Min(0f)] private float _transitionDuration = 0.2f;
+
+    [Tooltip("Eases the recede over its duration. Sampled from 0..1.")]
+    [SerializeField] private AnimationCurve _transitionCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
+
+    [Tooltip("Scale the HUD reaches once it has faded out behind a popup.")]
+    [SerializeField, Min(0f)] private float _hiddenScale = 1.2f;
+
     [Inject] private BattleService _battleService;
 
     private InputAction _subscribedToggleAction;
     private bool _enabledToggleAction;
     private bool _progressionInputEnabled = true;
 
-    private void Awake() => this.AsInjected();
+    private CanvasGroup _canvasGroup;
+    private Coroutine _transitionCoroutine;
+    private bool _pauseShown;
+    private bool _progressionShown;
+    private bool _battleOverShown;
+    private bool _hudVisible = true;
+
+    private void Awake()
+    {
+      this.AsInjected();
+
+      _canvasGroup = GetComponent<CanvasGroup>();
+      if (_canvasGroup == null)
+        _canvasGroup = gameObject.AddComponent<CanvasGroup>();
+    }
 
     protected override void OnEnable()
     {
@@ -31,7 +55,21 @@ namespace Battle
       {
         _battleService.BattleStarted += OnBattleStarted;
         _battleService.BattleWinStarted += OnBattleWinStarted;
+        _battleService.BattleWon += OnBattleOver;
+        _battleService.BattleDefeated += OnBattleOver;
+        _battleService.BattleAbandoned += OnBattleAbandoned;
       }
+
+      if (_pauseMenuUi != null)
+        _pauseMenuUi.ShownChanged += OnPauseShownChanged;
+
+      if (_progressionUi != null)
+        _progressionUi.ShownChanged += OnProgressionShownChanged;
+
+      // The popups are siblings that reset themselves on Awake, so the HUD comes up unobscured.
+      _pauseShown = _pauseMenuUi != null && _pauseMenuUi.IsPaused;
+      _progressionShown = _progressionUi != null && _progressionUi.IsShown;
+      ApplyHudVisibility(false);
 
       if (_upgradeButton != null)
       {
@@ -54,6 +92,21 @@ namespace Battle
       {
         _battleService.BattleStarted -= OnBattleStarted;
         _battleService.BattleWinStarted -= OnBattleWinStarted;
+        _battleService.BattleWon -= OnBattleOver;
+        _battleService.BattleDefeated -= OnBattleOver;
+        _battleService.BattleAbandoned -= OnBattleAbandoned;
+      }
+
+      if (_pauseMenuUi != null)
+        _pauseMenuUi.ShownChanged -= OnPauseShownChanged;
+
+      if (_progressionUi != null)
+        _progressionUi.ShownChanged -= OnProgressionShownChanged;
+
+      if (_transitionCoroutine != null)
+      {
+        StopCoroutine(_transitionCoroutine);
+        _transitionCoroutine = null;
       }
 
       if (_upgradeButton != null)
@@ -119,8 +172,114 @@ namespace Battle
       _progressionUi.Toggle();
     }
 
+    private void OnPauseShownChanged(bool isShown)
+    {
+      _pauseShown = isShown;
+      ApplyHudVisibility(true);
+      KeepFrozenWhileAnyScreenIsOpen();
+    }
+
+    private void OnProgressionShownChanged(bool isShown)
+    {
+      _progressionShown = isShown;
+      ApplyHudVisibility(true);
+      KeepFrozenWhileAnyScreenIsOpen();
+    }
+
+    /// Pause and the progression screen each drive Time.timeScale on their own, so whichever one
+    /// closes first restores it to 1 and unfreezes the world behind the other. This is the only
+    /// place that sees both, so it re-freezes while either is still up.
+    private void KeepFrozenWhileAnyScreenIsOpen()
+    {
+      if (_pauseShown || _progressionShown)
+        Time.timeScale = 0f;
+    }
+
+    private void OnBattleOver()
+    {
+      _battleOverShown = true;
+      ApplyHudVisibility(true);
+    }
+
+    /// Abandoning tears the battle down without a win or defeat screen, so the latch that
+    /// OnBattleOver sets must not survive into whatever the HUD shows next.
+    private void OnBattleAbandoned()
+    {
+      _battleOverShown = false;
+      ApplyHudVisibility(true);
+    }
+
+    /// The HUD recedes while any popup is up: it fades out, scales up to <see cref="_hiddenScale"/>,
+    /// and stops taking clicks so the popup underneath owns the input.
+    private void ApplyHudVisibility(bool animate)
+    {
+      var visible = !_pauseShown && !_progressionShown && !_battleOverShown;
+      if (_hudVisible == visible && animate)
+        return;
+
+      _hudVisible = visible;
+
+      // Going away, the HUD stops taking clicks at once so the popup owns input immediately.
+      // Coming back, input waits for AnimateVisibility to finish, otherwise an invisible HUD
+      // swallows clicks meant for the popup that is still fading out.
+      if (!visible)
+        SetInteractive(false);
+
+      if (_transitionCoroutine != null)
+      {
+        StopCoroutine(_transitionCoroutine);
+        _transitionCoroutine = null;
+      }
+
+      if (!animate || _transitionDuration <= 0f || !isActiveAndEnabled)
+      {
+        SetTransitionState(visible ? 1f : 0f, Vector3.one * (visible ? 1f : _hiddenScale));
+        SetInteractive(visible);
+        return;
+      }
+
+      _transitionCoroutine = StartCoroutine(AnimateVisibility(visible));
+    }
+
+    private IEnumerator AnimateVisibility(bool visible)
+    {
+      var startAlpha = _canvasGroup.alpha;
+      var targetAlpha = visible ? 1f : 0f;
+      var startScale = transform.localScale;
+      var targetScale = Vector3.one * (visible ? 1f : _hiddenScale);
+
+      // Pause and the upgrade screen both drive timeScale to 0, so this cannot use scaled time.
+      for (var elapsed = 0f; elapsed < _transitionDuration; elapsed += Time.unscaledDeltaTime)
+      {
+        var progress = _transitionCurve.Evaluate(Mathf.Clamp01(elapsed / _transitionDuration));
+        SetTransitionState(
+          Mathf.LerpUnclamped(startAlpha, targetAlpha, progress),
+          Vector3.LerpUnclamped(startScale, targetScale, progress));
+        yield return null;
+      }
+
+      SetTransitionState(targetAlpha, targetScale);
+      _transitionCoroutine = null;
+      if (visible)
+        SetInteractive(true);
+    }
+
+    private void SetTransitionState(float alpha, Vector3 scale)
+    {
+      _canvasGroup.alpha = alpha;
+      transform.localScale = scale;
+    }
+
+    private void SetInteractive(bool interactive)
+    {
+      _canvasGroup.interactable = interactive;
+      _canvasGroup.blocksRaycasts = interactive;
+    }
+
     private void OnBattleStarted()
     {
+      _battleOverShown = false;
+      ApplyHudVisibility(true);
       _progressionInputEnabled = true;
       if (_upgradeButton != null)
         _upgradeButton.interactable = true;
