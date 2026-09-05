@@ -36,7 +36,7 @@ namespace Arrow
     private GameObject _hudCameraObject;
     private Transform _hudCamera;
     private Transform _player;
-    private Camera _viewCamera;
+    private UnityEngine.Camera _viewCamera;
     private Timer.BattleTimerObject _timer;
     private bool _isDead;
 
@@ -48,7 +48,7 @@ namespace Arrow
       if (_body == null)
         _body = GetComponentInChildren<DestructibleObject>(true);
 
-      var camera = GetComponentInChildren<Camera>(true);
+      var camera = GetComponentInChildren<UnityEngine.Camera>(true);
       _hudCameraObject = camera != null ? camera.gameObject : null;
       _hudCamera = camera != null ? camera.transform : null;
 

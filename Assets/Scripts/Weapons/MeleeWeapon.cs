@@ -33,13 +33,15 @@ namespace Weapons
     // Falls back to a direct Resources load so the radius still shows correctly for OnValidate
     // and the gizmo, which run in the editor outside of play mode where DI has not injected
     // _battleBalance yet.
-    private float AttackRadius =>
+    private float BaseAttackRadius =>
       (_battleBalance != null
         ? _battleBalance
         : _resourcesBattleBalance = _resourcesBattleBalance != null
           ? _resourcesBattleBalance
           : Resources.Load<BattleBalanceConfig>(BattleBalanceResourcePath))
       ?.MeleeAttackRadius ?? 0f;
+
+    private float AttackRadius => BaseAttackRadius * CharacterScaleFactor;
 
     protected override void SpawnAttackFx()
     {
@@ -90,7 +92,7 @@ namespace Weapons
           continue;
 
         mob.TakeDamage(damage);
-        SpawnFx(_hitFxPrefab, mob.transform.position, mob.transform.rotation);
+        SpawnHitFx(mob.transform.position, mob.transform.rotation);
       }
 
       var hitCount = Physics.OverlapSphereNonAlloc(
@@ -116,7 +118,7 @@ namespace Weapons
           return;
 
         mob.TakeDamage(damage);
-        SpawnFx(_hitFxPrefab, target.transform.position, target.transform.rotation);
+        SpawnHitFx(target.transform.position, target.transform.rotation);
         return;
       }
 
@@ -127,7 +129,7 @@ namespace Weapons
           continue;
 
         damageable.TakeDamage(damage);
-        SpawnFx(_hitFxPrefab, target.transform.position, target.transform.rotation);
+        SpawnHitFx(target.transform.position, target.transform.rotation);
         break;
       }
     }
@@ -145,9 +147,16 @@ namespace Weapons
         else
           damageable.TakeDamage(damage);
 
-        SpawnFx(_hitFxPrefab, target.transform.position, target.transform.rotation);
+        SpawnHitFx(target.transform.position, target.transform.rotation);
         break;
       }
+    }
+
+    private void SpawnHitFx(Vector3 position, Quaternion rotation)
+    {
+      var hitFx = SpawnFx(_hitFxPrefab, position, rotation);
+      if (hitFx != null && _hitFxPrefab != null)
+        hitFx.transform.localScale = _hitFxPrefab.transform.localScale * CharacterScaleFactor;
     }
 
     private void OnValidate()

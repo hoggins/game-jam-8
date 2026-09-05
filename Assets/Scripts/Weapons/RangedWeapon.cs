@@ -10,7 +10,7 @@ namespace Weapons
     [SerializeField] private GameObject _bulletPrefab;
     [SerializeField, Min(0)] private int _bulletPrewarmCount = 16;
     [SerializeField] private Transform _bulletPoint;
-    [SerializeField, Min(1)] private int _bulletCount = 1;
+    [SerializeField, Min(0)] private int _bulletCount;
     [SerializeField, Range(0f, 360f)] private float _bulletConeAngle;
 
     public int BulletCount => _bulletCount;
@@ -20,6 +20,7 @@ namespace Weapons
     protected override void Awake()
     {
       base.Awake();
+      _bulletCount = Mathf.Max(0, PlayerService.GunPower);
       PrewarmFx(_bulletPrefab, _bulletPrewarmCount);
     }
 
@@ -31,7 +32,7 @@ namespace Weapons
       var point = _bulletPoint != null ? _bulletPoint : transform;
       var owner = transform.root;
       var forward = GetOwnerForward(owner);
-      var bulletCount = Mathf.Max(1, _bulletCount);
+      var bulletCount = Mathf.Max(0, _bulletCount);
 
       for (var i = 0; i < bulletCount; i++)
       {
@@ -45,7 +46,7 @@ namespace Weapons
           : null;
 
         if (bullet != null)
-          bullet.Launch(direction, damage, owner);
+          bullet.Launch(direction, damage, owner, CharacterScaleFactor);
         else if (bulletObject != null)
           Pool.Release(bulletObject);
       }
@@ -79,7 +80,7 @@ namespace Weapons
     private void OnValidate()
     {
       _bulletPrewarmCount = Mathf.Max(0, _bulletPrewarmCount);
-      _bulletCount = Mathf.Max(1, _bulletCount);
+      _bulletCount = Mathf.Max(0, _bulletCount);
       _bulletConeAngle = Mathf.Clamp(_bulletConeAngle, 0f, 360f);
     }
   }

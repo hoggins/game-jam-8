@@ -1,4 +1,5 @@
 using Balance;
+using CustomCamera;
 using Destruction;
 using Map;
 using Model;
@@ -71,6 +72,10 @@ namespace App
         .AsSelf()
         .AsImplementedInterfaces();
       builder.Register<SceneHud.SceneHudService>(Lifetime.Singleton)
+        .AsSelf()
+        .AsImplementedInterfaces();
+      builder.Register<CameraDistanceController>(Lifetime.Singleton);
+      builder.Register<Sfx.UiSfxService>(Lifetime.Singleton)
         .AsSelf()
         .AsImplementedInterfaces();
 

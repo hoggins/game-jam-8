@@ -24,6 +24,10 @@ MonoBehaviour:
   - 0.6
   - 0.3
   - 0.1
+  _buildingCoinDropMin: 5
+  _buildingCoinDropMax: 9
+  _buildingCoinDropChance: 1
+  _buildingCoinDropDistance: 1
   _destructibleMaxHealth:
   - type: 0
     maxHealth: 20

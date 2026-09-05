@@ -103,6 +103,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2e2387f80d274704b420c5d1a6b24d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Combat.CoinPickup
+  _outwardDuration: 0.5
   _riseDuration: 1
   _riseHeight: 2
   _riseCurve:

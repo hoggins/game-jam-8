@@ -13,6 +13,8 @@ namespace Weapons
   [DisallowMultipleComponent]
   public sealed class Bullet : MonoBehaviour
   {
+    private const float ProjectileScaleGrowth = 0.1f;
+
     [SerializeField, Min(0f)] private float _speed = 20f;
     [SerializeField, Min(0.01f)] private float _lifetime = 3f;
     [SerializeField, Min(0.001f)] private float _radius = 0.05f;
@@ -29,6 +31,7 @@ namespace Weapons
 
     private Transform _owner;
     private Vector3 _direction;
+    private float _launchSpeed;
     private float _remainingLifetime;
     private int _damage;
     private int _collisionLayerMask;
@@ -50,7 +53,7 @@ namespace Weapons
       _owner = null;
     }
 
-    public void Launch(Vector3 direction, int damage, Transform owner)
+    public void Launch(Vector3 direction, int damage, Transform owner, float scale = 1f)
     {
       if (damage < 0)
         throw new ArgumentOutOfRangeException(nameof(damage), damage, "Damage cannot be negative.");
@@ -61,7 +64,10 @@ namespace Weapons
       _direction = direction.normalized;
       _damage = damage;
       _owner = owner;
-      _remainingLifetime = _lifetime;
+      scale = Mathf.Max(0f, scale);
+      var projectileScale = Mathf.Lerp(1f, scale, ProjectileScaleGrowth);
+      _launchSpeed = _speed * projectileScale;
+      _remainingLifetime = _lifetime * projectileScale;
       _launched = true;
     }
 
@@ -74,7 +80,7 @@ namespace Weapons
       if (deltaTime <= 0f)
         return;
 
-      var distance = _speed * deltaTime;
+      var distance = _launchSpeed * deltaTime;
       if (distance > 0f && TryHit(distance))
         return;
 

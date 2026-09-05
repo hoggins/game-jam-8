@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 8613883394905811420}
   - component: {fileID: 5336300265767881862}
   - component: {fileID: 4145790394240708929}
-  - component: {fileID: 6793211140249545236}
   m_Layer: 8
   m_Name: Road_Straight_S_Grass_01
   m_TagString: Untagged
@@ -93,24 +92,3 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &6793211140249545236
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8872097106873305134}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 8.000003, y: 0.19999999, z: 8.000003}
-  m_Center: {x: 0, y: -0.099999994, z: 0}

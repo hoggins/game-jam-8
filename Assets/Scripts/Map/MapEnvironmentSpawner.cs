@@ -9,6 +9,9 @@ namespace Map
   public class MapEnvironmentSpawner : System.IDisposable
   {
     private const string ContainerName = "SpawnedEnvironment";
+    // Extra margin added on top of a special's real bounding box when clearing houses out of its
+    // way, so the cleared area isn't drawn exactly flush with the mesh.
+    private const float SpecialClearMargin = 5f;
     // The camera only shows a small part of the map at once. Keeping every child renderer of every
     // spawned map element registered with the renderer culler makes the CPU pay for tens of
     // thousands of renderers every frame, even when they are hundreds of metres away. Buildings
@@ -17,6 +20,12 @@ namespace Map
     // exposed in EnvironmentVisibilitySettings so they can be tuned without changing code.
 
     private readonly Dictionary<int, RuntimeEnvironmentObject> _objects = new();
+    // Index of ids in _objects that are specials (Timer, Arrow, ...) rather than grid houses, so a
+    // new special can be checked against other live specials without disturbing houses.
+    private readonly HashSet<int> _specialIds = new();
+    // Real footprint of each special's prefab (from its renderer bounds, not the grid size it's
+    // configured with), computed once per type and reused on every spawn/respawn.
+    private readonly Dictionary<SpecialHouses, Vector2> _specialHalfExtentsCache = new();
     private readonly HashSet<Vector2Int> _occupied = new();
     private readonly MovementUpdater _movementUpdater;
     private readonly EnvironmentVisibilitySettings _visibilitySettings;
@@ -57,6 +66,7 @@ namespace Map
       // Everything it describes died with that scene; leaving it would keep those cells reserved
       // forever and silently skip every object that survived the last battle.
       _objects.Clear();
+      _specialIds.Clear();
       _occupied.Clear();
       DisposeRenderCulling();
       _groundDamageMask = GroundDamageMask.Instance;
@@ -250,7 +260,14 @@ namespace Map
 
       PickPlacement(anchor, lookTarget, minDistance, maxDistance, out var position, out var rotation);
       var worldHalfExtents = SpecialHalfExtents(special);
-      ClearOverlapping(position, rotation, worldHalfExtents, null);
+
+      if (HasSpecialOverlap(position, rotation, worldHalfExtents, null))
+      {
+        Debug.LogWarning($"MapEnvironmentSpawner.TrySpawnSpecial: '{type}' placement overlaps another special object; spawn skipped.");
+        return false;
+      }
+
+      ClearOverlapping(position, rotation, worldHalfExtents + ClearMargin, null);
 
       instance = Object.Instantiate(special.prefab, position, rotation, _container);
       instance.name = special.type.ToString();
@@ -258,9 +275,13 @@ namespace Map
 
       var destructible = instance.GetComponentInChildren<DestructibleObject>();
       var id = _nextId++;
+      // Vector2Int.zero: a freely-placed special never reserves grid cells via TryReserve, so it
+      // must not claim a grid Size either — Release would otherwise free cells on the grid that
+      // happen to fall under its footprint but were never its own.
       var runtimeObject = new RuntimeEnvironmentObject(
-        id, CellOf(position), special.size, destructible, position, worldHalfExtents);
+        id, CellOf(position), Vector2Int.zero, destructible, position, worldHalfExtents);
       _objects.Add(id, runtimeObject);
+      _specialIds.Add(id);
 
       if (destructible != null)
         destructible.Destroyed += _ => Release(id);
@@ -287,9 +308,15 @@ namespace Map
       PickPlacement(anchor, lookTarget, minDistance, maxDistance, out var position, out var rotation);
       var worldHalfExtents = SpecialHalfExtents(special);
 
+      if (HasSpecialOverlap(position, rotation, worldHalfExtents, instance.transform))
+      {
+        Debug.LogWarning($"MapEnvironmentSpawner.TryMoveSpecial: '{type}' relocation overlaps another special object; move skipped.");
+        return false;
+      }
+
       // Excluded from the sweep, or an object whose new footprint overlaps its old one would break
       // itself on arrival.
-      ClearOverlapping(position, rotation, worldHalfExtents, instance.transform);
+      ClearOverlapping(position, rotation, worldHalfExtents + ClearMargin, instance.transform);
 
       instance.transform.SetPositionAndRotation(position, rotation);
       Reseat(instance.transform, position, worldHalfExtents);
@@ -346,24 +373,75 @@ namespace Map
     }
 
     /// <summary>
-    /// Breaks every standing object whose footprint overlaps the given one, so a freely-placed
-    /// special never lands inside a house. <paramref name="exclude"/> keeps a moving object from
-    /// breaking itself.
+    /// Removes every standing object whose footprint overlaps the given one, so a freely-placed
+    /// special never lands inside a house. This is a silent clearing, not a destruction action, so
+    /// the house is removed instantly with no break FX/physics. <paramref name="exclude"/> keeps a
+    /// moving object from clearing itself.
     /// </summary>
     private void ClearOverlapping(Vector3 position, Quaternion rotation, Vector2 worldHalfExtents, Transform exclude)
     {
-      // Snapshot first: breaking a house fires its Destroyed event synchronously, which removes it
+      // Snapshot first: removing a house fires its Destroyed event synchronously, which removes it
       // from _objects via Release and would otherwise mutate the dictionary mid-enumeration.
       var standingObjects = new List<RuntimeEnvironmentObject>(_objects.Values);
       foreach (var standing in standingObjects)
         if (standing.Destructible != null
             && (exclude == null || !standing.Destructible.transform.IsChildOf(exclude))
             && RectanglesOverlap(position, rotation.eulerAngles.y, worldHalfExtents, standing.WorldCenter, standing.WorldHalfExtents))
-          standing.Destructible.Break(position);
+          standing.Destructible.DestroyInstant();
     }
 
-    private Vector2 SpecialHalfExtents(SpecialHouseObject special) =>
-      new(special.size.x * _cellSize * 0.5f, special.size.y * _cellSize * 0.5f);
+    /// <summary>
+    /// Whether the given footprint overlaps any currently live special (Timer, Arrow, ...),
+    /// checked against the <see cref="_specialIds"/> index rather than houses. <paramref name="exclude"/>
+    /// keeps a special being relocated from colliding with itself.
+    /// </summary>
+    private bool HasSpecialOverlap(Vector3 position, Quaternion rotation, Vector2 worldHalfExtents, Transform exclude)
+    {
+      foreach (var id in _specialIds)
+      {
+        if (!_objects.TryGetValue(id, out var standing))
+          continue;
+
+        if (exclude != null && standing.Destructible != null && standing.Destructible.transform.IsChildOf(exclude))
+          continue;
+
+        if (RectanglesOverlap(position, rotation.eulerAngles.y, worldHalfExtents, standing.WorldCenter, standing.WorldHalfExtents))
+          return true;
+      }
+
+      return false;
+    }
+
+    /// <summary>
+    /// The special's real footprint in the XZ plane, taken from its prefab's own renderer bounds —
+    /// the grid <c>size</c> it's configured with is ignored entirely, since that's sized for the
+    /// blocky grid fill, not for a freely-placed object. Cached per type since the prefab never
+    /// changes between spawns.
+    /// </summary>
+    private Vector2 SpecialHalfExtents(SpecialHouseObject special)
+    {
+      if (_specialHalfExtentsCache.TryGetValue(special.type, out var cached))
+        return cached;
+
+      var halfExtents = PrefabHalfExtents(special.prefab);
+      _specialHalfExtentsCache[special.type] = halfExtents;
+      return halfExtents;
+    }
+
+    private static Vector2 ClearMargin => new(SpecialClearMargin, SpecialClearMargin);
+
+    private static Vector2 PrefabHalfExtents(GameObject prefab)
+    {
+      var renderers = prefab.GetComponentsInChildren<Renderer>(true);
+      if (renderers.Length == 0)
+        return Vector2.zero;
+
+      var bounds = renderers[0].bounds;
+      for (var i = 1; i < renderers.Length; i++)
+        bounds.Encapsulate(renderers[i].bounds);
+
+      return new Vector2(bounds.extents.x, bounds.extents.z);
+    }
 
     private Vector2Int CellOf(Vector3 position) =>
       new(Mathf.RoundToInt(position.x / _cellSize), Mathf.RoundToInt(position.z / _cellSize));
@@ -544,6 +622,7 @@ namespace Map
         _occupied.Remove(runtimeObject.Cell + new Vector2Int(x, y));
 
       _objects.Remove(id);
+      _specialIds.Remove(id);
     }
   }
 }

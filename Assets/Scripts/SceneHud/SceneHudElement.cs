@@ -16,7 +16,7 @@ namespace SceneHud
   /// instead.
   /// </summary>
   [DisallowMultipleComponent]
-  [RequireComponent(typeof(Camera))]
+  [RequireComponent(typeof(UnityEngine.Camera))]
   public sealed class SceneHudElement : MonoBehaviour
   {
     [Tooltip("Which HUD widget this element feeds.")]
@@ -27,13 +27,13 @@ namespace SceneHud
 
     [Inject] private SceneHudService _sceneHud;
 
-    private Camera _camera;
+    private UnityEngine.Camera _camera;
     private RenderTexture _texture;
 
     private void Awake()
     {
       this.AsInjected();
-      _camera = GetComponent<Camera>();
+      _camera = GetComponent<UnityEngine.Camera>();
     }
 
     private void OnEnable()
