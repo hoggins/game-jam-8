@@ -130,7 +130,7 @@ MonoBehaviour:
     Recentering:
       Enabled: 1
       Wait: 0
-      Time: 1
+      Time: 10
     Restrictions: 0
   RadialAxis:
     Value: 3.75
@@ -154,7 +154,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e8b78ac948f05a46a6d8339a503172b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineHardLookAt
-  LookAtOffset: {x: 0, y: 10, z: 0}
+  LookAtOffset: {x: 0, y: 8.5, z: 0}
 --- !u!114 &853616194323509487
 MonoBehaviour:
   m_ObjectHideFlags: 0

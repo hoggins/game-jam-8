@@ -223,11 +223,11 @@ namespace Model
     }
 
     /// Brings the timer back after <see cref="TimerDestroyed"/>, once a new one has been placed
-    /// in the world. The countdown resumes from the default duration.
-    public void RespawnTimer()
+    /// in the world. The countdown resumes from the computed budget for the next route hop.
+    public void RespawnTimer(float seconds)
     {
       IsTimerDestroyed = false;
-      Timer = _battleBalance.BattleDuration;
+      Timer = Mathf.Max(0f, seconds);
     }
 
     public void EnableInfiniteTimer()

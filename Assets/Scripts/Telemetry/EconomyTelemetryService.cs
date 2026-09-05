@@ -36,6 +36,9 @@ namespace Telemetry
     private MobSpawner _mobSpawner;
     private int _observedSpawnCount;
     private DateTime _runStartedAtUtc;
+    private float _timerHopDistance;
+    private float _timerHopStartDistance;
+    private TimerHop _activeTimerHop;
 
     public EconomyTelemetryService(
       BattleService battleService,
@@ -112,6 +115,34 @@ namespace Telemetry
         _currentSlice.buildingHits++;
     }
 
+    public void BeginTimerHop(int hopIndex, float straightLineDistance, float secondsGranted, float playerSpeedAtStart)
+    {
+      if (!_runActive || _run == null)
+        return;
+
+      FinalizeTimerHop();
+      _activeTimerHop = new TimerHop
+      {
+        hopIndex = hopIndex,
+        straightLineDistance = Mathf.Max(0f, straightLineDistance),
+        secondsGranted = Mathf.Max(0f, secondsGranted),
+        playerSpeedAtStart = Mathf.Max(0f, playerSpeedAtStart),
+      };
+      _run.timerHops.Add(_activeTimerHop);
+      _timerHopStartDistance = _timerHopDistance;
+    }
+
+    public void CompleteTimerHop(float secondsRemainingOnArrival)
+    {
+      if (!_runActive || _activeTimerHop == null)
+        return;
+
+      _activeTimerHop.pathWalked = Mathf.Max(0f, _timerHopDistance - _timerHopStartDistance);
+      _activeTimerHop.secondsRemainingOnArrival = Mathf.Max(0f, secondsRemainingOnArrival);
+      _activeTimerHop.reached = true;
+      _activeTimerHop = null;
+    }
+
     void IDisposable.Dispose()
     {
       _battleService.BattleStarted -= StartRun;
@@ -140,6 +171,9 @@ namespace Telemetry
       _player = null;
       _mobSpawner = null;
       _observedSpawnCount = 0;
+      _timerHopDistance = 0f;
+      _timerHopStartDistance = 0f;
+      _activeTimerHop = null;
       _slices.Clear();
 
       _player = GameObject.FindGameObjectWithTag("Player")?.transform;
@@ -166,6 +200,7 @@ namespace Telemetry
         totals = new RunTotals(),
         slices = _slices,
         statTimeline = new List<PlayerStatPoint>(),
+        timerHops = new List<TimerHop>(),
       };
 
       CreateSlice(0f, _lastPosition);
@@ -287,7 +322,11 @@ namespace Telemetry
       var movement = position - _lastPosition;
       movement.y = 0f;
       if (movement.sqrMagnitude > 0f)
-        _currentSlice.distanceTravelled += movement.magnitude;
+      {
+        var distance = movement.magnitude;
+        _currentSlice.distanceTravelled += distance;
+        _timerHopDistance += distance;
+      }
 
       _lastPosition = position;
     }
@@ -353,6 +392,7 @@ namespace Telemetry
         ObserveSpawner();
         var endPosition = _player != null ? _player.position : _lastPosition;
         AccumulateMovement();
+        FinalizeTimerHop();
         if (_currentSlice.startTimeSeconds < _battleTime || _slices.Count == 1)
           FinishSlice(_battleTime, endPosition);
         else
@@ -476,6 +516,16 @@ namespace Telemetry
       Debug.Log($"Economy telemetry written to {path}");
     }
 
+    private void FinalizeTimerHop()
+    {
+      if (_activeTimerHop == null)
+        return;
+
+      _activeTimerHop.pathWalked = Mathf.Max(0f, _timerHopDistance - _timerHopStartDistance);
+      _activeTimerHop.reached = false;
+      _activeTimerHop = null;
+    }
+
     private static void PopulateDerivedValues(RunSlice slice)
     {
       slice.coinsEarned = slice.mobCoinsEarned + slice.buildingCoinsEarned;
@@ -506,6 +556,7 @@ namespace Telemetry
       public RunTotals totals;
       public List<RunSlice> slices;
       public List<PlayerStatPoint> statTimeline;
+      public List<TimerHop> timerHops;
       public SanityChecks sanity;
     }
 
@@ -609,6 +660,18 @@ namespace Telemetry
       public int attackPower;
       public int speed;
       public int maxHealth;
+    }
+
+    [Serializable]
+    private sealed class TimerHop
+    {
+      public int hopIndex;
+      public float straightLineDistance;
+      public float pathWalked;
+      public float secondsGranted;
+      public float secondsRemainingOnArrival;
+      public float playerSpeedAtStart;
+      public bool reached;
     }
 
     [Serializable]

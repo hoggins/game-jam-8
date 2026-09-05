@@ -1,8 +1,10 @@
 using System;
 using Arrow;
+using Balance;
 using Destruction;
 using Map;
 using Model;
+using Telemetry;
 using UnityEngine;
 using Unity.Profiling;
 using UnityEngine.Scripting;
@@ -13,7 +15,7 @@ namespace Timer
   /// <summary>
   /// Keeps the battle timer alive: once <see cref="BattleService.DestroyTimer"/> fires (every
   /// digit smashed), spawns a fresh <see cref="BattleTimerObject"/> on a goalward zig-zag route,
-  /// clearing any houses in its way, and resumes the countdown from the default duration. When the
+  /// clearing any houses in its way, and resumes the countdown from a computed route budget. When the
   /// new timer is far enough from the player, the other live specials form a fence between them
   /// with the health bar in the centre; otherwise they use the near-player rule.
   /// </summary>
@@ -25,24 +27,36 @@ namespace Timer
     private static readonly ProfilerMarker ArrangeFenceMarker = new("TimerRespawnService.ArrangeFence");
     private static readonly ProfilerMarker OtherSpecialsMarker = new("TimerRespawnService.OtherSpecials");
 
-    // The route uses the timer's existing respawn distance range as its forward travel range. The
-    // small placement jitter keeps the result from looking like a mathematically exact polyline.
-    private const float ZigZagLateralDistance = 14f;
     private const float ZigZagPlacementJitter = 4f;
 
     private readonly BattleService _battleService;
     private readonly MapEnvironmentSpawner _spawner;
     private readonly SpecialSpawnSettings _spawnSettings;
+    private readonly BattleBalanceConfig _battleBalance;
+    private readonly CharacterService _characterService;
+    private readonly EconomyTelemetryService _telemetry;
 
     private int _respawnCount;
     private Vector3 _lastTimerPosition;
     private bool _hasLastTimerPosition;
+    private Vector3 _routeOrigin;
+    private bool _hasRouteOrigin;
+    private float _routeProgress;
 
-    public TimerRespawnService(BattleService battleService, MapEnvironmentSpawner spawner, SpecialSpawnSettings spawnSettings)
+    public TimerRespawnService(
+      BattleService battleService,
+      MapEnvironmentSpawner spawner,
+      SpecialSpawnSettings spawnSettings,
+      BattleBalanceConfig battleBalance,
+      CharacterService characterService,
+      EconomyTelemetryService telemetry)
     {
       _battleService = battleService;
       _spawner = spawner;
       _spawnSettings = spawnSettings;
+      _battleBalance = battleBalance;
+      _characterService = characterService;
+      _telemetry = telemetry;
     }
 
     void IInitializable.Initialize()
@@ -62,6 +76,9 @@ namespace Timer
       _respawnCount = 0;
       _lastTimerPosition = default;
       _hasLastTimerPosition = false;
+      _routeOrigin = default;
+      _hasRouteOrigin = false;
+      _routeProgress = 0f;
     }
 
     private void OnTimerDestroyed()
@@ -76,11 +93,14 @@ namespace Timer
         if (_spawnSettings == null || !_spawnSettings.TryGetRespawnDistance(SpecialHouses.Timer, _respawnCount, out var minDistance, out var maxDistance))
           return;
 
+        var secondsRemainingOnArrival = _battleService.Timer;
+        var playerSpeedAtStart = _characterService.Speed;
         GameObject timerInstance = null;
+        Vector3 hopOrigin;
         SpawnTimerMarker.Begin();
         try
         {
-          if (!TrySpawnTimer(player.transform, minDistance, maxDistance, out timerInstance))
+          if (!TrySpawnTimer(player.transform, minDistance, maxDistance, out timerInstance, out hopOrigin))
             return;
         }
         finally
@@ -88,10 +108,14 @@ namespace Timer
           SpawnTimerMarker.End();
         }
 
+        var straightLineDistance = HorizontalDistance(hopOrigin, timerInstance.transform.position);
+        var secondsGranted = CalculateTimerBudget(straightLineDistance, playerSpeedAtStart);
+        _telemetry?.CompleteTimerHop(secondsRemainingOnArrival);
+        _battleService.RespawnTimer(secondsGranted);
         _lastTimerPosition = timerInstance.transform.position;
         _hasLastTimerPosition = true;
         _respawnCount++;
-        _battleService.RespawnTimer();
+        _telemetry?.BeginTimerHop(_respawnCount, straightLineDistance, secondsGranted, playerSpeedAtStart);
 
         var arrangedFence = false;
         ArrangeFenceMarker.Begin();
@@ -118,19 +142,40 @@ namespace Timer
       }
     }
 
-    private bool TrySpawnTimer(Transform player, float minDistance, float maxDistance, out GameObject timerInstance)
+    private bool TrySpawnTimer(
+      Transform player, float minDistance, float maxDistance, out GameObject timerInstance, out Vector3 hopOrigin)
     {
       timerInstance = null;
+      hopOrigin = _hasLastTimerPosition ? _lastTimerPosition : player.position;
+      if (!_hasLastTimerPosition)
+        TryGetCurrentTimerPosition(player.position, out hopOrigin);
+
+      if (!_hasRouteOrigin)
+      {
+        _routeOrigin = hopOrigin;
+        _hasRouteOrigin = true;
+        _routeProgress = 0f;
+      }
 
       if (TryGetGoalPosition(out var goalPosition)
-          && TryGetRouteOrigin(player.position, out var routeOrigin)
-          && TryGetZigZagAnchor(routeOrigin, goalPosition, minDistance, maxDistance, _respawnCount, out var anchor))
+          && TryGetZigZagAnchor(
+            _routeOrigin,
+            goalPosition,
+            minDistance,
+            maxDistance,
+            _respawnCount,
+            _routeProgress,
+            out var anchor,
+            out var nextRouteProgress))
       {
         // TrySpawnSpecial still validates the candidate against live specials and TheGoal. A small
         // jitter around the directed anchor gives it a few nearby options without losing the route.
         if (_spawner.TrySpawnSpecial(
           SpecialHouses.Timer, anchor, player, 0f, ZigZagPlacementJitter, out timerInstance))
+        {
+          _routeProgress = nextRouteProgress;
           return true;
+        }
       }
 
       // A missing goal, a short route, or a crowded candidate should not strand the battle. Keep the
@@ -139,14 +184,8 @@ namespace Timer
         SpecialHouses.Timer, player.position, player, minDistance, maxDistance, out timerInstance);
     }
 
-    private bool TryGetRouteOrigin(Vector3 playerPosition, out Vector3 routeOrigin)
+    private static bool TryGetCurrentTimerPosition(Vector3 playerPosition, out Vector3 timerPosition)
     {
-      if (_hasLastTimerPosition)
-      {
-        routeOrigin = _lastTimerPosition;
-        return true;
-      }
-
       // The destroyed timer root remains alive as a decay husk during this callback. Reusing its
       // position makes the first route leg start where the initial timer actually stood instead of
       // jumping to an arbitrary point around the player.
@@ -154,11 +193,11 @@ namespace Timer
       foreach (var timer in timers)
         if (timer != null && timer.IsDead)
         {
-          routeOrigin = timer.transform.position;
+          timerPosition = timer.transform.position;
           return true;
         }
 
-      routeOrigin = playerPosition;
+      timerPosition = playerPosition;
       return true;
     }
 
@@ -178,24 +217,33 @@ namespace Timer
       return true;
     }
 
-    private static bool TryGetZigZagAnchor(
-      Vector3 routeOrigin, Vector3 goalPosition, float minDistance, float maxDistance, int respawnIndex,
-      out Vector3 anchor)
+    private bool TryGetZigZagAnchor(
+      Vector3 routeOrigin,
+      Vector3 goalPosition,
+      float minDistance,
+      float maxDistance,
+      int respawnIndex,
+      float routeProgress,
+      out Vector3 anchor,
+      out float nextRouteProgress)
     {
       var toGoal = goalPosition - routeOrigin;
       toGoal.y = 0f;
-      var remainingDistance = toGoal.magnitude;
+      var totalDistance = toGoal.magnitude;
+      var remainingDistance = totalDistance - routeProgress;
       if (remainingDistance < 0.001f)
       {
         anchor = default;
+        nextRouteProgress = routeProgress;
         return false;
       }
 
-      var forward = toGoal / remainingDistance;
+      var forward = toGoal / totalDistance;
       var forwardDistance = Mathf.Min(UnityEngine.Random.Range(minDistance, maxDistance), remainingDistance * 0.8f);
       if (forwardDistance < 0.001f)
       {
         anchor = default;
+        nextRouteProgress = routeProgress;
         return false;
       }
 
@@ -203,14 +251,36 @@ namespace Timer
       // especially when the timer is on its final leg.
       var maxCloserLateralDistance = Mathf.Sqrt(
         Mathf.Max(0f, 2f * remainingDistance * forwardDistance - forwardDistance * forwardDistance));
-      var lateralDistance = Mathf.Min(ZigZagLateralDistance, maxCloserLateralDistance * 0.8f);
+      var lateralDistance = Mathf.Min(
+        forwardDistance * _battleBalance.TimerLateralDistanceRatio,
+        maxCloserLateralDistance);
       var side = new Vector3(-forward.z, 0f, forward.x);
-      if ((respawnIndex & 1) != 0)
+      if ((respawnIndex & 1) == 0)
         side = -side;
 
-      anchor = routeOrigin + forward * forwardDistance + side * lateralDistance;
+      nextRouteProgress = routeProgress + forwardDistance;
+      anchor = routeOrigin + forward * nextRouteProgress + side * lateralDistance;
       anchor.y = routeOrigin.y;
       return true;
+    }
+
+    private float CalculateTimerBudget(float straightLineDistance, float playerSpeed)
+    {
+      var path = straightLineDistance * _battleBalance.TimerPathOverhead;
+      var travelSpeed = _battleBalance.TimerTravelSpeedFactor * Mathf.Max(0.01f, playerSpeed);
+      var travel = path / Mathf.Max(0.01f, travelSpeed);
+      var build = path / Mathf.Max(0.01f, _battleBalance.TimerWuPerBuilding)
+        * _battleBalance.TimerSecondsPerBuilding;
+      return Mathf.Max(
+        _battleBalance.TimerMinSeconds,
+        _battleBalance.TimerSlack * (travel + build));
+    }
+
+    private static float HorizontalDistance(Vector3 first, Vector3 second)
+    {
+      first.y = 0f;
+      second.y = 0f;
+      return Vector3.Distance(first, second);
     }
 
     private void RespawnOtherSpecials(Transform player, Vector3 timerPosition)

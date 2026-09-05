@@ -20,7 +20,8 @@ namespace Combat
     private const int TopSide = 3;
     private const int SideCount = 4;
     private const int RepositionCheckInterval = 5;
-    private const float RepositionOutsideScreenDistance = 3f;
+    private const float RepositionEvictDistance = 6f;
+    private const float RepositionSpawnDistance = 3f;
     private const float SpawnRaycastHeight = 100f;
     private const float SpawnRaycastDistance = 200f;
 
@@ -186,6 +187,7 @@ namespace Combat
         ? _playerMovementSum / _playerMovementSamples
         : Vector3.zero;
       var repositionSide = GetRepositionSide(averagePlayerMovement);
+      var tailSide = GetOppositeSide(repositionSide);
       _playerMovementSum = Vector3.zero;
       _playerMovementSamples = 0;
       _liveMobCount = 0;
@@ -207,8 +209,13 @@ namespace Combat
         var offset = agent.Position - _player.position;
         offset.y = 0f;
         var isFarFromPlayer = offset.sqrMagnitude > repositionDistanceSquared;
+        var isBeyondTail = averagePlayerMovement.sqrMagnitude > 0.0001f
+                           && IsBeyondCameraView(
+                             agent.Position,
+                             RepositionEvictDistance,
+                             tailSide);
         if (!isFarFromPlayer
-            && !IsBeyondCameraView(agent.Position, RepositionOutsideScreenDistance))
+            && !isBeyondTail)
           continue;
 
         var radius = agent.Controller?.Radius ?? 0f;
@@ -275,7 +282,7 @@ namespace Combat
         if (!TryGetGroundPoint(camera, edgePoint, out var candidate))
           continue;
 
-        candidate += outwardDirection * RepositionOutsideScreenDistance;
+        candidate += outwardDirection * RepositionSpawnDistance;
         if (!_movementUpdater.IsInsideLevelBounds(candidate, radius)
             || IsOnDamagableLayer(candidate)
             || (_movementUpdater.IsInsideFlowMap(candidate)
@@ -289,7 +296,16 @@ namespace Combat
       return false;
     }
 
-    private bool IsBeyondCameraView(Vector3 position, float distance)
+    private static int GetOppositeSide(int side) =>
+      side switch
+      {
+        LeftSide => RightSide,
+        RightSide => LeftSide,
+        BottomSide => TopSide,
+        _ => BottomSide,
+      };
+
+    private bool IsBeyondCameraView(Vector3 position, float distance, int requiredSide)
     {
       var camera = _camera != null ? _camera : UnityEngine.Camera.main;
       if (camera == null)
@@ -308,10 +324,16 @@ namespace Combat
 
       var horizontalMargin = distance / horizontalScreenSize;
       var verticalMargin = distance / verticalScreenSize;
-      return viewportPosition.x <= -horizontalMargin
-        || viewportPosition.x >= 1f + horizontalMargin
-        || viewportPosition.y <= -verticalMargin
-        || viewportPosition.y >= 1f + verticalMargin;
+      if (requiredSide == LeftSide)
+        return viewportPosition.x <= -horizontalMargin;
+
+      if (requiredSide == RightSide)
+        return viewportPosition.x >= 1f + horizontalMargin;
+
+      if (requiredSide == BottomSide)
+        return viewportPosition.y <= -verticalMargin;
+
+      return viewportPosition.y >= 1f + verticalMargin;
     }
 
     private static Vector3 GetScreenOutwardDirection(UnityEngine.Camera camera, int side)

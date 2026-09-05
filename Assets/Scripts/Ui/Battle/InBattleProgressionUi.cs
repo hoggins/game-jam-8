@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using App;
 using Telemetry;
@@ -19,6 +20,9 @@ namespace Battle
     private Coroutine _transitionCoroutine;
 
     [Inject] private EconomyTelemetryService _telemetry;
+
+    /// Raised whenever the screen opens or closes, so the battle HUD can recede behind it.
+    public event Action<bool> ShownChanged;
 
     public bool IsShown { get; private set; }
 
@@ -77,6 +81,7 @@ namespace Battle
       _telemetry?.SetUpgradeUiShown(isShown);
       Time.timeScale = isShown ? 0f : 1f;
       SetVisible(isShown);
+      ShownChanged?.Invoke(isShown);
     }
 
     private void SetVisible(bool isVisible)

@@ -42,6 +42,16 @@ namespace Balance
     [Tooltip("Distance to leave between the player and the nearest special in the fence.")]
     [SerializeField, Min(0f)] private float _specialFencePlayerOffset = 8f;
 
+    [Header("Timer Route")]
+    [SerializeField, Min(0f)] private float _timerTravelSpeedFactor = 0.8f;
+    [SerializeField, Min(0f)] private float _timerPathOverhead = 1.25f;
+    [SerializeField, Min(0f)] private float _timerWuPerBuilding = 38f;
+    [SerializeField, Min(0f)] private float _timerSecondsPerBuilding = 2.5f;
+    [Tooltip("Primary dial for the time budget slack applied to timer hops.")]
+    [SerializeField, Min(0f)] private float _timerSlack = 1.15f;
+    [SerializeField, Min(0f)] private float _timerMinSeconds = 12f;
+    [SerializeField, Min(0f)] private float _timerLateralDistanceRatio = 0.5f;
+
     [Header("Duck (Mob)")]
     [SerializeField, Min(0)] private int _duckMaxHealth = 2;
     [SerializeField, Min(0)] private int _duckAttackDamage = 1;
@@ -88,6 +98,13 @@ namespace Balance
     public float SpecialFenceStartDistance => _specialFenceStartDistance;
     public float SpecialFenceTimerOffset => _specialFenceTimerOffset;
     public float SpecialFencePlayerOffset => _specialFencePlayerOffset;
+    public float TimerTravelSpeedFactor => _timerTravelSpeedFactor;
+    public float TimerPathOverhead => _timerPathOverhead;
+    public float TimerWuPerBuilding => _timerWuPerBuilding;
+    public float TimerSecondsPerBuilding => _timerSecondsPerBuilding;
+    public float TimerSlack => _timerSlack;
+    public float TimerMinSeconds => _timerMinSeconds;
+    public float TimerLateralDistanceRatio => _timerLateralDistanceRatio;
     public int DuckMaxHealth => _duckMaxHealth;
     public int DuckAttackDamage => _duckAttackDamage;
     public float DuckAttackDistance => _duckAttackDistance;
@@ -145,6 +162,13 @@ namespace Balance
       _specialFenceStartDistance = Mathf.Max(0f, _specialFenceStartDistance);
       _specialFenceTimerOffset = Mathf.Max(0f, _specialFenceTimerOffset);
       _specialFencePlayerOffset = Mathf.Max(0f, _specialFencePlayerOffset);
+      _timerTravelSpeedFactor = Mathf.Max(0f, _timerTravelSpeedFactor);
+      _timerPathOverhead = Mathf.Max(0f, _timerPathOverhead);
+      _timerWuPerBuilding = Mathf.Max(0f, _timerWuPerBuilding);
+      _timerSecondsPerBuilding = Mathf.Max(0f, _timerSecondsPerBuilding);
+      _timerSlack = Mathf.Max(0f, _timerSlack);
+      _timerMinSeconds = Mathf.Max(0f, _timerMinSeconds);
+      _timerLateralDistanceRatio = Mathf.Max(0f, _timerLateralDistanceRatio);
       _duckMaxHealth = Mathf.Max(0, _duckMaxHealth);
       _duckAttackDamage = Mathf.Max(0, _duckAttackDamage);
       _duckAttackDistance = Mathf.Max(0f, _duckAttackDistance);

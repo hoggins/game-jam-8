@@ -499,7 +499,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Destruction.DestructibleObject
   _breakMagnitude: 5
   _spawnDestructionFx: 1
-  _houseDifficultyLevel: 1
+  _houseDifficultyLevel: 3
 --- !u!114 &71922854367902544
 MonoBehaviour:
   m_ObjectHideFlags: 0

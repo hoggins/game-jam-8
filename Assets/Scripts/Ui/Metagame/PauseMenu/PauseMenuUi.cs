@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using App;
 using ScenesManagement;
@@ -19,6 +20,9 @@ namespace Metagame.PauseMenu
     [Inject] private SceneService _sceneService;
     private CanvasGroup _canvasGroup;
     private Coroutine _transitionCoroutine;
+
+    /// Raised whenever the menu opens or closes, so the battle HUD can recede behind it.
+    public event Action<bool> ShownChanged;
 
     public bool IsPaused { get; private set; }
 
@@ -83,6 +87,7 @@ namespace Metagame.PauseMenu
       IsPaused = isPaused;
       Time.timeScale = isPaused ? 0f : 1f;
       SetVisible(isPaused);
+      ShownChanged?.Invoke(isPaused);
     }
 
     private void SetVisible(bool isVisible)

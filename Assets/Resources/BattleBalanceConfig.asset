@@ -19,6 +19,13 @@ MonoBehaviour:
   _specialFenceStartDistance: 35
   _specialFenceTimerOffset: 14
   _specialFencePlayerOffset: 8
+  _timerTravelSpeedFactor: 0.8
+  _timerPathOverhead: 1.25
+  _timerWuPerBuilding: 38
+  _timerSecondsPerBuilding: 2.5
+  _timerSlack: 1.15
+  _timerMinSeconds: 12
+  _timerLateralDistanceRatio: 0.5
   _duckMaxHealth: 6
   _duckAttackDamage: 1
   _duckAttackDistance: 3

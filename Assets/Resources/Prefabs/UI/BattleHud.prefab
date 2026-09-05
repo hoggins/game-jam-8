@@ -180,6 +180,7 @@ GameObject:
   - component: {fileID: 995026694688641560}
   - component: {fileID: 2177909695306780739}
   - component: {fileID: 4491264373568684425}
+  - component: {fileID: 7383135919932897610}
   m_Layer: 0
   m_Name: BattleUpgradeWidget
   m_TagString: Untagged
@@ -325,6 +326,44 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &7383135919932897610
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1202498735220388644}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c9cb055deb1534cfea11bf1c311d814b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::App.ButtonHoverTilt
+  _tiltAngle: 2
+  _duration: 0.15
+  _curve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &1579190925087160697
 GameObject:
   m_ObjectHideFlags: 0
@@ -1295,6 +1334,7 @@ GameObject:
   - component: {fileID: 1410337025887571391}
   - component: {fileID: 3692067878617239292}
   - component: {fileID: 3938703220196254161}
+  - component: {fileID: 1572904560211064925}
   m_Layer: 5
   m_Name: BattleHud
   m_TagString: Untagged
@@ -1343,6 +1383,32 @@ MonoBehaviour:
   _progressionUi: {fileID: 0}
   _upgradeButton: {fileID: 4491264373568684425}
   _toggleProgressionAction: {fileID: 0}
+  _transitionDuration: 0.2
+  _transitionCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  _hiddenScale: 1.2
 --- !u!114 &3938703220196254161
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1359,3 +1425,15 @@ MonoBehaviour:
   _position: {x: 16, y: 16}
   _size: {x: 320, y: 250}
   _fontSize: 16
+--- !u!225 &1572904560211064925
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8714479988043036316}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0

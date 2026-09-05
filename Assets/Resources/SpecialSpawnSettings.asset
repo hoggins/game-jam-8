@@ -15,13 +15,13 @@ MonoBehaviour:
   ranges:
   - type: 0
     initial:
-      minDistance: 10
-      maxDistance: 30
+      minDistance: 25
+      maxDistance: 35
     respawns:
-    - minDistance: 20
-      maxDistance: 40
-    - minDistance: 30
-      maxDistance: 50
+    - minDistance: 25
+      maxDistance: 35
+    - minDistance: 50
+      maxDistance: 70
   - type: 1
     initial:
       minDistance: 0

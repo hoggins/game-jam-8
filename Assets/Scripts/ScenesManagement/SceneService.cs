@@ -51,8 +51,7 @@ namespace ScenesManagement
       if (!Application.CanStreamedLevelBeLoaded(sceneName))
         throw new ArgumentException($"Scene '{sceneName}' is not included in the build settings.", nameof(sceneName));
 
-      _sceneLoadingUi?.SetProgress(0f);
-      _sceneLoadingUi?.EnableLoading(true);
+      _sceneLoadingUi?.BeginLoading();
 
       _loadingOperation = SceneManager.LoadSceneAsync(sceneName);
       if (_loadingOperation == null)
@@ -60,6 +59,11 @@ namespace ScenesManagement
         _sceneLoadingUi?.EnableLoading(false);
         throw new InvalidOperationException($"Unity could not start loading scene '{sceneName}'.");
       }
+
+      // Activation is one long stalled frame that renders nothing, so the bar has to do its
+      // travelling before it. Held here until the overlay says it has filled to the hand-off point.
+      if (_sceneLoadingUi != null)
+        _loadingOperation.allowSceneActivation = false;
 
       _loadingSceneName = sceneName;
       _isLoading = true;
@@ -87,13 +91,26 @@ namespace ScenesManagement
       if (!_isLoading || _loadingOperation == null)
         return;
 
-      float progress = Mathf.Clamp01(_loadingOperation.progress / 0.9f);
-      _sceneLoadingUi?.SetProgress(progress);
+      if (!_loadingOperation.allowSceneActivation)
+      {
+        // progress tops out at 0.9 while activation is held back; 0.9 there means "fully loaded".
+        _sceneLoadingUi.SetProgress(Mathf.Clamp01(_loadingOperation.progress / 0.9f));
+        if (!_sceneLoadingUi.IsReadyForActivation)
+          return;
+
+        _loadingOperation.allowSceneActivation = true;
+        return;
+      }
 
       if (!_loadingOperation.isDone)
         return;
 
-      _sceneLoadingUi?.SetProgress(1f);
+      // The overlay stays up until the bar has visibly finished filling, so the load never ends on
+      // a half-full bar. It also keeps the new scene hidden until then, and delays StartBattle.
+      _sceneLoadingUi?.CompleteLoading();
+      if (_sceneLoadingUi != null && !_sceneLoadingUi.IsDisplayFinished)
+        return;
+
       _sceneLoadingUi?.EnableLoading(false);
       _loadingOperation = null;
       _isLoading = false;
