@@ -3,6 +3,15 @@ using Balance;
 
 namespace Model
 {
+  public enum UpgradeStat
+  {
+    Attack,
+    Health,
+    Speed,
+    Gun,
+    Timer,
+  }
+
   [UnityEngine.Scripting.Preserve]
   public class CharacterService : IBattleStarted
   {
@@ -16,8 +25,14 @@ namespace Model
     public event Action<int> HealthChanged;
     public event Action HealthDestroyed;
     public event Action DuckKilled;
+    public event Action BuildingDestroyed;
     public event Action ProgressionChanged;
     public event Action<int> CoinsChanged;
+    public event Action<int> MobCoinsEarned;
+    public event Action<int> BuildingCoinsEarned;
+    public event Action<int, bool> DamageTaken;
+    public event Action MobConnected;
+    public event Action<UpgradeStat, int> UpgradePurchased;
 
     /// Raised with the seconds just bought, so a battle in progress can extend its running clock.
     public event Action<int> TimerBonusAdded;
@@ -91,7 +106,10 @@ namespace Model
     internal void EndVictoryProtection() =>
       _isVictoryProtected = false;
 
-    public void TakeDamage(int damage)
+    public void TakeDamage(int damage) =>
+      TakeDamage(damage, false);
+
+    public void TakeDamage(int damage, bool fromMob)
     {
       if (damage < 0)
         throw new ArgumentOutOfRangeException(nameof(damage), damage, "Damage cannot be negative.");
@@ -99,11 +117,17 @@ namespace Model
       if (IsInvincible || _isVictoryProtected || !IsAlive)
         return;
 
+      if (fromMob)
+        MobConnected?.Invoke();
+
       var previousHealth = CurrentHealth;
       CurrentHealth = Math.Max(0, CurrentHealth - damage);
       HealthChanged?.Invoke(CurrentHealth);
       if (CurrentHealth < previousHealth)
+      {
         Damaged?.Invoke();
+        DamageTaken?.Invoke(previousHealth - CurrentHealth, fromMob);
+      }
       if (CurrentHealth > 0)
         return;
 
@@ -128,7 +152,10 @@ namespace Model
 
       var droppedCoins = _battleBalance.RollDuckCoinDrop();
       if (droppedCoins > 0)
+      {
         AddCoins(droppedCoins);
+        MobCoinsEarned?.Invoke(droppedCoins);
+      }
 
       return droppedCoins;
     }
@@ -138,10 +165,14 @@ namespace Model
     public int RegisterBuildingDestroyed()
     {
       _storage.BuildingsDestroyed += 1;
+      BuildingDestroyed?.Invoke();
 
       var droppedCoins = _battleBalance.RollBuildingCoinDrop();
       if (droppedCoins > 0)
+      {
         AddCoins(droppedCoins);
+        BuildingCoinsEarned?.Invoke(droppedCoins);
+      }
 
       return droppedCoins;
     }
@@ -164,6 +195,7 @@ namespace Model
       _storage.AttackPower += _progressionBalance.AttackPowerUpgradeAmount;
       ProgressionChanged?.Invoke();
       CoinsChanged?.Invoke(_storage.CurrentCoins);
+      UpgradePurchased?.Invoke(UpgradeStat.Attack, _progressionBalance.AttackPowerUpgradeCost);
     }
 
     public void UpgradeMaxHealth()
@@ -178,6 +210,7 @@ namespace Model
       _storage.MaxHealth += _progressionBalance.MaxHealthUpgradeAmount;
       ProgressionChanged?.Invoke();
       CoinsChanged?.Invoke(_storage.CurrentCoins);
+      UpgradePurchased?.Invoke(UpgradeStat.Health, _progressionBalance.MaxHealthUpgradeCost);
     }
 
     public void UpgradeSpeed()
@@ -192,6 +225,7 @@ namespace Model
       _storage.Speed += _progressionBalance.SpeedUpgradeAmount;
       ProgressionChanged?.Invoke();
       CoinsChanged?.Invoke(_storage.CurrentCoins);
+      UpgradePurchased?.Invoke(UpgradeStat.Speed, _progressionBalance.SpeedUpgradeCost);
     }
 
     public void UpgradeGunPower()
@@ -206,6 +240,7 @@ namespace Model
       _storage.GunPower += _progressionBalance.GunPowerUpgradeAmount;
       ProgressionChanged?.Invoke();
       CoinsChanged?.Invoke(_storage.CurrentCoins);
+      UpgradePurchased?.Invoke(UpgradeStat.Gun, _progressionBalance.GunPowerUpgradeCost);
     }
 
     public void UpgradeTimer()
@@ -221,6 +256,7 @@ namespace Model
       ProgressionChanged?.Invoke();
       CoinsChanged?.Invoke(_storage.CurrentCoins);
       TimerBonusAdded?.Invoke(_progressionBalance.TimerUpgradeAmount);
+      UpgradePurchased?.Invoke(UpgradeStat.Timer, _progressionBalance.TimerUpgradeCost);
     }
 
     public void Die()

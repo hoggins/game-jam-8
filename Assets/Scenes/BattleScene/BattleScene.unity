@@ -386,10 +386,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Combat.MobSpawner
   _mobs:
   - _mob: {fileID: 5917521179565502705, guid: 45e798951ff0545618b9474f7a6d0c60, type: 3}
-    _mobsPerSecStart: 1
-    _mobPerSecondEnd: 15
+    _mobsPerSecStart: 5
+    _mobPerSecondEnd: 20
     _secondStart: 0
-    _secondEnd: 60
+    _secondEnd: 90
   _player: {fileID: 667697734}
   _camera: {fileID: 330585545}
   _cameraViewportMargin: 0.05

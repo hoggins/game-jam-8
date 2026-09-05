@@ -12,6 +12,13 @@ namespace Balance
     [Min(0)] public int maxHealth;
   }
 
+  [Serializable]
+  public struct HouseDifficultyMaxHealthEntry
+  {
+    [Min(1)] public int difficultyLevel;
+    [Min(0)] public int maxHealth;
+  }
+
   [CreateAssetMenu(fileName = "BattleBalanceConfig", menuName = "Game/Battle Balance Config")]
   public sealed class BattleBalanceConfig : ScriptableObject
   {
@@ -40,6 +47,7 @@ namespace Balance
     [SerializeField, Min(0)] private int _duckAttackDamage = 1;
     [SerializeField, Min(0f)] private float _duckAttackDistance = 3f;
     [SerializeField, Min(0f)] private float _duckRepositionDistance = 40f;
+    [SerializeField, Min(0)] private int _maxLiveMobs = 0;
 
     [Header("Weapons")]
     [SerializeField, Min(0f)] private float _meleeAttackRadius = 2f;
@@ -56,14 +64,21 @@ namespace Balance
     [Header("Destructible Objects")]
     [SerializeField] private List<DestructibleMaxHealthEntry> _destructibleMaxHealth = new()
     {
-      new DestructibleMaxHealthEntry { type = DestructibleObjectType.House, maxHealth = 7 },
+      new DestructibleMaxHealthEntry { type = DestructibleObjectType.House, maxHealth = 50 },
       new DestructibleMaxHealthEntry { type = DestructibleObjectType.TimerDigit, maxHealth = 15 },
       new DestructibleMaxHealthEntry { type = DestructibleObjectType.TimerDivider, maxHealth = 10 },
       new DestructibleMaxHealthEntry { type = DestructibleObjectType.Arrow, maxHealth = 12 },
       new DestructibleMaxHealthEntry { type = DestructibleObjectType.HealthBar, maxHealth = 48 },
-      new DestructibleMaxHealthEntry { type = DestructibleObjectType.Upgrade, maxHealth = 20 },
-      new DestructibleMaxHealthEntry { type = DestructibleObjectType.Goal, maxHealth = 100 },
+      new DestructibleMaxHealthEntry { type = DestructibleObjectType.Upgrade, maxHealth = 50 },
+      new DestructibleMaxHealthEntry { type = DestructibleObjectType.Goal, maxHealth = 1250 },
       new DestructibleMaxHealthEntry { type = DestructibleObjectType.Prop, maxHealth = 1 },
+    };
+
+    [SerializeField] private List<HouseDifficultyMaxHealthEntry> _houseMaxHealthByDifficulty = new()
+    {
+      new HouseDifficultyMaxHealthEntry { difficultyLevel = 1, maxHealth = 50 },
+      new HouseDifficultyMaxHealthEntry { difficultyLevel = 2, maxHealth = 250 },
+      new HouseDifficultyMaxHealthEntry { difficultyLevel = 3, maxHealth = 1250 },
     };
 
     public float BattleDuration => _battleDuration;
@@ -77,6 +92,7 @@ namespace Balance
     public int DuckAttackDamage => _duckAttackDamage;
     public float DuckAttackDistance => _duckAttackDistance;
     public float DuckRepositionDistance => _duckRepositionDistance;
+    public int MaxLiveMobs => _maxLiveMobs;
     public float MeleeAttackRadius => _meleeAttackRadius;
     public float BuildingCoinDropDistance => _buildingCoinDropDistance;
 
@@ -87,6 +103,15 @@ namespace Balance
           return entry.maxHealth;
 
       throw new KeyNotFoundException($"No max health configured for destructible type '{type}'.");
+    }
+
+    public int GetHouseMaxHealth(int difficultyLevel)
+    {
+      foreach (var entry in _houseMaxHealthByDifficulty)
+        if (entry.difficultyLevel == difficultyLevel)
+          return entry.maxHealth;
+
+      throw new KeyNotFoundException($"No max health configured for house difficulty level '{difficultyLevel}'.");
     }
 
     public int RollDuckCoinDrop()
@@ -124,6 +149,7 @@ namespace Balance
       _duckAttackDamage = Mathf.Max(0, _duckAttackDamage);
       _duckAttackDistance = Mathf.Max(0f, _duckAttackDistance);
       _duckRepositionDistance = Mathf.Max(0f, _duckRepositionDistance);
+      _maxLiveMobs = Mathf.Max(0, _maxLiveMobs);
       _meleeAttackRadius = Mathf.Max(0f, _meleeAttackRadius);
       _buildingCoinDropMin = Mathf.Max(0, _buildingCoinDropMin);
       _buildingCoinDropMax = Mathf.Max(_buildingCoinDropMin, _buildingCoinDropMax);
@@ -135,6 +161,14 @@ namespace Balance
         var entry = _destructibleMaxHealth[i];
         entry.maxHealth = Mathf.Max(0, entry.maxHealth);
         _destructibleMaxHealth[i] = entry;
+      }
+
+      for (var i = 0; i < _houseMaxHealthByDifficulty.Count; i++)
+      {
+        var entry = _houseMaxHealthByDifficulty[i];
+        entry.difficultyLevel = Mathf.Max(1, entry.difficultyLevel);
+        entry.maxHealth = Mathf.Max(0, entry.maxHealth);
+        _houseMaxHealthByDifficulty[i] = entry;
       }
     }
   }

@@ -89,6 +89,10 @@ namespace Combat
     private int _repositionFrame;
     private int _damagableLayerMask;
     private bool _isSpawning;
+    private int _liveMobCount;
+    private int _totalSpawned;
+
+    public int TotalSpawned => _totalSpawned;
 
     private void Awake()
     {
@@ -102,6 +106,8 @@ namespace Combat
       _nextSpawnSide = 0;
       _repositionFrame = 0;
       _isSpawning = true;
+      _liveMobCount = 0;
+      _totalSpawned = 0;
       for (var i = 0; i < _mobs.Count; i++)
         _mobs[i]?.ResetRuntime();
 
@@ -141,12 +147,20 @@ namespace Combat
         if (item == null || item.Mob == null)
           continue;
 
+        if (_battleBalance.MaxLiveMobs > 0 && _liveMobCount >= _battleBalance.MaxLiveMobs)
+          continue;
+
         item.AddSpawnProgress(item.GetRate(_elapsedSeconds) * Time.deltaTime);
         while (item.HasPendingSpawn)
         {
+          if (_battleBalance.MaxLiveMobs > 0 && _liveMobCount >= _battleBalance.MaxLiveMobs)
+            break;
+
           if (!TrySpawn(item.Mob))
             break;
 
+          _totalSpawned++;
+          _liveMobCount++;
           item.ConsumeSpawn();
         }
       }
@@ -157,6 +171,7 @@ namespace Combat
       var agents = _movementUpdater.ActiveAgents;
       var repositionDistance = _battleBalance.DuckRepositionDistance;
       var repositionDistanceSquared = repositionDistance * repositionDistance;
+      _liveMobCount = 0;
 
       for (var i = 0; i < agents.Count; i++)
       {
@@ -165,7 +180,11 @@ namespace Combat
           continue;
 
         var mob = agent.GetComponent<Mob>();
-        if (mob == null || !mob.IsAlive || mob.IsAttached)
+        if (mob == null || !mob.IsAlive)
+          continue;
+
+        _liveMobCount++;
+        if (mob.IsAttached)
           continue;
 
         var offset = agent.Position - _player.position;

@@ -65,6 +65,9 @@ namespace App
       builder.Register<CharacterService>(Lifetime.Singleton)
         .AsSelf()
         .AsImplementedInterfaces();
+      builder.Register<Telemetry.EconomyTelemetryService>(Lifetime.Singleton)
+        .AsSelf()
+        .AsImplementedInterfaces();
       builder.Register<ArrowService>(Lifetime.Singleton)
         .AsSelf()
         .AsImplementedInterfaces();
