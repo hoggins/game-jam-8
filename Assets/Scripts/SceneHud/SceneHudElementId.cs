@@ -8,5 +8,8 @@ namespace SceneHud
   public enum SceneHudElementId
   {
     BattleTimer = 0,
+
+    /// The compass arrow pointing at the current battle timer.
+    Arrow = 1,
   }
 }

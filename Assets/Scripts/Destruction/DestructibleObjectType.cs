@@ -5,5 +5,6 @@ namespace Destruction
     House = 0,
     TimerDigit = 1,
     TimerDivider = 2,
+    Arrow = 3,
   }
 }

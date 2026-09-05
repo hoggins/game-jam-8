@@ -243,46 +243,20 @@ namespace Map
     {
       instance = null;
 
-      SpecialHouseObject special = null;
-      if (_houseSet != null)
-        foreach (var candidate in _houseSet.Specials)
-          if (candidate.type == type && candidate.enabled && candidate.prefab != null)
-          {
-            special = candidate;
-            break;
-          }
-
-      if (special == null)
-      {
-        Debug.LogWarning($"MapEnvironmentSpawner.TrySpawnSpecial: no enabled '{type}' entry configured on the HouseSet.");
+      if (!TryResolveSpecial(type, "TrySpawnSpecial", out var special))
         return false;
-      }
 
-      var angle = Random.Range(0f, Mathf.PI * 2f);
-      var radius = Random.Range(minDistance, maxDistance);
-      var position = anchor + new Vector3(Mathf.Cos(angle) * radius, 0f, Mathf.Sin(angle) * radius);
-
-      var facing = lookTarget != null ? lookTarget.position - position : Vector3.zero;
-      facing.y = 0f;
-      var rotation = facing.sqrMagnitude > 0.0001f ? Quaternion.LookRotation(facing.normalized, Vector3.up) : Quaternion.identity;
-
-      var worldHalfExtents = new Vector2(special.size.x * _cellSize * 0.5f, special.size.y * _cellSize * 0.5f);
-
-      // Snapshot first: breaking a house fires its Destroyed event synchronously, which removes it
-      // from _objects via Release and would otherwise mutate the dictionary mid-enumeration.
-      var standingObjects = new List<RuntimeEnvironmentObject>(_objects.Values);
-      foreach (var standing in standingObjects)
-        if (standing.Destructible != null
-            && RectanglesOverlap(position, rotation.eulerAngles.y, worldHalfExtents, standing.WorldCenter, standing.WorldHalfExtents))
-          standing.Destructible.Break(position);
+      PickPlacement(anchor, lookTarget, minDistance, maxDistance, out var position, out var rotation);
+      var worldHalfExtents = SpecialHalfExtents(special);
+      ClearOverlapping(position, rotation, worldHalfExtents, null);
 
       instance = Object.Instantiate(special.prefab, position, rotation, _container);
       instance.name = special.type.ToString();
 
       var destructible = instance.GetComponentInChildren<DestructibleObject>();
       var id = _nextId++;
-      var cell = new Vector2Int(Mathf.RoundToInt(position.x / _cellSize), Mathf.RoundToInt(position.z / _cellSize));
-      var runtimeObject = new RuntimeEnvironmentObject(id, cell, special.size, destructible, position, worldHalfExtents);
+      var runtimeObject = new RuntimeEnvironmentObject(
+        id, CellOf(position), special.size, destructible, position, worldHalfExtents);
       _objects.Add(id, runtimeObject);
 
       if (destructible != null)
@@ -291,6 +265,105 @@ namespace Map
       _movementUpdater.RefreshNoGoZones();
       return true;
     }
+
+    /// <summary>
+    /// Picks a fresh spot for a special that is already standing and moves it there, clearing houses
+    /// out of the way exactly as a spawn would. Used for objects that must stay unique across a
+    /// battle: relocating the one that exists keeps a single instance in the world (and a single
+    /// scene HUD camera behind it) while still making the player go and find it again.
+    /// </summary>
+    public bool TryMoveSpecial(
+      SpecialHouses type, GameObject instance, Vector3 anchor, Transform lookTarget, float minDistance, float maxDistance)
+    {
+      if (instance == null)
+        return false;
+
+      if (!TryResolveSpecial(type, "TryMoveSpecial", out var special))
+        return false;
+
+      PickPlacement(anchor, lookTarget, minDistance, maxDistance, out var position, out var rotation);
+      var worldHalfExtents = SpecialHalfExtents(special);
+
+      // Excluded from the sweep, or an object whose new footprint overlaps its old one would break
+      // itself on arrival.
+      ClearOverlapping(position, rotation, worldHalfExtents, instance.transform);
+
+      instance.transform.SetPositionAndRotation(position, rotation);
+      Reseat(instance.transform, position, worldHalfExtents);
+
+      _movementUpdater.RefreshNoGoZones();
+      return true;
+    }
+
+    /// <summary>
+    /// Rewrites the moved object's registered footprint. Without this the stale one keeps standing
+    /// in for it: later specials would clear houses around the spot it left and land on top of it at
+    /// the spot it moved to.
+    /// </summary>
+    private void Reseat(Transform instance, Vector3 position, Vector2 worldHalfExtents)
+    {
+      foreach (var pair in _objects)
+      {
+        var standing = pair.Value;
+        if (standing.Destructible == null || !standing.Destructible.transform.IsChildOf(instance))
+          continue;
+
+        _objects[pair.Key] = new RuntimeEnvironmentObject(
+          standing.Id, CellOf(position), standing.Size, standing.Destructible, position, worldHalfExtents);
+        return;
+      }
+    }
+
+    private bool TryResolveSpecial(SpecialHouses type, string caller, out SpecialHouseObject special)
+    {
+      special = null;
+      if (_houseSet != null)
+        foreach (var candidate in _houseSet.Specials)
+          if (candidate.type == type && candidate.enabled && candidate.prefab != null)
+          {
+            special = candidate;
+            return true;
+          }
+
+      Debug.LogWarning($"MapEnvironmentSpawner.{caller}: no enabled '{type}' entry configured on the HouseSet.");
+      return false;
+    }
+
+    /// A random point in the annulus [minDistance, maxDistance] around the anchor, facing lookTarget.
+    private static void PickPlacement(
+      Vector3 anchor, Transform lookTarget, float minDistance, float maxDistance, out Vector3 position, out Quaternion rotation)
+    {
+      var angle = Random.Range(0f, Mathf.PI * 2f);
+      var radius = Random.Range(minDistance, maxDistance);
+      position = anchor + new Vector3(Mathf.Cos(angle) * radius, 0f, Mathf.Sin(angle) * radius);
+
+      var facing = lookTarget != null ? lookTarget.position - position : Vector3.zero;
+      facing.y = 0f;
+      rotation = facing.sqrMagnitude > 0.0001f ? Quaternion.LookRotation(facing.normalized, Vector3.up) : Quaternion.identity;
+    }
+
+    /// <summary>
+    /// Breaks every standing object whose footprint overlaps the given one, so a freely-placed
+    /// special never lands inside a house. <paramref name="exclude"/> keeps a moving object from
+    /// breaking itself.
+    /// </summary>
+    private void ClearOverlapping(Vector3 position, Quaternion rotation, Vector2 worldHalfExtents, Transform exclude)
+    {
+      // Snapshot first: breaking a house fires its Destroyed event synchronously, which removes it
+      // from _objects via Release and would otherwise mutate the dictionary mid-enumeration.
+      var standingObjects = new List<RuntimeEnvironmentObject>(_objects.Values);
+      foreach (var standing in standingObjects)
+        if (standing.Destructible != null
+            && (exclude == null || !standing.Destructible.transform.IsChildOf(exclude))
+            && RectanglesOverlap(position, rotation.eulerAngles.y, worldHalfExtents, standing.WorldCenter, standing.WorldHalfExtents))
+          standing.Destructible.Break(position);
+    }
+
+    private Vector2 SpecialHalfExtents(SpecialHouseObject special) =>
+      new(special.size.x * _cellSize * 0.5f, special.size.y * _cellSize * 0.5f);
+
+    private Vector2Int CellOf(Vector3 position) =>
+      new(Mathf.RoundToInt(position.x / _cellSize), Mathf.RoundToInt(position.z / _cellSize));
 
     /// 2D SAT test in the XZ plane between rectangle A (center/rotation/half-extents) and axis-aligned
     /// rectangle B, used to find which grid-placed houses a freely-placed special object overlaps.

@@ -38,6 +38,10 @@ namespace Timer
     private GameObject _hudCamera;
     private bool _isDead;
 
+    /// True once every digit has been smashed. The husk lingers for a few seconds while the debris
+    /// decays, so anything looking for "the timer" in the world has to skip a dead one.
+    public bool IsDead => _isDead;
+
     private readonly int[] _places = new int[PlaceCount];
     private readonly int[] _survivors = new int[PlaceCount];
     private readonly int[] _digitValues = new int[PlaceCount];

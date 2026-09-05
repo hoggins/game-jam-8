@@ -1,4 +1,5 @@
 using System;
+using Arrow;
 using Map;
 using Model;
 using UnityEngine;
@@ -76,8 +77,33 @@ namespace Timer
         if (special.type == SpecialHouses.Timer || !special.enabled || special.prefab == null)
           continue;
 
+        if (special.type == SpecialHouses.Arrow)
+        {
+          MoveArrow(anchor, player, minDistance, maxDistance);
+          continue;
+        }
+
         _spawner.TrySpawnSpecial(special.type, anchor, player, minDistance, maxDistance, out _);
       }
+    }
+
+    /// <summary>
+    /// The compass arrow is the one special that is never respawned. There is exactly one per
+    /// battle: while it stands, a new timer moves it somewhere new along the route rather than
+    /// handing the player a second one, so the navigation aid has to be found again; once it is
+    /// smashed it is gone for the rest of the battle, and losing your bearings is the price of
+    /// having broken it.
+    ///
+    /// <see cref="BattleArrowObject.Current"/> is null in exactly that second case, which is why
+    /// nothing here spawns a replacement.
+    /// </summary>
+    private void MoveArrow(Vector3 anchor, Transform player, float minDistance, float maxDistance)
+    {
+      var arrow = BattleArrowObject.Current;
+      if (arrow == null)
+        return;
+
+      _spawner.TryMoveSpecial(SpecialHouses.Arrow, arrow.gameObject, anchor, player, minDistance, maxDistance);
     }
   }
 }
