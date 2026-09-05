@@ -90,7 +90,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3614559905059733436, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}
       propertyPath: m_Sprite
-      value: 
+      value:
       objectReference: {fileID: -1062243159, guid: e831094bd88b14452a178aa2972c4c56, type: 3}
     - target: {fileID: 5719777227461545449, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}
       propertyPath: m_Name
@@ -99,5 +99,28 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8664870211935560753, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8064732131083772455}
   m_SourcePrefab: {fileID: 100100000, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}
+--- !u!1 &4013361616922473865 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8664870211935560753, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}
+  m_PrefabInstance: {fileID: 5732412366118818232}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8064732131083772455
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4013361616922473865}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfabb0440166ab443bba8876756fdfa9, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Shadow
+  m_EffectColor: {r: 0, g: 0, b: 0, a: 0.5}
+  m_EffectDistance: {x: 4, y: -4}
+  m_UseGraphicAlpha: 1

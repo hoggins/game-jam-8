@@ -12,7 +12,7 @@ namespace Sfx
   [Preserve]
   public class UiSfxService : IInitializable, IDisposable
   {
-    private const string QuackClipResourcePath = "SFX/quackSfx";
+    private const string QuackClipsResourceFolder = "SFX";
 
     /// A wave of ducks can die within the same frame - without this floor they stack into one
     /// loud smear instead of reading as separate quacks.
@@ -20,8 +20,9 @@ namespace Sfx
 
     private readonly CharacterService _characterService;
 
-    private AudioClip _quackClip;
+    private AudioClip[] _quackClips;
     private AudioSource _source;
+    private int _lastQuackIndex = -1;
     private float _lastDuckKillQuackTime = float.NegativeInfinity;
 
     public UiSfxService(CharacterService characterService)
@@ -31,10 +32,11 @@ namespace Sfx
 
     void IInitializable.Initialize()
     {
-      _quackClip = Resources.Load<AudioClip>(QuackClipResourcePath);
-      if (_quackClip == null)
+      // Every clip in the folder is a variant - dropping another wav in there is all it takes.
+      _quackClips = Resources.LoadAll<AudioClip>(QuackClipsResourceFolder);
+      if (_quackClips.Length == 0)
       {
-        Debug.LogError($"Quack clip was not found at Resources/{QuackClipResourcePath}.");
+        Debug.LogError($"No quack clips were found in Resources/{QuackClipsResourceFolder}.");
         return;
       }
 
@@ -70,10 +72,25 @@ namespace Sfx
 
     public void PlayQuack()
     {
-      if (_source == null || _quackClip == null)
+      if (_source == null || _quackClips == null || _quackClips.Length == 0)
         return;
 
-      _source.PlayOneShot(_quackClip);
+      _source.PlayOneShot(_quackClips[NextQuackIndex()]);
+    }
+
+    /// Random, but never the same variant twice in a row - a repeat reads as a stutter rather
+    /// than as a second quack.
+    private int NextQuackIndex()
+    {
+      if (_quackClips.Length == 1)
+        return 0;
+
+      var index = UnityEngine.Random.Range(0, _quackClips.Length - 1);
+      if (index >= _lastQuackIndex)
+        index++;
+
+      _lastQuackIndex = index;
+      return index;
     }
   }
 }
