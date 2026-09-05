@@ -20,6 +20,7 @@ namespace Combat
     private const int TopSide = 3;
     private const int SideCount = 4;
     private const int RepositionCheckInterval = 5;
+    private const float RepositionOutsideScreenDistance = 3f;
     private const float SpawnRaycastHeight = 100f;
     private const float SpawnRaycastDistance = 200f;
 
@@ -91,6 +92,10 @@ namespace Combat
     private bool _isSpawning;
     private int _liveMobCount;
     private int _totalSpawned;
+    private Vector3 _playerMovementSum;
+    private Vector3 _previousPlayerPosition;
+    private int _playerMovementSamples;
+    private bool _hasPreviousPlayerPosition;
 
     public int TotalSpawned => _totalSpawned;
 
@@ -108,6 +113,10 @@ namespace Combat
       _isSpawning = true;
       _liveMobCount = 0;
       _totalSpawned = 0;
+      _playerMovementSum = Vector3.zero;
+      _previousPlayerPosition = Vector3.zero;
+      _playerMovementSamples = 0;
+      _hasPreviousPlayerPosition = false;
       for (var i = 0; i < _mobs.Count; i++)
         _mobs[i]?.ResetRuntime();
 
@@ -134,6 +143,8 @@ namespace Combat
           || _player == null
           || !_movementUpdater.HasWalkableFlowMap)
         return;
+
+      AccumulatePlayerMovement();
 
       if (++_repositionFrame >= RepositionCheckInterval)
       {
@@ -171,6 +182,12 @@ namespace Combat
       var agents = _movementUpdater.ActiveAgents;
       var repositionDistance = _battleBalance.DuckRepositionDistance;
       var repositionDistanceSquared = repositionDistance * repositionDistance;
+      var averagePlayerMovement = _playerMovementSamples > 0
+        ? _playerMovementSum / _playerMovementSamples
+        : Vector3.zero;
+      var repositionSide = GetRepositionSide(averagePlayerMovement);
+      _playerMovementSum = Vector3.zero;
+      _playerMovementSamples = 0;
       _liveMobCount = 0;
 
       for (var i = 0; i < agents.Count; i++)
@@ -189,16 +206,139 @@ namespace Combat
 
         var offset = agent.Position - _player.position;
         offset.y = 0f;
-        if (offset.sqrMagnitude <= repositionDistanceSquared)
+        var isFarFromPlayer = offset.sqrMagnitude > repositionDistanceSquared;
+        if (!isFarFromPlayer
+            && !IsBeyondCameraView(agent.Position, RepositionOutsideScreenDistance))
           continue;
 
         var radius = agent.Controller?.Radius ?? 0f;
-        if (!TryGetSpawnPosition(radius, out var position))
+        if (!TryGetRepositionPosition(repositionSide, radius, out var position))
           continue;
 
         agent.Teleport(position);
         _nextSpawnSide = (_nextSpawnSide + 1) % SideCount;
       }
+    }
+
+    private void AccumulatePlayerMovement()
+    {
+      var currentPosition = _player.position;
+      if (!_hasPreviousPlayerPosition)
+      {
+        _previousPlayerPosition = currentPosition;
+        _hasPreviousPlayerPosition = true;
+        return;
+      }
+
+      var movement = currentPosition - _previousPlayerPosition;
+      movement.y = 0f;
+      _previousPlayerPosition = currentPosition;
+      _playerMovementSum += movement;
+      _playerMovementSamples++;
+    }
+
+    private int GetRepositionSide(Vector3 averagePlayerMovement)
+    {
+      if (averagePlayerMovement.sqrMagnitude <= 0.0001f)
+        return _nextSpawnSide;
+
+      var camera = _camera != null ? _camera : UnityEngine.Camera.main;
+      if (camera == null)
+        return _nextSpawnSide;
+
+      var start = camera.WorldToViewportPoint(_player.position);
+      var end = camera.WorldToViewportPoint(_player.position + averagePlayerMovement);
+      var screenMovement = end - start;
+      if (screenMovement.x * screenMovement.x + screenMovement.y * screenMovement.y <= 0.0001f)
+        return _nextSpawnSide;
+
+      if (Mathf.Abs(screenMovement.x) >= Mathf.Abs(screenMovement.y))
+        return screenMovement.x >= 0f ? RightSide : LeftSide;
+
+      return screenMovement.y >= 0f ? TopSide : BottomSide;
+    }
+
+    private bool TryGetRepositionPosition(int side, float radius, out Vector3 position)
+    {
+      position = default;
+      var camera = _camera != null ? _camera : UnityEngine.Camera.main;
+      if (camera == null)
+        return false;
+
+      var outwardDirection = GetScreenOutwardDirection(camera, side);
+      if (outwardDirection.sqrMagnitude <= 0.0001f)
+        return false;
+
+      for (var attempt = 0; attempt < _positionAttempts; attempt++)
+      {
+        var edgePoint = GetCameraEdgeViewportPoint(side);
+        if (!TryGetGroundPoint(camera, edgePoint, out var candidate))
+          continue;
+
+        candidate += outwardDirection * RepositionOutsideScreenDistance;
+        if (!_movementUpdater.IsInsideLevelBounds(candidate, radius)
+            || IsOnDamagableLayer(candidate)
+            || (_movementUpdater.IsInsideFlowMap(candidate)
+                && !_movementUpdater.IsWalkable(candidate)))
+          continue;
+
+        position = candidate;
+        return true;
+      }
+
+      return false;
+    }
+
+    private bool IsBeyondCameraView(Vector3 position, float distance)
+    {
+      var camera = _camera != null ? _camera : UnityEngine.Camera.main;
+      if (camera == null)
+        return true;
+
+      var viewportPosition = camera.WorldToViewportPoint(position);
+      if (viewportPosition.z <= 0f)
+        return true;
+
+      var verticalScreenSize = camera.orthographic
+        ? camera.orthographicSize * 2f
+        : 2f * viewportPosition.z * Mathf.Tan(camera.fieldOfView * Mathf.Deg2Rad * 0.5f);
+      var horizontalScreenSize = verticalScreenSize * camera.aspect;
+      if (verticalScreenSize <= 0f || horizontalScreenSize <= 0f)
+        return false;
+
+      var horizontalMargin = distance / horizontalScreenSize;
+      var verticalMargin = distance / verticalScreenSize;
+      return viewportPosition.x <= -horizontalMargin
+        || viewportPosition.x >= 1f + horizontalMargin
+        || viewportPosition.y <= -verticalMargin
+        || viewportPosition.y >= 1f + verticalMargin;
+    }
+
+    private static Vector3 GetScreenOutwardDirection(UnityEngine.Camera camera, int side)
+    {
+      var direction = side == LeftSide || side == RightSide
+        ? Vector3.ProjectOnPlane(camera.transform.right, Vector3.up).normalized
+        : Vector3.ProjectOnPlane(camera.transform.up, Vector3.up).normalized;
+
+      if (side == LeftSide || side == BottomSide)
+        direction = -direction;
+
+      return direction;
+    }
+
+    private static Vector2 GetCameraEdgeViewportPoint(int side)
+    {
+      var edgePosition = UnityEngine.Random.value;
+      if (side == LeftSide)
+        return new Vector2(0f, edgePosition);
+
+      if (side == RightSide)
+        return new Vector2(1f, edgePosition);
+
+      if (side == BottomSide)
+        return new Vector2(edgePosition, 0f);
+
+      return new Vector2(edgePosition, 1f);
     }
 
     private bool TrySpawn(GameObject mobPrefab)
