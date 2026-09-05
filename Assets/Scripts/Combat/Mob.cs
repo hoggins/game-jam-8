@@ -14,6 +14,22 @@ namespace Combat
   [DisallowMultipleComponent]
   public sealed class Mob : MonoBehaviour, IDamageable
   {
+    [Serializable]
+    private sealed class MaterialWeight
+    {
+      [SerializeField] private Material _material;
+      [SerializeField, Min(0f)] private float _weight = 1f;
+
+      internal Material Material => _material;
+      internal float Weight => _weight;
+
+      internal void Validate() =>
+        _weight = Mathf.Max(0f, _weight);
+    }
+
+    [Header("Appearance")]
+    [SerializeField] private List<MaterialWeight> _materials = new();
+
     [Header("Attach")]
     [SerializeField, Min(0f)] private float _attachDuration = 0.35f;
     [SerializeField] private AnimationCurve _attachPositionCurve = DefaultAttachCurve();
@@ -36,6 +52,7 @@ namespace Combat
 
     private MovementAgent _movementAgent;
     private MobDeath _death;
+    private Renderer[] _renderers;
     private Transform _player;
     private Coroutine _attachCoroutine;
     private bool _isDying;
@@ -51,6 +68,7 @@ namespace Combat
       this.AsInjected();
       _movementAgent = GetComponent<MovementAgent>();
       _death = GetComponent<MobDeath>();
+      _renderers = GetComponentsInChildren<Renderer>(true);
       CurrentHealth = BattleBalance.DuckMaxHealth;
     }
 
@@ -64,6 +82,7 @@ namespace Combat
       _hasAttacked = false;
       _isAttached = false;
       _player = null;
+      ApplyRandomMaterial();
       _death?.ResetVisual();
 
       if (_movementAgent != null)
@@ -342,6 +361,66 @@ namespace Combat
     private static float Evaluate(AnimationCurve curve, float progress) =>
       curve == null ? progress : curve.Evaluate(progress);
 
+    private void ApplyRandomMaterial()
+    {
+      var material = PickRandomMaterial();
+      if (material == null || _renderers == null)
+        return;
+
+      for (var i = 0; i < _renderers.Length; i++)
+      {
+        var renderer = _renderers[i];
+        if (renderer == null)
+          continue;
+
+        var materials = renderer.sharedMaterials;
+        if (materials == null || materials.Length == 0)
+        {
+          renderer.sharedMaterial = material;
+          continue;
+        }
+
+        for (var slot = 0; slot < materials.Length; slot++)
+          materials[slot] = material;
+
+        renderer.sharedMaterials = materials;
+      }
+    }
+
+    private Material PickRandomMaterial()
+    {
+      var totalWeight = 0f;
+      Material lastValidMaterial = null;
+
+      for (var i = 0; i < _materials.Count; i++)
+      {
+        var entry = _materials[i];
+        if (entry == null || entry.Material == null || entry.Weight <= 0f)
+          continue;
+
+        totalWeight += entry.Weight;
+        lastValidMaterial = entry.Material;
+      }
+
+      if (totalWeight <= 0f)
+        return null;
+
+      var roll = UnityEngine.Random.value * totalWeight;
+      var accumulatedWeight = 0f;
+      for (var i = 0; i < _materials.Count; i++)
+      {
+        var entry = _materials[i];
+        if (entry == null || entry.Material == null || entry.Weight <= 0f)
+          continue;
+
+        accumulatedWeight += entry.Weight;
+        if (roll < accumulatedWeight)
+          return entry.Material;
+      }
+
+      return lastValidMaterial;
+    }
+
     private static AnimationCurve DefaultAttachCurve() =>
       AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
 
@@ -371,6 +450,9 @@ namespace Combat
       _attachDuration = Mathf.Max(0f, _attachDuration);
       _attachPositionCurve ??= DefaultAttachCurve();
       _attachRotationCurve ??= DefaultAttachCurve();
+
+      for (var i = 0; i < _materials.Count; i++)
+        _materials[i]?.Validate();
     }
   }
 }

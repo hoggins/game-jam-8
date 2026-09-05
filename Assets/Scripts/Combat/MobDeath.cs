@@ -93,6 +93,7 @@ namespace Combat
         + Vector3.up * (launchSpeed * Mathf.Sin(angleRad));
       rigidbody.AddForce(launchVelocity, ForceMode.VelocityChange);
       rigidbody.AddTorque(UnityEngine.Random.insideUnitSphere * _throwSpinTorque, ForceMode.VelocityChange);
+      rigidbody.interpolation = RigidbodyInterpolation.Interpolate;
       _throwRigidbody = rigidbody;
     }
 

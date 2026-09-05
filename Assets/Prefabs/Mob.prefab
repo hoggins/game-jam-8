@@ -78,6 +78,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5b2b11323224842c1a6661c282f4d24b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Combat.Mob
+  _materials:
+  - _material: {fileID: 2100000, guid: 731d5a1ae52e0c84ab8f02126a396a70, type: 2}
+    _weight: 0.8
+  - _material: {fileID: 2100000, guid: 897d70b1b319140709531b7685cd2b02, type: 2}
+    _weight: 0.1
+  - _material: {fileID: 2100000, guid: 9e77629fa27664af08502bce3aa949d6, type: 2}
+    _weight: 0.05
+  - _material: {fileID: 2100000, guid: 141317022326a44389fdb5bbc97b19e7, type: 2}
+    _weight: 0.01
   _attachDuration: 0.35
   _attachPositionCurve:
     serializedVersion: 2
