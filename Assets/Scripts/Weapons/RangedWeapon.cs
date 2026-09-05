@@ -46,7 +46,7 @@ namespace Weapons
           : null;
 
         if (bullet != null)
-          bullet.Launch(direction, damage, owner);
+          bullet.Launch(direction, damage, owner, CharacterScaleFactor);
         else if (bulletObject != null)
           Pool.Release(bulletObject);
       }

@@ -6,11 +6,16 @@ using VContainer;
 
 namespace Combat
 {
-  /// Purely cosmetic: the coins are already credited when the duck dies. This just
-  /// rises off the corpse and lobs itself at the player before returning to the pool.
+  /// Purely cosmetic: the coins are credited when their source is destroyed. This flies from the
+  /// source to its drop target, rises, and then lobs itself at the player before returning to pool.
   [DisallowMultipleComponent]
   public sealed class CoinPickup : MonoBehaviour
   {
+    [Header("Outward Drop")]
+    [SerializeField, Min(0f)] private float _outwardDuration = 0.5f;
+    [SerializeField, Min(0f)] private float _outwardArcHeight = 0.75f;
+    [SerializeField] private AnimationCurve _outwardArcCurve = DefaultOutwardArcCurve();
+
     [Header("Rise")]
     [SerializeField, Min(0f)] private float _riseDuration = 0.6f;
     [SerializeField, Min(0f)] private float _riseHeight = 0.9f;
@@ -33,6 +38,8 @@ namespace Combat
 
     private Transform _player;
     private Coroutine _flightCoroutine;
+    private Vector3? _outwardTarget;
+    private Vector3 _launchOrigin;
 
     private void Awake() =>
       this.AsInjected();
@@ -40,7 +47,9 @@ namespace Combat
     private void OnEnable()
     {
       _player = null;
-      _flightCoroutine = StartCoroutine(Fly(transform.position));
+      _outwardTarget = null;
+      _launchOrigin = transform.position;
+      StartFlight();
     }
 
     private void OnDisable()
@@ -52,8 +61,28 @@ namespace Combat
       _flightCoroutine = null;
     }
 
+    internal void SetOutwardTarget(Vector3 target)
+    {
+      _outwardTarget = target;
+      transform.position = _launchOrigin;
+      if (_flightCoroutine != null)
+        StopCoroutine(_flightCoroutine);
+
+      StartFlight();
+    }
+
+    private void StartFlight() =>
+      _flightCoroutine = StartCoroutine(Fly(transform.position));
+
     private IEnumerator Fly(Vector3 origin)
     {
+      if (_outwardTarget.HasValue)
+      {
+        var target = _outwardTarget.Value;
+        yield return FlyOut(origin, target);
+        origin = target;
+      }
+
       var apex = origin + Vector3.up * _riseHeight + GetSpreadOffset();
 
       yield return Rise(origin, apex);
@@ -61,6 +90,29 @@ namespace Combat
 
       _flightCoroutine = null;
       _pool?.Release(gameObject);
+    }
+
+    private IEnumerator FlyOut(Vector3 from, Vector3 to)
+    {
+      if (_outwardDuration <= 0f)
+      {
+        transform.position = to;
+        yield break;
+      }
+
+      var elapsed = 0f;
+      while (elapsed < _outwardDuration)
+      {
+        elapsed += Time.deltaTime;
+        var progress = Mathf.Clamp01(elapsed / _outwardDuration);
+        var ground = Vector3.Lerp(from, to, progress);
+        ground.y += _outwardArcHeight * Evaluate(_outwardArcCurve, progress);
+        transform.position = ground;
+        Spin();
+        yield return null;
+      }
+
+      transform.position = to;
     }
 
     private IEnumerator Rise(Vector3 from, Vector3 to)
@@ -137,8 +189,17 @@ namespace Combat
     private static AnimationCurve DefaultRiseCurve() =>
       new(new Keyframe(0f, 0f, 2.5f, 2.5f), new Keyframe(1f, 1f, 0f, 0f));
 
+    private static AnimationCurve DefaultOutwardArcCurve() =>
+      new(
+        new Keyframe(0f, 0f, 2f, 2f),
+        new Keyframe(0.5f, 1f, 0f, 0f),
+        new Keyframe(1f, 0f, -2f, -2f));
+
     private void OnValidate()
     {
+      _outwardDuration = Mathf.Max(0f, _outwardDuration);
+      _outwardArcHeight = Mathf.Max(0f, _outwardArcHeight);
+      _outwardArcCurve ??= DefaultOutwardArcCurve();
       _riseDuration = Mathf.Max(0f, _riseDuration);
       _riseHeight = Mathf.Max(0f, _riseHeight);
       _riseCurve ??= DefaultRiseCurve();

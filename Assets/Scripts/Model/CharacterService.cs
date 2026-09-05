@@ -25,6 +25,10 @@ namespace Model
     public int Speed => _storage.Speed;
     public int GunPower => _storage.GunPower;
 
+    /// Scale applied to the character and its size-dependent attacks.
+    public float CharacterScaleFactor =>
+      1f + Math.Max(0, MaxHealthLevel - 1) * _progressionBalance.MaxHealthScalePerLevel;
+
     /// Seconds this character adds to the battle clock.
     public int Timer => _storage.Timer;
     public int CurrentCoins => _storage.CurrentCoins;
@@ -119,9 +123,17 @@ namespace Model
       return droppedCoins;
     }
 
-    public void RegisterBuildingDestroyed()
+    /// Credits the building destruction and its coin drop immediately, and returns how many coins
+    /// dropped so the caller can spawn that many visual pickups.
+    public int RegisterBuildingDestroyed()
     {
       _storage.BuildingsDestroyed += 1;
+
+      var droppedCoins = _battleBalance.RollBuildingCoinDrop();
+      if (droppedCoins > 0)
+        AddCoins(droppedCoins);
+
+      return droppedCoins;
     }
 
     public void AddCoins(int count)

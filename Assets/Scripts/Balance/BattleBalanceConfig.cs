@@ -38,6 +38,12 @@ namespace Balance
     [Tooltip("Chance of dropping N coins on a duck kill, indexed by coin count. Must sum to 1.")]
     [SerializeField] private float[] _duckCoinDropChances = { 0.6f, 0.3f, 0.1f };
 
+    [Header("Building Coin Drop")]
+    [SerializeField, Min(0)] private int _buildingCoinDropMin = 1;
+    [SerializeField, Min(0)] private int _buildingCoinDropMax = 3;
+    [SerializeField, Range(0f, 1f)] private float _buildingCoinDropChance = 0.5f;
+    [SerializeField, Min(0f)] private float _buildingCoinDropDistance = 2f;
+
     [Header("Destructible Objects")]
     [SerializeField] private List<DestructibleMaxHealthEntry> _destructibleMaxHealth = new()
     {
@@ -56,6 +62,7 @@ namespace Balance
     public float DuckAttackDistance => _duckAttackDistance;
     public float DuckRepositionDistance => _duckRepositionDistance;
     public float MeleeAttackRadius => _meleeAttackRadius;
+    public float BuildingCoinDropDistance => _buildingCoinDropDistance;
 
     public int GetDestructibleMaxHealth(DestructibleObjectType type)
     {
@@ -80,6 +87,14 @@ namespace Balance
       return _duckCoinDropChances.Length - 1;
     }
 
+    public int RollBuildingCoinDrop()
+    {
+      if (UnityEngine.Random.value >= _buildingCoinDropChance)
+        return 0;
+
+      return UnityEngine.Random.Range(_buildingCoinDropMin, _buildingCoinDropMax + 1);
+    }
+
     private void OnValidate()
     {
       _battleDuration = Mathf.Max(0f, _battleDuration);
@@ -90,6 +105,10 @@ namespace Balance
       _duckAttackDistance = Mathf.Max(0f, _duckAttackDistance);
       _duckRepositionDistance = Mathf.Max(0f, _duckRepositionDistance);
       _meleeAttackRadius = Mathf.Max(0f, _meleeAttackRadius);
+      _buildingCoinDropMin = Mathf.Max(0, _buildingCoinDropMin);
+      _buildingCoinDropMax = Mathf.Max(_buildingCoinDropMin, _buildingCoinDropMax);
+      _buildingCoinDropChance = Mathf.Clamp01(_buildingCoinDropChance);
+      _buildingCoinDropDistance = Mathf.Max(0f, _buildingCoinDropDistance);
 
       for (var i = 0; i < _destructibleMaxHealth.Count; i++)
       {

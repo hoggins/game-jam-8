@@ -72,7 +72,7 @@ namespace Combat
 
     [Header("Spawn Position")]
     [SerializeField] private Transform _player;
-    [SerializeField] private Camera _camera;
+    [SerializeField] private UnityEngine.Camera _camera;
     [SerializeField, Min(0f)] private float _cameraViewportMargin = 0.05f;
     [SerializeField, Min(1)] private int _positionAttempts = 32;
 
@@ -229,7 +229,7 @@ namespace Combat
     }
 
     private static bool TryGetGroundPoint(
-      Camera camera,
+      UnityEngine.Camera camera,
       Vector2 viewportPoint,
       out Vector3 groundPoint)
     {
@@ -247,7 +247,7 @@ namespace Combat
 
     private bool IsOutsideCameraView(Vector3 position, int requiredSide)
     {
-      var camera = _camera != null ? _camera : Camera.main;
+      var camera = _camera != null ? _camera : UnityEngine.Camera.main;
       if (camera == null)
         return true;
 

@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using App;
+using Balance;
+using Combat;
+using Model;
 using Movement;
 using Pooling;
 using UnityEngine;
@@ -13,17 +16,22 @@ namespace Destruction
   {
     private const string FrictionMaterialPath = "Descructable/FirstHouseFriction";
     private const string DestructionFxPath = "Fx/Prefabs/FxBuildingDucksDestruction01";
+    private const string CoinPickupPrefabPath = "Prefabs/Interface/Coin01";
 
     [SerializeField, Min(0f)] private float _breakMagnitude = 5f;
 
     [Inject] private EnvironmentDecayManager _decayManager;
     [Inject] private Pool _pool;
+    [Inject] private CharacterService _characterService;
+    [Inject] private BattleBalanceConfig _battleBalance;
 
     private FlowMapNoGoZone _noGoZone;
     private BoxCollider _navigationCollider;
     private List<DecayPart> _parts;
     private GameObject _destructionFxPrefab;
     private bool _destroyed;
+
+    private static GameObject _coinPickupPrefab;
 
     public event Action<DestructibleObject> Destroyed;
 
@@ -96,6 +104,7 @@ namespace Destruction
 
       ApplyGroundDamage();
       SpawnDestructionFx();
+      SpawnBuildingCoinPickups();
 
       gameObject.layer = _partLayer!.Value;
 
@@ -158,6 +167,62 @@ namespace Destruction
 
       var rotation = transform.rotation * _destructionFxPrefab.transform.localRotation;
       _pool.Get(_destructionFxPrefab, transform.position, rotation);
+    }
+
+    private void SpawnBuildingCoinPickups()
+    {
+      if (!Application.isPlaying)
+        return;
+
+      var health = GetComponent<DestructibleHealth>();
+      if (health == null || health.ObjectType != DestructibleObjectType.House)
+        return;
+
+      var count = _characterService?.RegisterBuildingDestroyed() ?? 0;
+      if (count <= 0 || _pool == null)
+        return;
+
+      var prefab = CoinPickupPrefab;
+      if (prefab == null)
+        return;
+
+      for (var i = 0; i < count; i++)
+      {
+        var target = GetBuildingCoinDropPosition();
+        var instance = _pool.Get(prefab, transform.position, Quaternion.identity);
+        instance.GetComponent<CoinPickup>()?.SetOutwardTarget(target);
+      }
+    }
+
+    private static GameObject CoinPickupPrefab =>
+      _coinPickupPrefab = _coinPickupPrefab != null
+        ? _coinPickupPrefab
+        : Resources.Load<GameObject>(CoinPickupPrefabPath);
+
+    private Vector3 GetBuildingCoinDropPosition()
+    {
+      var position = transform.position;
+      var renderers = GetComponentsInChildren<Renderer>(true);
+      if (renderers.Length == 0)
+        return position;
+
+      var bounds = renderers[0].bounds;
+      for (var i = 1; i < renderers.Length; i++)
+        bounds.Encapsulate(renderers[i].bounds);
+
+      var footprintRadius = Mathf.Sqrt(
+        bounds.extents.x * bounds.extents.x
+        + bounds.extents.z * bounds.extents.z);
+      var direction = UnityEngine.Random.insideUnitCircle.normalized;
+      if (direction == Vector2.zero)
+        direction = Vector2.right;
+
+      position.x = bounds.center.x;
+      position.z = bounds.center.z;
+      var distance = footprintRadius + (_battleBalance?.BuildingCoinDropDistance ?? 0f);
+      position.x += direction.x * distance;
+      position.z += direction.y * distance;
+      return position;
     }
 
     private void ApplyGroundDamage()

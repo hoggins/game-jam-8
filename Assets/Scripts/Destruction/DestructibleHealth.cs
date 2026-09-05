@@ -2,7 +2,6 @@ using System;
 using Balance;
 using App;
 using Combat;
-using Model;
 using UnityEngine;
 using VContainer;
 
@@ -17,7 +16,6 @@ namespace Destruction
 
     [SerializeField] private DestructibleObjectType _objectType;
 
-    [Inject] private CharacterService _characterService;
     [Inject] private BattleBalanceConfig _battleBalance;
 
     private DestructibleObject _destructibleObject;
@@ -67,11 +65,6 @@ namespace Destruction
       if (CurrentHealth == 0)
       {
         _isDestroyed = true;
-
-        // Only actual buildings count towards the run statistic; the battle timer's digits are
-        // destructible too but are not buildings.
-        if (_objectType == DestructibleObjectType.House)
-          _characterService?.RegisterBuildingDestroyed();
 
         _destructibleObject.Break(origin);
       }
