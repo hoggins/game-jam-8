@@ -71,30 +71,28 @@ MonoBehaviour:
     enabled: 1
   difficultyRanges:
   - minDistance: 0
-    maxDistance: 5
+    maxDistance: 8
     levelWeights:
     - level: 1
       weight: 1
-  - minDistance: 5
-    maxDistance: 12
+  - minDistance: 8
+    maxDistance: 24
     levelWeights:
     - level: 1
-      weight: 0.7
+      weight: 0.4
     - level: 2
-      weight: 0.3
-  - minDistance: 12
-    maxDistance: 18
-    levelWeights:
-    - level: 1
-      weight: 0.2
-    - level: 2
-      weight: 0.5
-    - level: 3
-      weight: 0.3
-  - minDistance: 18
-    maxDistance: 1000
+      weight: 0.6
+  - minDistance: 24
+    maxDistance: 41
     levelWeights:
     - level: 2
       weight: 0.4
     - level: 3
       weight: 0.6
+  - minDistance: 41
+    maxDistance: 1000
+    levelWeights:
+    - level: 2
+      weight: 0.2
+    - level: 3
+      weight: 0.8
