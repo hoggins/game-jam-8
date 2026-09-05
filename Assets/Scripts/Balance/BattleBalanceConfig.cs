@@ -71,6 +71,7 @@ namespace Balance
       new DestructibleMaxHealthEntry { type = DestructibleObjectType.HealthBar, maxHealth = 48 },
       new DestructibleMaxHealthEntry { type = DestructibleObjectType.Upgrade, maxHealth = 50 },
       new DestructibleMaxHealthEntry { type = DestructibleObjectType.Goal, maxHealth = 1250 },
+      new DestructibleMaxHealthEntry { type = DestructibleObjectType.Prop, maxHealth = 1 },
     };
 
     [SerializeField] private List<HouseDifficultyMaxHealthEntry> _houseMaxHealthByDifficulty = new()
@@ -78,7 +79,6 @@ namespace Balance
       new HouseDifficultyMaxHealthEntry { difficultyLevel = 1, maxHealth = 50 },
       new HouseDifficultyMaxHealthEntry { difficultyLevel = 2, maxHealth = 250 },
       new HouseDifficultyMaxHealthEntry { difficultyLevel = 3, maxHealth = 1250 },
-      new DestructibleMaxHealthEntry { type = DestructibleObjectType.Prop, maxHealth = 1 },
     };
 
     public float BattleDuration => _battleDuration;
