@@ -68,6 +68,8 @@ MonoBehaviour:
   - {fileID: 7836709304280008139}
   - {fileID: 75188845398810000}
   - {fileID: 3539929141449562212}
+  - {fileID: 646038122822343149}
+  - {fileID: 711919002551436911}
 --- !u!114 &75188845398810000
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -135,6 +137,44 @@ MonoBehaviour:
   chromaticAbberationIntensity:
     m_OverrideState: 0
     m_Value: 0.5
+--- !u!114 &646038122822343149
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81180773991d8724ab7f2d216912b564, type: 3}
+  m_Name: ChromaticAberration
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.ChromaticAberration
+  active: 1
+  intensity:
+    m_OverrideState: 1
+    m_Value: 0.17
+--- !u!114 &711919002551436911
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5485954d14dfb9a4c8ead8edb0ded5b1, type: 3}
+  m_Name: LiftGammaGain
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.LiftGammaGain
+  active: 1
+  lift:
+    m_OverrideState: 1
+    m_Value: {x: 1, y: 1, z: 1, w: 0}
+  gamma:
+    m_OverrideState: 1
+    m_Value: {x: 1, y: 0.88590807, z: 0.8953583, w: 0}
+  gain:
+    m_OverrideState: 1
+    m_Value: {x: 0.91540766, y: 0.9905395, z: 1, w: 4.6330614e-10}
 --- !u!114 &1881579288749618558
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -196,7 +236,7 @@ MonoBehaviour:
     m_Value: {x: 0.5, y: 0.5}
   intensity:
     m_OverrideState: 1
-    m_Value: 0.306
+    m_Value: 0.325
   smoothness:
     m_OverrideState: 0
     m_Value: 0.2
