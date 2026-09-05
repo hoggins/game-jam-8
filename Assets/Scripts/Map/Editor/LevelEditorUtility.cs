@@ -192,12 +192,12 @@ namespace Map.Editor
       EditorUtility.SetDirty(mapData);
     }
 
-    public static MapData CreateMapDataNextToScene(Scene scene)
+    private static string GetOrCreateSceneFolder(Scene scene)
     {
       var scenePath = scene.path;
       if (string.IsNullOrEmpty(scenePath))
       {
-        Debug.LogWarning("Save the scene before creating a MapData asset.");
+        Debug.LogWarning("Save the scene before creating assets next to it.");
         return null;
       }
 
@@ -208,11 +208,36 @@ namespace Map.Editor
       if (!AssetDatabase.IsValidFolder(folder))
         AssetDatabase.CreateFolder(sceneDir, sceneName);
 
+      return folder;
+    }
+
+    public static MapData CreateMapDataNextToScene(Scene scene)
+    {
+      var folder = GetOrCreateSceneFolder(scene);
+      if (folder == null)
+        return null;
+
       var assetPath = AssetDatabase.GenerateUniqueAssetPath($"{folder}/MapData.asset");
       var mapData = ScriptableObject.CreateInstance<MapData>();
       AssetDatabase.CreateAsset(mapData, assetPath);
       AssetDatabase.SaveAssets();
       return mapData;
+    }
+
+    /// <summary>
+    /// Saves the given scene GameObject as a prefab next to the scene and reconnects the scene
+    /// copy to it, so the level's authored data (set references, seed, etc.) lives in an asset
+    /// instead of the scene file - keeping scene diffs small and merge-friendly like any other
+    /// prefab instance, instead of a raw GameObject whose fields conflict line-by-line.
+    /// </summary>
+    public static GameObject CreateLevelPrefabNextToScene(GameObject target, Scene scene)
+    {
+      var folder = GetOrCreateSceneFolder(scene);
+      if (folder == null)
+        return target;
+
+      var assetPath = AssetDatabase.GenerateUniqueAssetPath($"{folder}/Level.prefab");
+      return PrefabUtility.SaveAsPrefabAssetAndConnect(target, assetPath, InteractionMode.UserAction);
     }
 
     public static HouseSet GetOrCreateConstantHouseSet()

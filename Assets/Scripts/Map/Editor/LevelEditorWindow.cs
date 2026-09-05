@@ -203,8 +203,11 @@ namespace Map.Editor
 
       so.ApplyModifiedProperties();
 
+      if (PrefabUtility.GetPrefabInstanceStatus(target) == PrefabInstanceStatus.NotAPrefab)
+        target = LevelEditorUtility.CreateLevelPrefabNextToScene(target, target.scene);
+
       Selection.activeGameObject = target;
-      _levelData = levelData;
+      _levelData = target.GetComponent<LevelData>();
     }
 
     private void CreateMapData()
