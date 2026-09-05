@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Map;
 using Movement;
 using UnityEditor;
 using UnityEngine;
@@ -41,13 +42,46 @@ namespace Destruction.Editor
       using (new EditorGUI.DisabledScope(!IsPrefabAsset(_prefab)))
       {
         if (GUILayout.Button("Configure Prefab"))
-          ConfigurePrefab();
+          ConfigurePrefab(_prefab);
       }
+
+      if (GUILayout.Button("Apply to All"))
+        ApplyToAllHouses();
     }
 
-    private void ConfigurePrefab()
+    private void ApplyToAllHouses()
     {
-      var prefabPath = AssetDatabase.GetAssetPath(_prefab);
+      var guids = AssetDatabase.FindAssets($"t:{nameof(HouseSet)}");
+      if (guids.Length == 0)
+      {
+        Debug.LogError("No HouseSet asset found in the project.");
+        return;
+      }
+
+      var configuredCount = 0;
+
+      foreach (var guid in guids)
+      {
+        var houseSet = AssetDatabase.LoadAssetAtPath<HouseSet>(AssetDatabase.GUIDToAssetPath(guid));
+        if (houseSet == null)
+          continue;
+
+        foreach (var house in houseSet.Houses)
+        {
+          if (house.prefab == null || !IsPrefabAsset(house.prefab))
+            continue;
+
+          ConfigurePrefab(house.prefab);
+          configuredCount++;
+        }
+      }
+
+      Debug.Log($"Applied destructible setup to {configuredCount} house entry(ies) from {guids.Length} HouseSet asset(s).");
+    }
+
+    private void ConfigurePrefab(GameObject prefab)
+    {
+      var prefabPath = AssetDatabase.GetAssetPath(prefab);
       var root = PrefabUtility.LoadPrefabContents(prefabPath);
       if (root == null)
       {
@@ -149,7 +183,7 @@ namespace Destruction.Editor
       if (boxCollider == null)
         boxCollider = root.AddComponent<BoxCollider>();
 
-      boxCollider.isTrigger = true;
+      boxCollider.isTrigger = false;
       SetBounds(boxCollider, root);
 
       var damagableLayer = LayerMask.NameToLayer(DestructibleLayers.Damagable);
