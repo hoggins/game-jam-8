@@ -16,6 +16,7 @@ namespace Model
     private const string CurrentCoinsKey = "Player.CurrentCoins";
     private const string SpeedKey = "Player.Speed";
     private const string GunPowerKey = "Player.GunPower";
+    private const string TimerKey = "Player.Timer";
 
     private int _attackPower;
     private int _maxHealth;
@@ -24,6 +25,7 @@ namespace Model
     private int _currentCoins;
     private int _speed;
     private int _gunPower;
+    private int _timer;
     private bool _isInitialized;
 
     public event Action StatisticsChanged;
@@ -78,6 +80,12 @@ namespace Model
       set => SetValue(ref _gunPower, value, GunPowerKey);
     }
 
+    public int Timer
+    {
+      get => _timer;
+      set => SetValue(ref _timer, value, TimerKey);
+    }
+
     void IInitializable.Initialize()
     {
       _attackPower = PlayerPrefs.GetInt(AttackPowerKey, ProgressionBalance.StartingAttackPower);
@@ -87,6 +95,7 @@ namespace Model
       _currentCoins = PlayerPrefs.GetInt(CurrentCoinsKey, 0);
       _speed = PlayerPrefs.GetInt(SpeedKey, ProgressionBalance.StartingSpeed);
       _gunPower = PlayerPrefs.GetInt(GunPowerKey, ProgressionBalance.StartingGunPower);
+      _timer = PlayerPrefs.GetInt(TimerKey, ProgressionBalance.StartingTimer);
       _isInitialized = true;
     }
 

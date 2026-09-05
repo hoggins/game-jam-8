@@ -15,6 +15,7 @@ namespace Metagame.Stats
     MaxHealth,
     Speed,
     GunPower,
+    Timer,
   }
 
   public class ProgressionItemUi : MonoBehaviour
@@ -62,6 +63,9 @@ namespace Metagame.Stats
         case CharacterStatType.GunPower:
           _characterService.UpgradeGunPower();
           break;
+        case CharacterStatType.Timer:
+          _characterService.UpgradeTimer();
+          break;
         default:
           throw new ArgumentOutOfRangeException(nameof(_statType), _statType, "Unhandled character stat.");
       }
@@ -73,7 +77,7 @@ namespace Metagame.Stats
       var bonus = GetBonus();
       _valueText.text = bonus > 0 ? $"+{bonus}" : "NO BONUS";
       _priceText.text = $"{GetUpgradeCost()} COINS";
-      _levelText.text = $"LVL {GetLevel()}";
+      _levelText.text = GetIsMaxLevel() ? "MAX LVL" : $"LVL {GetLevel()}";
       _upgradeButton.interactable = GetCanUpgrade();
     }
 
@@ -84,6 +88,7 @@ namespace Metagame.Stats
         CharacterStatType.MaxHealth => "max hp",
         CharacterStatType.Speed => "speed",
         CharacterStatType.GunPower => "gun",
+        CharacterStatType.Timer => "timer",
         _ => string.Empty,
       };
 
@@ -91,12 +96,27 @@ namespace Metagame.Stats
     private int GetBonus() =>
       GetValue() - GetStartingValue();
 
-    /// Upgrades bought so far, displayed as a level starting from 1.
-    private int GetLevel()
-    {
-      var upgradeAmount = GetUpgradeAmount();
-      return upgradeAmount <= 0 ? 1 : GetBonus() / upgradeAmount + 1;
-    }
+    private int GetLevel() =>
+      _statType switch
+      {
+        CharacterStatType.AttackPower => _characterService.AttackPowerLevel,
+        CharacterStatType.MaxHealth => _characterService.MaxHealthLevel,
+        CharacterStatType.Speed => _characterService.SpeedLevel,
+        CharacterStatType.GunPower => _characterService.GunPowerLevel,
+        CharacterStatType.Timer => _characterService.TimerLevel,
+        _ => 1,
+      };
+
+    private bool GetIsMaxLevel() =>
+      _statType switch
+      {
+        CharacterStatType.AttackPower => _characterService.IsAttackPowerMaxLevel,
+        CharacterStatType.MaxHealth => _characterService.IsMaxHealthMaxLevel,
+        CharacterStatType.Speed => _characterService.IsSpeedMaxLevel,
+        CharacterStatType.GunPower => _characterService.IsGunPowerMaxLevel,
+        CharacterStatType.Timer => _characterService.IsTimerMaxLevel,
+        _ => false,
+      };
 
     private int GetValue() =>
       _statType switch
@@ -105,6 +125,7 @@ namespace Metagame.Stats
         CharacterStatType.MaxHealth => _characterService.MaxHealth,
         CharacterStatType.Speed => _characterService.Speed,
         CharacterStatType.GunPower => _characterService.GunPower,
+        CharacterStatType.Timer => _characterService.Timer,
         _ => 0,
       };
 
@@ -115,16 +136,7 @@ namespace Metagame.Stats
         CharacterStatType.MaxHealth => ProgressionBalance.StartingMaxHealth,
         CharacterStatType.Speed => ProgressionBalance.StartingSpeed,
         CharacterStatType.GunPower => ProgressionBalance.StartingGunPower,
-        _ => 0,
-      };
-
-    private int GetUpgradeAmount() =>
-      _statType switch
-      {
-        CharacterStatType.AttackPower => ProgressionBalance.AttackPowerUpgradeAmount,
-        CharacterStatType.MaxHealth => ProgressionBalance.MaxHealthUpgradeAmount,
-        CharacterStatType.Speed => ProgressionBalance.SpeedUpgradeAmount,
-        CharacterStatType.GunPower => ProgressionBalance.GunPowerUpgradeAmount,
+        CharacterStatType.Timer => ProgressionBalance.StartingTimer,
         _ => 0,
       };
 
@@ -135,6 +147,7 @@ namespace Metagame.Stats
         CharacterStatType.MaxHealth => ProgressionBalance.MaxHealthUpgradeCost,
         CharacterStatType.Speed => ProgressionBalance.SpeedUpgradeCost,
         CharacterStatType.GunPower => ProgressionBalance.GunPowerUpgradeCost,
+        CharacterStatType.Timer => ProgressionBalance.TimerUpgradeCost,
         _ => 0,
       };
 
@@ -145,6 +158,7 @@ namespace Metagame.Stats
         CharacterStatType.MaxHealth => _characterService.CanUpgradeMaxHealth,
         CharacterStatType.Speed => _characterService.CanUpgradeSpeed,
         CharacterStatType.GunPower => _characterService.CanUpgradeGunPower,
+        CharacterStatType.Timer => _characterService.CanUpgradeTimer,
         _ => false,
       };
   }

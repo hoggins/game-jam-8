@@ -29,6 +29,9 @@ namespace Model
 
     public float Timer { get; private set; } = BattleBalance.BattleDuration;
 
+    /// The base clock plus the seconds the character's Timer stat has bought.
+    private float StartingDuration => BattleBalance.BattleDuration + _characterService.Timer;
+
     public BattleService(
       IEnumerable<IBattleStarted> battleStartedHandlers,
       IEnumerable<IBattleEnd> battleEndHandlers,
@@ -39,8 +42,21 @@ namespace Model
       _characterService = characterService;
     }
 
-    void IInitializable.Initialize() =>
+    void IInitializable.Initialize()
+    {
       _characterService.Died += DefeatBattle;
+      _characterService.TimerBonusAdded += OnTimerBonusAdded;
+    }
+
+    /// A Timer upgrade bought mid-battle extends the clock that is already running; outside a
+    /// battle the stat is picked up by the next StartBattle instead.
+    private void OnTimerBonusAdded(int seconds)
+    {
+      if (!IsBattleActive || IsTimerDestroyed || IsCombatSuspended)
+        return;
+
+      SetTimer(Timer + seconds);
+    }
 
     void ITickable.Tick()
     {
@@ -84,6 +100,7 @@ namespace Model
     void IDisposable.Dispose()
     {
       _characterService.Died -= DefeatBattle;
+      _characterService.TimerBonusAdded -= OnTimerBonusAdded;
     }
 
     public void StartBattle()
@@ -95,7 +112,7 @@ namespace Model
       IsTimerDestroyed = false;
       IsCombatSuspended = false;
       _defeatDelay = 0f;
-      Timer = BattleBalance.BattleDuration;
+      Timer = StartingDuration;
       Time.timeScale = 1f;
       foreach (var handler in _battleStartedHandlers)
         handler.OnBattleStarted();
@@ -135,7 +152,7 @@ namespace Model
       IsTimerDestroyed = false;
       IsCombatSuspended = false;
       _defeatDelay = 0f;
-      Timer = BattleBalance.BattleDuration;
+      Timer = StartingDuration;
       Time.timeScale = 1f;
       foreach (IBattleEnd handler in _battleEndHandlers)
         handler.OnBattleEnd();

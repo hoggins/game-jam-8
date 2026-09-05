@@ -14,23 +14,56 @@ namespace Model
     public event Action ProgressionChanged;
     public event Action<int> CoinsChanged;
 
+    /// Raised with the seconds just bought, so a battle in progress can extend its running clock.
+    public event Action<int> TimerBonusAdded;
+
     public int AttackPower => _storage.AttackPower;
     public int MaxHealth => _storage.MaxHealth;
     public int Speed => _storage.Speed;
     public int GunPower => _storage.GunPower;
+
+    /// Seconds this character adds to the battle clock.
+    public int Timer => _storage.Timer;
     public int CurrentCoins => _storage.CurrentCoins;
     public bool IsAlive => CurrentHealth > 0;
     public bool IsInvincible { get; private set; }
-    public bool CanUpgradeAttackPower => _storage.CurrentCoins >= ProgressionBalance.AttackPowerUpgradeCost;
-    public bool CanUpgradeMaxHealth => _storage.CurrentCoins >= ProgressionBalance.MaxHealthUpgradeCost;
-    public bool CanUpgradeSpeed => _storage.CurrentCoins >= ProgressionBalance.SpeedUpgradeCost;
-    public bool CanUpgradeGunPower => _storage.CurrentCoins >= ProgressionBalance.GunPowerUpgradeCost;
+
+    /// Levels are 1-based: a stat sitting at its starting value is level 1, and no stat can pass
+    /// <see cref="ProgressionBalance.MaxUpgradeLevel"/>.
+    public int AttackPowerLevel => GetLevel(_storage.AttackPower, ProgressionBalance.StartingAttackPower, ProgressionBalance.AttackPowerUpgradeAmount);
+    public int MaxHealthLevel => GetLevel(_storage.MaxHealth, ProgressionBalance.StartingMaxHealth, ProgressionBalance.MaxHealthUpgradeAmount);
+    public int SpeedLevel => GetLevel(_storage.Speed, ProgressionBalance.StartingSpeed, ProgressionBalance.SpeedUpgradeAmount);
+    public int GunPowerLevel => GetLevel(_storage.GunPower, ProgressionBalance.StartingGunPower, ProgressionBalance.GunPowerUpgradeAmount);
+    public int TimerLevel => GetLevel(_storage.Timer, ProgressionBalance.StartingTimer, ProgressionBalance.TimerUpgradeAmount);
+
+    public bool IsAttackPowerMaxLevel => AttackPowerLevel >= ProgressionBalance.MaxUpgradeLevel;
+    public bool IsMaxHealthMaxLevel => MaxHealthLevel >= ProgressionBalance.MaxUpgradeLevel;
+    public bool IsSpeedMaxLevel => SpeedLevel >= ProgressionBalance.MaxUpgradeLevel;
+    public bool IsGunPowerMaxLevel => GunPowerLevel >= ProgressionBalance.MaxUpgradeLevel;
+    public bool IsTimerMaxLevel => TimerLevel >= ProgressionBalance.MaxUpgradeLevel;
+
+    public bool CanUpgradeAttackPower => !IsAttackPowerMaxLevel && _storage.CurrentCoins >= ProgressionBalance.AttackPowerUpgradeCost;
+    public bool CanUpgradeMaxHealth => !IsMaxHealthMaxLevel && _storage.CurrentCoins >= ProgressionBalance.MaxHealthUpgradeCost;
+    public bool CanUpgradeSpeed => !IsSpeedMaxLevel && _storage.CurrentCoins >= ProgressionBalance.SpeedUpgradeCost;
+    public bool CanUpgradeGunPower => !IsGunPowerMaxLevel && _storage.CurrentCoins >= ProgressionBalance.GunPowerUpgradeCost;
+    public bool CanUpgradeTimer => !IsTimerMaxLevel && _storage.CurrentCoins >= ProgressionBalance.TimerUpgradeCost;
 
     public int CurrentHealth { get; private set; }
 
     public CharacterService(Storage storage)
     {
       _storage = storage;
+    }
+
+    /// Clamped at both ends: a saved value below the current starting value (a lowered balance
+    /// number against an existing save) must not read as a negative level.
+    private static int GetLevel(int value, int startingValue, int upgradeAmount)
+    {
+      if (upgradeAmount <= 0)
+        return 1;
+
+      var level = (value - startingValue) / upgradeAmount + 1;
+      return Math.Clamp(level, 1, ProgressionBalance.MaxUpgradeLevel);
     }
 
     void IBattleStarted.OnBattleStarted()
@@ -91,6 +124,9 @@ namespace Model
 
     public void UpgradeAttackPower()
     {
+      if (IsAttackPowerMaxLevel)
+        throw new InvalidOperationException($"AttackPower is already at max level {ProgressionBalance.MaxUpgradeLevel}.");
+
       if (_storage.CurrentCoins < ProgressionBalance.AttackPowerUpgradeCost)
         throw new InvalidOperationException($"Not enough coins to upgrade attack power. Current coins: {_storage.CurrentCoins}, required: {ProgressionBalance.AttackPowerUpgradeCost}");
 
@@ -102,6 +138,9 @@ namespace Model
 
     public void UpgradeMaxHealth()
     {
+      if (IsMaxHealthMaxLevel)
+        throw new InvalidOperationException($"MaxHealth is already at max level {ProgressionBalance.MaxUpgradeLevel}.");
+
       if (_storage.CurrentCoins < ProgressionBalance.MaxHealthUpgradeCost)
         throw new InvalidOperationException($"Not enough coins to upgrade max health. Current coins: {_storage.CurrentCoins}, required: {ProgressionBalance.MaxHealthUpgradeCost}");
 
@@ -113,6 +152,9 @@ namespace Model
 
     public void UpgradeSpeed()
     {
+      if (IsSpeedMaxLevel)
+        throw new InvalidOperationException($"Speed is already at max level {ProgressionBalance.MaxUpgradeLevel}.");
+
       if (_storage.CurrentCoins < ProgressionBalance.SpeedUpgradeCost)
         throw new InvalidOperationException($"Not enough coins to upgrade speed. Current coins: {_storage.CurrentCoins}, required: {ProgressionBalance.SpeedUpgradeCost}");
 
@@ -124,6 +166,9 @@ namespace Model
 
     public void UpgradeGunPower()
     {
+      if (IsGunPowerMaxLevel)
+        throw new InvalidOperationException($"GunPower is already at max level {ProgressionBalance.MaxUpgradeLevel}.");
+
       if (_storage.CurrentCoins < ProgressionBalance.GunPowerUpgradeCost)
         throw new InvalidOperationException($"Not enough coins to upgrade gun power. Current coins: {_storage.CurrentCoins}, required: {ProgressionBalance.GunPowerUpgradeCost}");
 
@@ -131,6 +176,21 @@ namespace Model
       _storage.GunPower += ProgressionBalance.GunPowerUpgradeAmount;
       ProgressionChanged?.Invoke();
       CoinsChanged?.Invoke(_storage.CurrentCoins);
+    }
+
+    public void UpgradeTimer()
+    {
+      if (IsTimerMaxLevel)
+        throw new InvalidOperationException($"Timer is already at max level {ProgressionBalance.MaxUpgradeLevel}.");
+
+      if (_storage.CurrentCoins < ProgressionBalance.TimerUpgradeCost)
+        throw new InvalidOperationException($"Not enough coins to upgrade timer. Current coins: {_storage.CurrentCoins}, required: {ProgressionBalance.TimerUpgradeCost}");
+
+      _storage.CurrentCoins -= ProgressionBalance.TimerUpgradeCost;
+      _storage.Timer += ProgressionBalance.TimerUpgradeAmount;
+      ProgressionChanged?.Invoke();
+      CoinsChanged?.Invoke(_storage.CurrentCoins);
+      TimerBonusAdded?.Invoke(ProgressionBalance.TimerUpgradeAmount);
     }
 
     public void Die()
