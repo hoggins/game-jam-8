@@ -55,5 +55,25 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1062195347798725532, guid: a651b3a4999c59546acfd48d3e7a9790, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2561250006300676753}
   m_SourcePrefab: {fileID: 100100000, guid: a651b3a4999c59546acfd48d3e7a9790, type: 3}
+--- !u!1 &8635080864412073820 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1062195347798725532, guid: a651b3a4999c59546acfd48d3e7a9790, type: 3}
+  m_PrefabInstance: {fileID: 8748336014525754560}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2561250006300676753
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8635080864412073820}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 802cd6f481491405aa7b70c12b14dd71, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Destruction.HitFx

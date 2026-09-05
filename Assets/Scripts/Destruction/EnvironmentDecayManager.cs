@@ -11,8 +11,7 @@ namespace Destruction
     {
       public DestructibleObject Owner;
       public Rigidbody Body;
-      public PartDecaySettings Settings;
-      public float IdleTimer;
+      public float DecayStartTimer;
       public float GroundY;
       public bool Sinking;
     }
@@ -27,7 +26,7 @@ namespace Destruction
       _settings = settings;
     }
 
-    public void RegisterPart(DestructibleObject owner, Rigidbody body, PartDecaySettings settings)
+    public void RegisterPart(DestructibleObject owner, Rigidbody body)
     {
       _remainingParts.TryGetValue(owner, out var count);
       _remainingParts[owner] = count + 1;
@@ -36,7 +35,7 @@ namespace Destruction
       {
         Owner = owner,
         Body = body,
-        Settings = settings,
+        DecayStartTimer = 0f,
       });
     }
 
@@ -69,28 +68,20 @@ namespace Destruction
           continue;
         }
 
+        part.DecayStartTimer += Time.deltaTime;
+
         if (!part.Sinking)
         {
-          if (!IsIdle(part.Body))
-          {
-            part.IdleTimer = 0f;
-            continue;
-          }
-
-          part.IdleTimer += Time.deltaTime;
-          if (part.IdleTimer < _settings.IdleGraceTime)
+          if (part.DecayStartTimer < _settings.DecayStartDelay)
             continue;
 
           part.GroundY = SampleGround(part.Body.position);
           part.Sinking = true;
-          part.Body.isKinematic = true;
 
           // Ignore physics from here on: other debris should pass through as this part sinks, not rest on top of it.
           foreach (var partCollider in part.Body.GetComponentsInChildren<Collider>())
             partCollider.enabled = false;
         }
-
-        part.Body.MovePosition(part.Body.position + Vector3.down * (part.Settings.FallSpeed * Time.deltaTime));
 
         var bounds = GetBounds(part.Body.transform);
         if (!IsUnderground(bounds, part.GroundY, _settings.SinkDepth))
@@ -132,10 +123,6 @@ namespace Destruction
         target.SetActive(false);
       }
     }
-
-    private bool IsIdle(Rigidbody body) =>
-      body.linearVelocity.sqrMagnitude <= _settings.IdleLinearSpeedThreshold * _settings.IdleLinearSpeedThreshold
-      && body.angularVelocity.sqrMagnitude <= _settings.IdleAngularSpeedThreshold * _settings.IdleAngularSpeedThreshold;
 
     private static Bounds GetBounds(Transform target)
     {

@@ -17,3 +17,6 @@ MonoBehaviour:
     m_Bits: 256
   groundRaycastHeight: 50
   groundRaycastDistance: 200
+  sinkDepth: 0.5
+  decayStartDelay: 3
+  maxFallSpeedMultiplier: 5

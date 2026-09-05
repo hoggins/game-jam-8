@@ -166,13 +166,16 @@ namespace Destruction
       if (body == null)
         body = part.gameObject.AddComponent<Rigidbody>();
       body.isKinematic = false;
+      if (Application.isPlaying && _decayManager != null)
+        body.useGravity = true;
 
+      body.interpolation = RigidbodyInterpolation.Interpolate;
       var hitPoint = ClosestPoint(colliders, origin);
       var direction = (hitPoint - origin).normalized;
       body.AddForceAtPosition(direction * magnitude, hitPoint, ForceMode.Impulse);
 
       if (Application.isPlaying && _decayManager != null)
-        _decayManager.RegisterPart(this, body, part.Settings);
+        _decayManager.RegisterPart(this, body);
     }
 
     private void RemoveMissingParts()
