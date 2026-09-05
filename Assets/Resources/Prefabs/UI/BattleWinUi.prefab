@@ -530,6 +530,30 @@ PrefabInstance:
       propertyPath: m_Name
       value: MainMenuButton
       objectReference: {fileID: 0}
+    - target: {fileID: 2093152101388360737, guid: deee2fe4adeb745ddb3e8fcb8dde6d67, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.9847124
+      objectReference: {fileID: 0}
+    - target: {fileID: 2093152101388360737, guid: deee2fe4adeb745ddb3e8fcb8dde6d67, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2093152101388360737, guid: deee2fe4adeb745ddb3e8fcb8dde6d67, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2093152101388360737, guid: deee2fe4adeb745ddb3e8fcb8dde6d67, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.17418803
+      objectReference: {fileID: 0}
+    - target: {fileID: 2093152101388360737, guid: deee2fe4adeb745ddb3e8fcb8dde6d67, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -25.299957
+      objectReference: {fileID: 0}
+    - target: {fileID: 2093152101388360737, guid: deee2fe4adeb745ddb3e8fcb8dde6d67, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: -20.063
+      objectReference: {fileID: 0}
     - target: {fileID: 7469698093598864024, guid: deee2fe4adeb745ddb3e8fcb8dde6d67, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
