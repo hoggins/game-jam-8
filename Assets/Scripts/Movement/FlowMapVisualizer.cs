@@ -19,6 +19,7 @@ namespace Movement
 
     private void OnDrawGizmos()
     {
+      return;
       if (_movementUpdater == null && Application.isPlaying)
         this.AsInjected();
 
