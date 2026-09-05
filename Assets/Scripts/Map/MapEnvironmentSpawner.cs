@@ -154,6 +154,10 @@ namespace Map
         _cullingGroup.SetBoundingSphereCount(_boundingSpheres.Length);
       }
 
+      // The final goal is authored directly in the scene, outside this service's runtime object
+      // bookkeeping. Clear only the generated houses around it so map generation cannot bury the
+      // objective or make it impossible to reach.
+      ClearSceneGoalFootprint();
       _movementUpdater.RefreshNoGoZones();
 
       SpawnInitialSpecials(parent);
@@ -397,6 +401,10 @@ namespace Map
     /// </summary>
     private bool HasSpecialOverlap(Vector3 position, Quaternion rotation, Vector2 worldHalfExtents, Transform exclude)
     {
+      if (TryGetSceneGoalFootprint(out var goalCenter, out var goalHalfExtents)
+          && RectanglesOverlap(position, rotation.eulerAngles.y, worldHalfExtents, goalCenter, goalHalfExtents))
+        return true;
+
       foreach (var id in _specialIds)
       {
         if (!_objects.TryGetValue(id, out var standing))
@@ -410,6 +418,34 @@ namespace Map
       }
 
       return false;
+    }
+
+    private void ClearSceneGoalFootprint()
+    {
+      if (!TryGetSceneGoalFootprint(out var goalCenter, out var goalHalfExtents))
+        return;
+
+      ClearOverlapping(goalCenter, Quaternion.identity, goalHalfExtents + ClearMargin, null);
+    }
+
+    private static bool TryGetSceneGoalFootprint(out Vector3 center, out Vector2 halfExtents)
+    {
+      var goal = TheGoal.Current;
+      if (goal == null)
+        goal = Object.FindFirstObjectByType<TheGoal>();
+
+      var collider = goal != null ? goal.GetComponent<BoxCollider>() : null;
+      if (goal == null || goal.IsDestroyed || collider == null || !collider.enabled)
+      {
+        center = default;
+        halfExtents = default;
+        return false;
+      }
+
+      var bounds = collider.bounds;
+      center = bounds.center;
+      halfExtents = new Vector2(bounds.extents.x, bounds.extents.z);
+      return true;
     }
 
     /// <summary>

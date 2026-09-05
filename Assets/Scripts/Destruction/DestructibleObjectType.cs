@@ -8,5 +8,6 @@ namespace Destruction
     Arrow = 3,
     HealthBar = 4,
     Upgrade = 5,
+    Goal = 6,
   }
 }

@@ -8,25 +8,35 @@ namespace Arrow
 {
   /// <summary>
   /// The in-world compass arrow: a destructible glyph lying flat on the ground that tells the player
-  /// which way the current <see cref="Timer.BattleTimerObject"/> is.
+  /// which way its configured target is. The target can be the current
+  /// <see cref="Timer.BattleTimerObject"/> or the scene-authored <see cref="Destruction.TheGoal"/>.
   ///
   /// The glyph itself never turns — it is a solid object standing in the street, and spinning it
   /// would drag its colliders, its flow-map footprint and its debris around with it. What turns is
   /// the HUD camera hanging above it: rolling that camera about the vertical axis rotates the image
   /// it draws, so the arrow reads as a compass needle on the HUD while staying put in the world.
   ///
-  /// One arrow exists per battle. It is moved rather than duplicated when the timer respawns, and
-  /// smashing it costs the player navigation for the rest of the run — see
-  /// <see cref="Timer.TimerRespawnService"/>, which reads <see cref="Current"/> to decide between
-  /// the two.
+  /// One timer arrow exists per battle. It is moved rather than duplicated when the timer respawns,
+  /// and smashing it costs the player timer navigation for the rest of the run — see
+  /// <see cref="Timer.TimerRespawnService"/>, which reads <see cref="Current"/>. A goal arrow uses
+  /// the same controller but stays scene-authored and does not claim that timer slot.
   /// </summary>
   [DisallowMultipleComponent]
   public sealed class BattleArrowObject : MonoBehaviour
   {
-    /// The one live arrow, or null when there is none — either not spawned yet, or smashed. Cleared
-    /// the moment the arrow dies rather than when the husk finally retires, so a caller never gets
-    /// handed an arrow that is already on its way out.
+    private enum Target
+    {
+      Timer = 0,
+      Goal = 1,
+    }
+
+    /// The one live timer arrow, or null when there is none — either not spawned yet, or smashed.
+    /// Cleared the moment the arrow dies rather than when the husk finally retires, so a caller never
+    /// gets handed an arrow that is already on its way out.
     public static BattleArrowObject Current { get; private set; }
+
+    [Tooltip("Object this arrow points at. Timer arrows are moved by TimerRespawnService; the goal arrow stays scene-authored.")]
+    [SerializeField] private Target _target = Target.Timer;
 
     [Tooltip("The single destructible group that makes up the glyph. Found in children when unset.")]
     [SerializeField] private DestructibleObject _body;
@@ -38,6 +48,7 @@ namespace Arrow
     private Transform _player;
     private UnityEngine.Camera _viewCamera;
     private Timer.BattleTimerObject _timer;
+    private TheGoal _goal;
     private bool _isDead;
 
     private void Awake()
@@ -52,7 +63,8 @@ namespace Arrow
       _hudCameraObject = camera != null ? camera.gameObject : null;
       _hudCamera = camera != null ? camera.transform : null;
 
-      Current = this;
+      if (_target == Target.Timer)
+        Current = this;
     }
 
     private void OnEnable()
@@ -60,8 +72,11 @@ namespace Arrow
       if (_body != null)
         _body.Destroyed += OnBodyDestroyed;
 
-      if (_battleService != null)
+      if (_battleService != null && _target == Target.Timer)
         _battleService.TimerDestroyed += OnTimerDestroyed;
+
+      if (_target == Target.Goal)
+        SubscribeGoal();
     }
 
     private void OnDisable()
@@ -69,8 +84,10 @@ namespace Arrow
       if (_body != null)
         _body.Destroyed -= OnBodyDestroyed;
 
-      if (_battleService != null)
+      if (_battleService != null && _target == Target.Timer)
         _battleService.TimerDestroyed -= OnTimerDestroyed;
+
+      UnsubscribeGoal();
     }
 
     private void OnDestroy()
@@ -98,7 +115,7 @@ namespace Arrow
     }
 
     /// <summary>
-    /// Rolls the HUD camera so the glyph reads as a needle pointing at the timer.
+    /// Rolls the HUD camera so the glyph reads as a needle pointing at the configured target.
     ///
     /// The camera looks straight down, so rolling it about the vertical axis rotates the image it
     /// draws: setting its yaw to Y makes a glyph pointing at world yaw Y read as pointing straight
@@ -127,21 +144,41 @@ namespace Arrow
         _player = player != null ? player.transform : null;
       }
 
-      if (_timer == null && _battleService != null && !_battleService.IsTimerDestroyed)
-        _timer = FindLiveTimer();
-
-      if (_player == null || _timer == null)
+      if (_player == null)
         return;
 
-      var toTimer = _timer.transform.position - _player.position;
-      toTimer.y = 0f;
+      Vector3 targetPosition;
+      if (_target == Target.Timer)
+      {
+        if (_timer == null && _battleService != null && !_battleService.IsTimerDestroyed)
+          _timer = FindLiveTimer();
+
+        if (_timer == null)
+          return;
+
+        targetPosition = _timer.transform.position;
+      }
+      else
+      {
+        SubscribeGoal();
+        if (_goal == null || _goal.IsDestroyed)
+        {
+          DisableHudCamera();
+          return;
+        }
+
+        targetPosition = _goal.transform.position;
+      }
+
+      var toTarget = targetPosition - _player.position;
+      toTarget.y = 0f;
 
       var forward = GetCameraForward();
 
-      if (toTimer.sqrMagnitude < 0.0001f || forward.sqrMagnitude < 0.0001f)
+      if (toTarget.sqrMagnitude < 0.0001f || forward.sqrMagnitude < 0.0001f)
         return;
 
-      var bearing = Vector3.SignedAngle(forward, toTimer, Vector3.up);
+      var bearing = Vector3.SignedAngle(forward, toTarget, Vector3.up);
 
       var facing = transform.forward;
       facing.y = 0f;
@@ -184,6 +221,39 @@ namespace Arrow
     /// </summary>
     private void OnTimerDestroyed() => _timer = null;
 
+    private void SubscribeGoal()
+    {
+      if (_target != Target.Goal || _goal != null)
+        return;
+
+      _goal = TheGoal.Current;
+      if (_goal != null)
+        _goal.Destroyed += OnGoalDestroyed;
+    }
+
+    private void UnsubscribeGoal()
+    {
+      if (_goal == null)
+        return;
+
+      _goal.Destroyed -= OnGoalDestroyed;
+      _goal = null;
+    }
+
+    private void OnGoalDestroyed(TheGoal goal)
+    {
+      if (_goal == goal)
+        _goal = null;
+
+      DisableHudCamera();
+    }
+
+    private void DisableHudCamera()
+    {
+      if (_hudCameraObject != null)
+        _hudCameraObject.SetActive(false);
+    }
+
     /// <summary>
     /// A dead timer's husk stays in the scene while its debris decays, so the first match is not
     /// necessarily the one the player is meant to walk to.
@@ -210,8 +280,7 @@ namespace Arrow
       if (Current == this)
         Current = null;
 
-      if (_hudCameraObject != null)
-        _hudCameraObject.SetActive(false);
+      DisableHudCamera();
     }
 
     private bool HasDestructibleChildren()

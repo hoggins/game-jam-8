@@ -17,5 +17,8 @@ namespace SceneHud
 
     /// The static upgrade house display. It is hidden after the house is destroyed.
     Upgrade = 3,
+
+    /// The compass arrow pointing at the final goal.
+    GoalArrow = 4,
   }
 }
