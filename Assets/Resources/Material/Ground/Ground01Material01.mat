@@ -67,7 +67,7 @@ Material:
     - _AnimSpeed: 3
     - _AnimatePrints: 0
     - _DamageColorAdd: 0.45
-    - _DamageColorMul: 0.54
+    - _DamageColorMul: 0.4
     - _EnvironmentReflections: 1
     - _Float0: 1
     - _Hit: 0
