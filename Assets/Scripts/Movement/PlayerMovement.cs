@@ -51,7 +51,7 @@ namespace Movement
     }
 
     float IMovementController.Speed => Speed;
-    float IMovementController.Radius => _radius;
+    float IMovementController.Radius => _radius * (_characterService?.CharacterScaleFactor ?? 1f);
     float IMovementController.AvoidancePower => _avoidancePower;
     float IMovementController.VelocitySmoothing => 0f;
     float IMovementController.RotationSpeed => _rotationSpeed;
