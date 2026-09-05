@@ -15,7 +15,7 @@ namespace Battle
     [SerializeField] private Button _continueButton;
     [SerializeField, Min(0f)] private float _transitionDuration = 0.2f;
     [SerializeField] private AnimationCurve _transitionCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
-    [SerializeField, Min(0f)] private float _hiddenScale = 0.9f;
+    [SerializeField, Min(0f)] private float _hiddenScale = 1.2f;
 
     [Inject] private BattleService _battleService;
     [Inject] private SceneService _sceneService;

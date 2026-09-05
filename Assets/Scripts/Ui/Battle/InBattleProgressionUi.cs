@@ -1,40 +1,32 @@
 using System.Collections;
 using App;
-using ScenesManagement;
 using UnityEngine;
-using UnityEngine.UI;
-using VContainer;
 
-namespace Metagame.PauseMenu
+namespace Battle
 {
   [RequireComponent(typeof(CanvasGroup))]
-  public class PauseMenuUi : MonoBehaviour
+  public class InBattleProgressionUi : UiBase
   {
-    [SerializeField] private Button _resumeButton;
-    [SerializeField] private Button _mainMenuButton;
     [SerializeField, Min(0f)] private float _transitionDuration = 0.2f;
     [SerializeField] private AnimationCurve _transitionCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
     [SerializeField, Min(0f)] private float _hiddenScale = 1.2f;
 
-    [Inject] private SceneService _sceneService;
     private CanvasGroup _canvasGroup;
     private Coroutine _transitionCoroutine;
 
-    public bool IsPaused { get; private set; }
+    public bool IsShown { get; private set; }
 
-    public void Pause() =>
-      SetPaused(true);
+    public void Show() =>
+      SetShown(true);
 
-    public void Resume() =>
-      SetPaused(false);
+    public void Hide() =>
+      SetShown(false);
 
-    public void TogglePause() =>
-      SetPaused(!IsPaused);
+    public void Toggle() =>
+      SetShown(!IsShown);
 
     private void Awake()
     {
-      this.AsInjected();
-
       _canvasGroup = GetComponent<CanvasGroup>();
       if (_canvasGroup == null)
         _canvasGroup = gameObject.AddComponent<CanvasGroup>();
@@ -45,16 +37,9 @@ namespace Metagame.PauseMenu
       gameObject.SetActive(false);
     }
 
-    private void OnEnable()
+    protected override void OnDisable()
     {
-      _resumeButton.onClick.AddListener(Resume);
-      _mainMenuButton.onClick.AddListener(ToMainMenu);
-    }
-
-    private void OnDisable()
-    {
-      _resumeButton.onClick.RemoveListener(Resume);
-      _mainMenuButton.onClick.RemoveListener(ToMainMenu);
+      base.OnDisable();
 
       if (_transitionCoroutine == null)
         return;
@@ -63,26 +48,16 @@ namespace Metagame.PauseMenu
       _transitionCoroutine = null;
     }
 
-    private void OnDestroy()
-    {
-      if (IsPaused)
-        Time.timeScale = 1f;
-    }
+    protected override void OnCancel() =>
+      Hide();
 
-    private void ToMainMenu()
+    private void SetShown(bool isShown)
     {
-      Resume();
-      _sceneService.LoadMainMenuScene();
-    }
-
-    private void SetPaused(bool isPaused)
-    {
-      if (IsPaused == isPaused)
+      if (IsShown == isShown)
         return;
 
-      IsPaused = isPaused;
-      Time.timeScale = isPaused ? 0f : 1f;
-      SetVisible(isPaused);
+      IsShown = isShown;
+      SetVisible(isShown);
     }
 
     private void SetVisible(bool isVisible)
@@ -109,6 +84,9 @@ namespace Metagame.PauseMenu
       {
         SetTransitionState(targetAlpha, targetScale);
         _transitionCoroutine = null;
+        if (!isVisible)
+          gameObject.SetActive(false);
+
         yield break;
       }
 

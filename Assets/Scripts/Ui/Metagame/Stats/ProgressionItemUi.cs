@@ -21,8 +21,10 @@ namespace Metagame.Stats
   {
     [SerializeField] private CharacterStatType _statType;
     [SerializeField] private Button _upgradeButton;
+    [SerializeField] private TMP_Text _nameText;
     [SerializeField] private TMP_Text _valueText;
     [SerializeField] private TMP_Text _priceText;
+    [SerializeField] private TMP_Text _levelText;
 
     [Inject] private readonly CharacterService _characterService;
 
@@ -67,9 +69,32 @@ namespace Metagame.Stats
 
     private void Refresh()
     {
-      _valueText.text = GetValue().ToString();
-      _priceText.text = GetUpgradeCost().ToString();
+      _nameText.text = GetName();
+      _valueText.text = $"+{GetBonus()}";
+      _priceText.text = $"{GetUpgradeCost()} COINS";
+      _levelText.text = $"LVL {GetLevel()}";
       _upgradeButton.interactable = GetCanUpgrade();
+    }
+
+    private string GetName() =>
+      _statType switch
+      {
+        CharacterStatType.AttackPower => "attack",
+        CharacterStatType.MaxHealth => "max hp",
+        CharacterStatType.Speed => "speed",
+        CharacterStatType.GunPower => "gun",
+        _ => string.Empty,
+      };
+
+    /// How much the stat gained over its starting value.
+    private int GetBonus() =>
+      GetValue() - GetStartingValue();
+
+    /// Upgrades bought so far, displayed as a level starting from 1.
+    private int GetLevel()
+    {
+      var upgradeAmount = GetUpgradeAmount();
+      return upgradeAmount <= 0 ? 1 : GetBonus() / upgradeAmount + 1;
     }
 
     private int GetValue() =>
@@ -79,6 +104,26 @@ namespace Metagame.Stats
         CharacterStatType.MaxHealth => _characterService.MaxHealth,
         CharacterStatType.Speed => _characterService.Speed,
         CharacterStatType.GunPower => _characterService.GunPower,
+        _ => 0,
+      };
+
+    private int GetStartingValue() =>
+      _statType switch
+      {
+        CharacterStatType.AttackPower => ProgressionBalance.StartingAttackPower,
+        CharacterStatType.MaxHealth => ProgressionBalance.StartingMaxHealth,
+        CharacterStatType.Speed => ProgressionBalance.StartingSpeed,
+        CharacterStatType.GunPower => ProgressionBalance.StartingGunPower,
+        _ => 0,
+      };
+
+    private int GetUpgradeAmount() =>
+      _statType switch
+      {
+        CharacterStatType.AttackPower => ProgressionBalance.AttackPowerUpgradeAmount,
+        CharacterStatType.MaxHealth => ProgressionBalance.MaxHealthUpgradeAmount,
+        CharacterStatType.Speed => ProgressionBalance.SpeedUpgradeAmount,
+        CharacterStatType.GunPower => ProgressionBalance.GunPowerUpgradeAmount,
         _ => 0,
       };
 
