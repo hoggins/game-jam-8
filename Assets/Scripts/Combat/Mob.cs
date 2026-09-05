@@ -105,15 +105,17 @@ namespace Combat
       _isDying = true;
       SpawnCoinPickups(_characterService?.RegisterDuckKill() ?? 0);
 
+      ResolvePlayer();
+
       if (_attachCoroutine != null)
       {
         StopCoroutine(_attachCoroutine);
         _attachCoroutine = null;
       }
 
-      // Unattached mobs keep moving while they dissolve. Attached mobs are detached and
-      // thrown by MobDeath, so their local attachment animation must stop first.
-      _death?.Play(_isAttached ? _player : null, _movementAgent, OnDeathPlayed);
+      // Attached mobs are thrown from the player; unattached mobs are thrown from their current
+      // position. Attached mobs also need their local attachment animation stopped first.
+      _death?.Play(_isAttached ? _player : transform, _movementAgent, OnDeathPlayed);
     }
 
     private void OnDeathPlayed()
