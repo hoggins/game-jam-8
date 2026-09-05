@@ -313,6 +313,11 @@ namespace Movement
       MarkBlockedCellsMarker.Begin();
       try
       {
+        var fieldMinX = _offset.x - _clearance;
+        var fieldMinY = _offset.y - _clearance;
+        var fieldMaxX = _offset.x + _width * _cellSize + _clearance;
+        var fieldMaxY = _offset.y + _height * _cellSize + _clearance;
+
         for (var i = 0; i < noGoZones.Count; i++)
         {
           var zone = noGoZones[i];
@@ -324,19 +329,25 @@ namespace Movement
               || !collider.gameObject.activeInHierarchy)
             continue;
 
-        var bounds = collider.bounds;
-        var minCell = PositionToCell(
-          bounds.min - new Vector3(_clearance, 0f, _clearance),
-          _offset,
-          _cellSize);
-        var maxCell = PositionToCell(
-          bounds.max + new Vector3(_clearance, 0f, _clearance),
-          _offset,
-          _cellSize);
-        var minX = Mathf.Max(0, minCell.x);
-        var minY = Mathf.Max(0, minCell.y);
-        var maxX = Mathf.Min(_width - 1, maxCell.x);
-        var maxY = Mathf.Min(_height - 1, maxCell.y);
+          var bounds = zone.WorldBounds;
+          if (bounds.max.x < fieldMinX
+              || bounds.min.x > fieldMaxX
+              || bounds.max.z < fieldMinY
+              || bounds.min.z > fieldMaxY)
+            continue;
+
+          var minCell = PositionToCell(
+            bounds.min - new Vector3(_clearance, 0f, _clearance),
+            _offset,
+            _cellSize);
+          var maxCell = PositionToCell(
+            bounds.max + new Vector3(_clearance, 0f, _clearance),
+            _offset,
+            _cellSize);
+          var minX = Mathf.Max(0, minCell.x);
+          var minY = Mathf.Max(0, minCell.y);
+          var maxX = Mathf.Min(_width - 1, maxCell.x);
+          var maxY = Mathf.Min(_height - 1, maxCell.y);
 
           for (var y = minY; y <= maxY; y++)
           for (var x = minX; x <= maxX; x++)
@@ -369,12 +380,13 @@ namespace Movement
 
     private void EnsureCapacity(int count)
     {
-      if (_directions.Length == count)
+      if (_directions.Length >= count)
         return;
 
-      _directions = new Vector2[count];
-      _costs = new float[count];
-      _blocked = new bool[count];
+      var capacity = Mathf.NextPowerOfTwo(count);
+      _directions = new Vector2[capacity];
+      _costs = new float[capacity];
+      _blocked = new bool[capacity];
     }
 
     private bool TryGetIndex(Vector2Int cell, out int index)

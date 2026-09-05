@@ -12,20 +12,22 @@ namespace Movement
     private readonly Vector2[] _boxFootprint = new Vector2[16];
 
     private int _boxFootprintCount;
+    private bool _initialized;
+    private Bounds _worldBounds;
 
     internal event Action<FlowMapNoGoZone, bool> ActiveChanged;
     internal event Action<FlowMapNoGoZone> Destroyed;
 
     internal Collider Collider { get; private set; }
     internal bool IgnoreMobs { get; private set; }
+    internal Bounds WorldBounds => _worldBounds;
 
     private void Awake() =>
       Initialize();
 
     private void OnEnable()
     {
-      Initialize();
-      CacheBoxFootprint();
+      RefreshCache();
       ActiveChanged?.Invoke(this, true);
     }
 
@@ -34,6 +36,9 @@ namespace Movement
 
     internal void Initialize()
     {
+      if (_initialized)
+        return;
+
       if (Collider == null)
         Collider = GetComponent<Collider>();
 
@@ -42,6 +47,14 @@ namespace Movement
       var health = GetComponent<DestructibleHealth>();
       IgnoreMobs = CompareTag("Prop")
                    || (health != null && health.ObjectType == DestructibleObjectType.Prop);
+      _initialized = true;
+    }
+
+    internal void RefreshCache()
+    {
+      Initialize();
+      CacheBoxFootprint();
+      _worldBounds = Collider != null ? Collider.bounds : default;
     }
 
     internal bool OverlapsCircle(Vector2 center, float radius) =>

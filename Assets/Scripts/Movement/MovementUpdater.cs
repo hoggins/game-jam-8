@@ -146,7 +146,7 @@ namespace Movement
         for (var i = 0; i < noGoZones.Length; i++)
         {
           var zone = noGoZones[i];
-          zone.Initialize();
+          zone.RefreshCache();
           _knownNoGoZones.Add(zone);
           zone.ActiveChanged += OnNoGoZoneActiveChanged;
           zone.Destroyed += OnNoGoZoneDestroyed;
