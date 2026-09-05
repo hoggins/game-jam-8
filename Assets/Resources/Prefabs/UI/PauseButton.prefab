@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 6159973293863945062}
   - component: {fileID: 5490567923897080515}
   - component: {fileID: 1062715643614157053}
+  - component: {fileID: 3197330015280415647}
   m_Layer: 5
   m_Name: PauseButton
   m_TagString: Untagged
@@ -120,3 +121,15 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &3197330015280415647
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 696521459834521333}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 975db8b2ebcbd486fa30736c935a260c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Sfx.UiClickSfx

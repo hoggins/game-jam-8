@@ -62,6 +62,28 @@ namespace Destruction
     public void Break(Vector3 origin) =>
       Impulse(origin, _breakMagnitude);
 
+    /// <summary>
+    /// Removes the object immediately with no break FX, ground damage, or part physics — used when
+    /// a spawn needs to clear its footprint rather than destroy the house as a game action.
+    /// </summary>
+    public void DestroyInstant()
+    {
+      if (_destroyed)
+        return;
+
+      _destroyed = true;
+      if (_noGoZone != null)
+        _noGoZone.enabled = false;
+
+      if (_navigationCollider != null)
+        _navigationCollider.enabled = false;
+
+      Destroyed?.Invoke(this);
+
+      if (Application.isPlaying)
+        Destroy(gameObject);
+    }
+
     public bool FallOutRandomPart(Vector3 origin)
     {
       RemoveMissingParts();

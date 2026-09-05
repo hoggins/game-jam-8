@@ -74,7 +74,8 @@ namespace App
       builder.Register<SceneHud.SceneHudService>(Lifetime.Singleton)
         .AsSelf()
         .AsImplementedInterfaces();
-      builder.Register<CameraDistanceController>(Lifetime.Singleton)
+      builder.Register<CameraDistanceController>(Lifetime.Singleton);
+      builder.Register<Sfx.UiSfxService>(Lifetime.Singleton)
         .AsSelf()
         .AsImplementedInterfaces();
 
