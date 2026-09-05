@@ -13,9 +13,11 @@ namespace Weapons
   {
     private const string BattleBalanceResourcePath = "BattleBalanceConfig";
 
+    [SerializeField, Min(0f)] private float _attackRadius = 5f;
     [SerializeField, Range(0f, 360f)] private float _attackConeAngle = 90f;
     [SerializeField, Min(1f)] private float _attackScaleMultiplier = 1.2f;
     [SerializeField] private bool _alternateAttackFx;
+    [SerializeField] private bool _damageOnlyProps;
     [SerializeField] private GameObject _hitFxPrefab;
     [SerializeField, Min(0)] private int _hitFxPrewarmCount = 8;
 
@@ -43,7 +45,7 @@ namespace Weapons
       ?.MeleeAttackRadius ?? 0f;
 
     private float AttackScaleFactor => CharacterScaleFactor * _attackScaleMultiplier;
-    private float AttackRadius => BaseAttackRadius * AttackScaleFactor;
+    private float AttackRadius => (_damageOnlyProps ? _attackRadius : BaseAttackRadius) * AttackScaleFactor;
 
     protected override float AttackFxScaleMultiplier => _attackScaleMultiplier;
 
@@ -65,7 +67,7 @@ namespace Weapons
     {
       _hitMobs.Clear();
 
-      if (_movementUpdater != null)
+      if (!_damageOnlyProps && _movementUpdater != null)
       {
         _movementUpdater.QueryCircle(
           transform.position,
@@ -85,18 +87,21 @@ namespace Weapons
         }
       }
 
-      var attachedMobs = Mob.AttachedMobs;
-      for (var i = 0; i < attachedMobs.Count; i++)
+      if (!_damageOnlyProps)
       {
-        var mob = attachedMobs[i];
-        if (mob == null
-            || !mob.IsAttached
-            || !mob.IsAlive
-            || !_hitMobs.Add(mob))
-          continue;
+        var attachedMobs = Mob.AttachedMobs;
+        for (var i = 0; i < attachedMobs.Count; i++)
+        {
+          var mob = attachedMobs[i];
+          if (mob == null
+              || !mob.IsAttached
+              || !mob.IsAlive
+              || !_hitMobs.Add(mob))
+            continue;
 
-        mob.TakeDamage(damage);
-        SpawnHitFx(mob.transform.position, mob.transform.rotation);
+          mob.TakeDamage(damage);
+          SpawnHitFx(mob.transform.position, mob.transform.rotation);
+        }
       }
 
       var hitCount = Physics.OverlapSphereNonAlloc(
@@ -140,6 +145,10 @@ namespace Weapons
 
     private void DamageDestructible(GameObject target, int damage)
     {
+      if (_damageOnlyProps
+          && (target.GetComponent<DestructibleHealth>()?.ObjectType != DestructibleObjectType.Prop))
+        return;
+
       var components = target.GetComponents<MonoBehaviour>();
       for (var i = 0; i < components.Length; i++)
       {
@@ -165,6 +174,7 @@ namespace Weapons
 
     private void OnValidate()
     {
+      _attackRadius = Mathf.Max(0f, _attackRadius);
       _attackConeAngle = Mathf.Clamp(_attackConeAngle, 0f, 360f);
       _attackScaleMultiplier = Mathf.Max(1f, _attackScaleMultiplier);
       _hitFxPrewarmCount = Mathf.Max(0, _hitFxPrewarmCount);
