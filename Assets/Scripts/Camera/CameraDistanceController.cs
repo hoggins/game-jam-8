@@ -11,10 +11,13 @@ namespace CustomCamera
   [Preserve]
   public sealed class CameraDistanceController : IInitializable, IDisposable
   {
+    private const float AdditionalCameraScaleFactor = 0.5f;
+
     private readonly CharacterService _characterService;
 
     private CinemachineOrbitalFollow _orbitalFollow;
     private float _authoredRadius;
+    private Vector3 _authoredTargetOffset;
 
     public CameraDistanceController(CharacterService characterService)
     {
@@ -23,10 +26,13 @@ namespace CustomCamera
 
     void IInitializable.Initialize()
     {
-      _characterService.ProgressionChanged += Refresh;
+      _characterService.ProgressionChanged += OnProgressionChanged;
       SceneManager.sceneLoaded += OnSceneLoaded;
       TryBindCamera();
     }
+
+    private void OnProgressionChanged() =>
+      TryBindCamera();
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode) =>
       TryBindCamera();
@@ -41,6 +47,7 @@ namespace CustomCamera
       {
         _orbitalFollow = orbitalFollow;
         _authoredRadius = orbitalFollow.Radius;
+        _authoredTargetOffset = orbitalFollow.TargetOffset;
       }
 
       Refresh();
@@ -51,12 +58,14 @@ namespace CustomCamera
       if (_orbitalFollow == null)
         return;
 
-      _orbitalFollow.Radius = _authoredRadius * _characterService.CharacterScaleFactor;
+      var scaleFactor = _characterService.CharacterScaleFactor + (_characterService.CharacterScaleFactor -1f) * AdditionalCameraScaleFactor;
+      _orbitalFollow.Radius = _authoredRadius * scaleFactor;
+      _orbitalFollow.TargetOffset = _authoredTargetOffset * scaleFactor;
     }
 
     void IDisposable.Dispose()
     {
-      _characterService.ProgressionChanged -= Refresh;
+      _characterService.ProgressionChanged -= OnProgressionChanged;
       SceneManager.sceneLoaded -= OnSceneLoaded;
       _orbitalFollow = null;
     }
