@@ -43,6 +43,21 @@ namespace Model
 
     public event Action StatisticsChanged;
 
+    /// True when at least one player value has ever been written to disk.
+    public bool HasSavedProgress
+    {
+      get
+      {
+        foreach (var key in AllKeys)
+        {
+          if (PlayerPrefs.HasKey(key))
+            return true;
+        }
+
+        return false;
+      }
+    }
+
     public int AttackPower
     {
       get => _attackPower;

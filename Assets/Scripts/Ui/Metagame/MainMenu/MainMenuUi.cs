@@ -45,6 +45,8 @@ namespace Metagame.MainMenu
       if (_progressionPlayButton != null)
         _progressionPlayButton.onClick.AddListener(Play);
 
+      RefreshProgressButtons();
+
       if (ConsumeOpenProgressionRequest())
         OpenProgression();
       else
@@ -76,8 +78,32 @@ namespace Metagame.MainMenu
     private static void Quit() =>
       Application.Quit();
 
-    private void ResetProgress() =>
+    private void ResetProgress()
+    {
       _storage.Reset();
+      RefreshProgressButtons();
+    }
+
+    /// Progression and Reset are meaningless before anything has been saved - grey them out.
+    private void RefreshProgressButtons()
+    {
+      var hasProgress = _storage.HasSavedProgress;
+      SetEnabled(_progressionButton, hasProgress);
+      SetEnabled(_resetButton, hasProgress);
+    }
+
+    private static void SetEnabled(Button button, bool isEnabled)
+    {
+      if (button == null)
+        return;
+
+      button.interactable = isEnabled;
+      //
+      // // The label and icon are children of the button, so the Selectable disabled tint
+      // // does not reach them - dim the whole thing instead.
+      // if (!button.TryGetComponent<CanvasGroup>(out var canvasGroup))
+      //   canvasGroup = button.gameObject.AddComponent<CanvasGroup>();
+    }
 
     private void ShowMainMenu()
     {
