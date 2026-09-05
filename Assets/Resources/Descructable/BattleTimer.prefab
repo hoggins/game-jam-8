@@ -1456,11 +1456,11 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.9, y: 0.9, z: 2.8}
+  m_Size: {x: 0.9, y: 10, z: 2.8}
   m_Center: {x: 0, y: 0.45, z: 0}
 --- !u!114 &5685785569141414648
 MonoBehaviour:
@@ -1567,11 +1567,11 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 2.8, y: 0.9, z: 4.7}
+  m_Size: {x: 2.8, y: 10, z: 4.7}
   m_Center: {x: 0, y: 0.45, z: 0}
 --- !u!114 &974041650073140138
 MonoBehaviour:
@@ -7378,11 +7378,11 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 2.8, y: 0.9, z: 4.7}
+  m_Size: {x: 2.8, y: 10, z: 4.7}
   m_Center: {x: 0, y: 0.45, z: 0}
 --- !u!114 &6775780251958572958
 MonoBehaviour:
@@ -8623,11 +8623,11 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 2.8, y: 0.9, z: 4.7}
+  m_Size: {x: 2.8, y: 10, z: 4.7}
   m_Center: {x: 0, y: 0.45, z: 0}
 --- !u!114 &4814154262455557793
 MonoBehaviour:
@@ -10180,11 +10180,11 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 2.8, y: 0.9, z: 4.7}
+  m_Size: {x: 2.8, y: 10, z: 4.7}
   m_Center: {x: 0, y: 0.45, z: 0}
 --- !u!114 &5680558011625262395
 MonoBehaviour:

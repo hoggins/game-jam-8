@@ -14,6 +14,7 @@ namespace Weapons
     private const string BattleBalanceResourcePath = "BattleBalanceConfig";
 
     [SerializeField, Range(0f, 360f)] private float _attackConeAngle = 90f;
+    [SerializeField, Min(1f)] private float _attackScaleMultiplier = 1.2f;
     [SerializeField] private bool _alternateAttackFx;
     [SerializeField] private GameObject _hitFxPrefab;
     [SerializeField, Min(0)] private int _hitFxPrewarmCount = 8;
@@ -41,7 +42,10 @@ namespace Weapons
           : Resources.Load<BattleBalanceConfig>(BattleBalanceResourcePath))
       ?.MeleeAttackRadius ?? 0f;
 
-    private float AttackRadius => BaseAttackRadius * CharacterScaleFactor;
+    private float AttackScaleFactor => CharacterScaleFactor * _attackScaleMultiplier;
+    private float AttackRadius => BaseAttackRadius * AttackScaleFactor;
+
+    protected override float AttackFxScaleMultiplier => _attackScaleMultiplier;
 
     protected override void SpawnAttackFx()
     {
@@ -156,12 +160,13 @@ namespace Weapons
     {
       var hitFx = SpawnFx(_hitFxPrefab, position, rotation);
       if (hitFx != null && _hitFxPrefab != null)
-        hitFx.transform.localScale = _hitFxPrefab.transform.localScale * CharacterScaleFactor;
+        hitFx.transform.localScale = _hitFxPrefab.transform.localScale * AttackScaleFactor;
     }
 
     private void OnValidate()
     {
       _attackConeAngle = Mathf.Clamp(_attackConeAngle, 0f, 360f);
+      _attackScaleMultiplier = Mathf.Max(1f, _attackScaleMultiplier);
       _hitFxPrewarmCount = Mathf.Max(0, _hitFxPrewarmCount);
     }
 
