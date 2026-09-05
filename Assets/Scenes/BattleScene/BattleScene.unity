@@ -241,6 +241,7 @@ GameObject:
   m_Component:
   - component: {fileID: 190080260}
   - component: {fileID: 190080259}
+  - component: {fileID: 190080261}
   m_Layer: 0
   m_Name: Level
   m_TagString: Untagged
@@ -281,6 +282,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &190080261
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 190080258}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90198e1b647504b61870c486f0b284a7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::App.DebugCheatManager
+  _teleportPosition: {x: -200, y: 0, z: -360}
 --- !u!1 &211954662
 GameObject:
   m_ObjectHideFlags: 0
