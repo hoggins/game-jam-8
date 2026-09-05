@@ -28,7 +28,7 @@ Material:
         m_Scale: {x: 0.0625, y: 0.0625}
         m_Offset: {x: 0, y: 0}
     - _DamageMask:
-        m_Texture: {fileID: 2800000, guid: 0a1e51e6eaffb4110ac3e034ab0e04be, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 0.0078125, y: 0.0078125}
         m_Offset: {x: 0.5, y: 0.5}
     - _DamageNormal:
