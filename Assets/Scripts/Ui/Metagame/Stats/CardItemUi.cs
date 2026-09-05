@@ -93,7 +93,7 @@ namespace Metagame.Stats
       else
       {
         var cost = GetUpgradeCost();
-        _priceText.text = $"{cost} COINS";
+        _priceText.text = $"{cost} FEATHERS";
         _priceText.color = _characterService.CurrentCoins >= cost ? _affordablePriceColor : _unaffordablePriceColor;
       }
 

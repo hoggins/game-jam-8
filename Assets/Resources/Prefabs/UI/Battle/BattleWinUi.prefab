@@ -38,7 +38,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 1086, y: 1132}
+  m_SizeDelta: {x: 860, y: 1500}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3280071048382920387
 CanvasRenderer:
@@ -68,7 +68,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -1825043125, guid: 2d00041a7db5240e3a98172bb19651ac, type: 3}
+  m_Sprite: {fileID: 1387087701, guid: a85d13ae0040a4d918d59a2b8fdef382, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -112,7 +112,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -51}
+  m_AnchoredPosition: {x: 0, y: -194.4}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4427429374274135830
@@ -152,8 +152,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4282896895
-  m_fontColor: {r: 1, g: 0.81925, b: 0.27699995, a: 1}
+    rgba: 4280994559
+  m_fontColor: {r: 1, g: 0.7907501, b: 0.16300005, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -170,8 +170,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 100
-  m_fontSizeBase: 100
+  m_fontSize: 70
+  m_fontSizeBase: 70
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -249,8 +249,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -634}
-  m_SizeDelta: {x: -180, y: 162.59998}
+  m_AnchoredPosition: {x: 0, y: -961}
+  m_SizeDelta: {x: -180, y: 102.41}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!222 &4784197707243189456
 CanvasRenderer:
@@ -307,8 +307,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 40
-  m_fontSizeBase: 40
+  m_fontSize: 30
+  m_fontSizeBase: 30
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -320,7 +320,7 @@ MonoBehaviour:
   m_characterSpacing: 0
   m_characterHorizontalScale: 1
   m_wordSpacing: 0
-  m_lineSpacing: 0
+  m_lineSpacing: -14
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
@@ -608,7 +608,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7469698093598864024, guid: deee2fe4adeb745ddb3e8fcb8dde6d67, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -297
+      value: -353
       objectReference: {fileID: 0}
     - target: {fileID: 7469698093598864024, guid: deee2fe4adeb745ddb3e8fcb8dde6d67, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
