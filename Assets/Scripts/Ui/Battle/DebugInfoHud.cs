@@ -3,17 +3,21 @@ using Combat;
 using Model;
 using Movement;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using VContainer;
 
 namespace Battle
 {
   /// <summary>
   /// Lightweight runtime diagnostics for the battle HUD. The panel is compiled out of the player
-  /// by the preprocessor and can be hidden in the editor with <see cref="_showInEditor"/>.
+  /// by the preprocessor, can be hidden in the editor with <see cref="_showInEditor"/>, and can be
+  /// toggled with F2. The toggle is remembered between Play Mode sessions.
   /// </summary>
   [DisallowMultipleComponent]
   public sealed class DebugInfoHud : MonoBehaviour
   {
+    private const string ShowInEditorPreferenceKey = "GameJam8.DebugInfoHud.ShowInEditor";
+
     [SerializeField] private bool _showInEditor = true;
     [SerializeField] private Vector2 _position = new(16f, 16f);
     [SerializeField] private Vector2 _size = new(320f, 250f);
@@ -26,10 +30,18 @@ namespace Battle
 
     private GUIStyle _boxStyle;
     private GUIStyle _labelStyle;
+    private int _lastToggleFrame = -1;
 
     private void Awake()
     {
 #if UNITY_EDITOR
+      if (UnityEditor.EditorPrefs.HasKey(ShowInEditorPreferenceKey))
+        _showInEditor = UnityEditor.EditorPrefs.GetBool(
+          ShowInEditorPreferenceKey,
+          _showInEditor);
+      else
+        UnityEditor.EditorPrefs.SetBool(ShowInEditorPreferenceKey, _showInEditor);
+
       this.AsInjected();
 #else
       enabled = false;
@@ -37,8 +49,30 @@ namespace Battle
     }
 
 #if UNITY_EDITOR
+    private void Update()
+    {
+      if (Keyboard.current != null && Keyboard.current.f2Key.wasPressedThisFrame)
+        ToggleVisibility();
+    }
+
+    private void ToggleVisibility()
+    {
+      if (_lastToggleFrame == Time.frameCount)
+        return;
+
+      _lastToggleFrame = Time.frameCount;
+      _showInEditor = !_showInEditor;
+      UnityEditor.EditorPrefs.SetBool(ShowInEditorPreferenceKey, _showInEditor);
+    }
+
     private void OnGUI()
     {
+      if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.F2)
+      {
+        ToggleVisibility();
+        Event.current.Use();
+      }
+
       if (!_showInEditor)
         return;
 
