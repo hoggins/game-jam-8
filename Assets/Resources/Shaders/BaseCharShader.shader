@@ -638,7 +638,7 @@ Shader "Char/BaseCharShader"
 				float2 uv_DissolveTex = input.ase_texcoord7.xy * _DissolveTex_ST.xy + _DissolveTex_ST.zw;
 				
 
-				float3 BaseColor = ( ( ( tex2DNode71.r * _Color0.rgb ) + ( tex2DNode71.g * _Color1.rgb ) + ( tex2DNode71.b * _Color2.rgb ) ) * tex2DNode70.rgb * _MainTexMul );
+				float3 BaseColor = ( saturate( ( ( tex2DNode71.r * _Color0.rgb ) + ( tex2DNode71.g * _Color1.rgb ) + ( tex2DNode71.b * _Color2.rgb ) ) ) * tex2DNode70.rgb * _MainTexMul );
 				float3 Normal = float3(0, 0, 1);
 				float3 Specular = 0.5;
 				float Metallic = _Metal;
@@ -1618,6 +1618,7 @@ Version=19910
 {"type":"AmplifyShaderEditor.SimpleAddOpNode, AmplifyShaderEditor","id":77,"pos":[-225.3514,-732.5726],"params":["Inherit","False","3","3","0","FLOAT3","0,0,0","False","1","FLOAT3","0,0,0","False","2","FLOAT3","0,0,0","False","1","FLOAT3","0"]}
 {"type":"AmplifyShaderEditor.SamplerNode, AmplifyShaderEditor","id":70,"pos":[-760,-312],"params":["Inherit","True","Property","_MainTex","MainTex","19","0","Create","True","0","0","0","False","0","False","","-1","None","None","True","0","False","white","Auto","False","Object","-1","Auto","Texture2D","False","8","0","SAMPLER2D","","False","1","FLOAT2","0,0","False","2","FLOAT","0","False","3","FLOAT2","0,0","False","4","FLOAT2","0,0","False","5","FLOAT","1","False","6","FLOAT","0","False","7","SAMPLERSTATE","","False","6","COLOR","0","FLOAT","1","FLOAT","2","FLOAT","3","FLOAT","4","FLOAT3","5"]}
 {"type":"AmplifyShaderEditor.RangedFloatNode, AmplifyShaderEditor","id":78,"pos":[-440.1234,-166.9524],"params":["Inherit","False","Property","_MainTexMul","MainTexMul","21","0","Create","True","0","0","0","False","0","False","Object","-1","","1","0","0","0","0","1","FLOAT","0"]}
+{"type":"AmplifyShaderEditor.SaturateNode, AmplifyShaderEditor","id":87,"pos":[-80.24231,-588.7336],"params":["Inherit","False","1","0","FLOAT3","0,0,0","False","1","FLOAT3","0"]}
 {"type":"AmplifyShaderEditor.SimpleTimeNode, AmplifyShaderEditor","id":37,"pos":[-3540.437,1751.069],"params":["Inherit","False","1","0","FLOAT","1","False","5","FLOAT","0","FLOAT","1","FLOAT","2","FLOAT","3","FLOAT","4"]}
 {"type":"AmplifyShaderEditor.RangedFloatNode, AmplifyShaderEditor","id":38,"pos":[-3536,1928],"params":["Inherit","False","Property","_PannerDuration","PannerDuration","10","0","Create","True","0","0","0","False","0","False","Object","-1","","1","3.333333","0","0","0","1","FLOAT","0"]}
 {"type":"AmplifyShaderEditor.SimpleDivideOpNode, AmplifyShaderEditor","id":40,"pos":[-3300.437,1751.069],"params":["Inherit","False","2","0","FLOAT","0","False","1","FLOAT","0","False","1","FLOAT","0"]}
@@ -1690,6 +1691,7 @@ Version=19910
 {"wire":[77,0,74,0]}
 {"wire":[77,1,75,0]}
 {"wire":[77,2,76,0]}
+{"wire":[87,0,77,0]}
 {"wire":[40,0,37,0]}
 {"wire":[40,1,38,0]}
 {"wire":[41,0,47,0]}
@@ -1733,7 +1735,7 @@ Version=19910
 {"wire":[65,1,67,0]}
 {"wire":[56,0,58,0]}
 {"wire":[56,1,60,0]}
-{"wire":[17,0,77,0]}
+{"wire":[17,0,87,0]}
 {"wire":[17,1,70,5]}
 {"wire":[17,2,78,0]}
 {"wire":[69,0,64,0]}
@@ -1750,4 +1752,4 @@ Version=19910
 {"wire":[1,7,82,0]}
 {"wire":[1,8,81,0]}
 ASEEND*/
-//CHKSM=155AB136DACBFE656119215203944AC22DB9F3D9
+//CHKSM=67217906816DD27336D9371A751D60E152EE99F5
