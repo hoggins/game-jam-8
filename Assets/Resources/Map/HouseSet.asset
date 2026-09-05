@@ -58,6 +58,16 @@ MonoBehaviour:
     size: {x: 2, y: 1}
     enabled: 1
     difficultyLevel: 3
+  - name: House02
+    prefab: {fileID: 2256713952819970624, guid: c8cf614f9f473f04aa9e95c712ef9c63, type: 3}
+    size: {x: 1, y: 1}
+    enabled: 1
+    difficultyLevel: 1
+  - name: House02_2
+    prefab: {fileID: 8635080864412073820, guid: 007ade94c4480164f974abe0558d8934, type: 3}
+    size: {x: 1, y: 1}
+    enabled: 1
+    difficultyLevel: 1
   specials:
   - type: 0
     prefab: {fileID: 6775418544681209697, guid: f1baf58a7ee9643a987187050600e04a, type: 3}
