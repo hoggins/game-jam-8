@@ -18,7 +18,9 @@ namespace Destruction
     private FlowMapNoGoZone _noGoZone;
     private BoxCollider _navigationCollider;
     private DecayPart[] _parts;
+    private Renderer[] _renderers;
     private bool _destroyed;
+    private bool _visible = true;
 
     public event Action<DestructibleObject> Destroyed;
 
@@ -35,6 +37,7 @@ namespace Destruction
       _noGoZone = GetComponent<FlowMapNoGoZone>();
       _navigationCollider = GetComponent<BoxCollider>();
       _parts = GetComponentsInChildren<DecayPart>();
+      _renderers = GetComponentsInChildren<Renderer>(true);
 
       // A part only needs a live Rigidbody once it actually breaks off (added in Impulse below);
       // with thousands of houses on a big map, a Rigidbody sitting on every intact part is pure
@@ -43,6 +46,21 @@ namespace Destruction
       foreach (var part in _parts)
         foreach (var collider in part.GetComponents<Collider>())
           collider.enabled = false;
+    }
+
+    // Driven by EnvironmentVisibilityService: a house far from the player still needs its
+    // no-go zone/collider/health live for pathfinding and damage, but nobody is looking at it, so
+    // its renderers can sit disabled — one less object for the camera's per-frame culling pass to
+    // consider, which matters a lot when thousands of houses are spawned at once.
+    public void SetVisible(bool visible)
+    {
+      if (_visible == visible)
+        return;
+
+      _visible = visible;
+      foreach (var renderer in _renderers)
+        if (renderer != null)
+          renderer.enabled = visible;
     }
 
     public void Break(Vector3 origin) =>

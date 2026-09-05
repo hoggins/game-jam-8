@@ -83,6 +83,14 @@ namespace App
         .AsSelf();
 
       builder.Register<MapEnvironmentSpawner>(Lifetime.Singleton).AsSelf();
+
+      var visibilitySettings = Resources.Load<Map.EnvironmentVisibilitySettings>("EnvironmentVisibilitySettings");
+      if (visibilitySettings == null)
+        throw new System.InvalidOperationException("EnvironmentVisibilitySettings asset was not found in Resources.");
+
+      builder.RegisterInstance(visibilitySettings);
+      builder.RegisterEntryPoint<Map.EnvironmentVisibilityService>(Lifetime.Singleton)
+        .AsSelf();
     }
   }
 }
