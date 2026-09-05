@@ -19,6 +19,7 @@ namespace Weapons
     [SerializeField, Min(0)] private int _attackFxPrewarmCount = 8;
     [SerializeField] private Transform _attackFxPoint;
     [SerializeField] private bool _attachAttackFxToPlayer;
+    [SerializeField] private Vector3 _hitFxOffset;
 
     [Inject] private CharacterService _playerService;
     [Inject] private BattleService _battleService;
@@ -77,7 +78,7 @@ namespace Weapons
 
       var point = _attackFxPoint != null ? _attackFxPoint : transform;
       var parent = _attachAttackFxToPlayer ? transform.root : null;
-      var attackFx = SpawnFx(_attackFxPrefab, point.position, point.rotation, parent);
+      var attackFx = SpawnFx(_attackFxPrefab, point.position + _hitFxOffset, point.rotation, parent);
       if (attackFx == null)
         return;
 
