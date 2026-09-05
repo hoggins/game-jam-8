@@ -53,6 +53,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Battle.BattleDefeatUi
   _content: {fileID: 897731221571498845}
   _continueButton: {fileID: 6376635608004557623}
+  _messageText: {fileID: 5006633406640806378}
+  _diedMessage: 'Out of <color=#FF4E4E>health</color>, out of the fight.
+
+    Empower
+    yourself and get even.'
+  _timerExpiredMessage: 'The <color=#FF4E4E>clock</color> quacked before you did.
+
+    Empower
+    yourself and beat it.'
   _transitionDuration: 0.2
   _transitionCurve:
     serializedVersion: 2
@@ -293,9 +302,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Ducks gonna celebrate.
+  m_text: 'Out of <color=#FF4E4E>health</color>, out of the fight.
 
-    Empower to punish them!'
+    Empower yourself
+    and get even.'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 879dd6613e6954151bee20dbd7eba2e3, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: 8feaf6e9f89d64393b6ed62586ac8a27, type: 2}
@@ -348,7 +358,7 @@ MonoBehaviour:
   m_ActiveFontFeatures: 6e72656b
   m_enableExtraPadding: 0
   checkPaddingRequired: 0
-  m_isRichText: 0
+  m_isRichText: 1
   m_EmojiFallbackSupport: 1
   m_parseCtrlCharacters: 0
   m_isOrthographic: 1

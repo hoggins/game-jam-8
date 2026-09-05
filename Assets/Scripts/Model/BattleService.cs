@@ -7,6 +7,13 @@ using VContainer.Unity;
 
 namespace Model
 {
+  /// Why the run ended. Drives the copy on the defeat screen.
+  public enum DefeatReason
+  {
+    CharacterDied,
+    TimerExpired,
+  }
+
   [Preserve]
   public sealed class BattleService : IInitializable, ITickable, IDisposable
   {
@@ -46,6 +53,9 @@ namespace Model
 
     public float Timer { get; private set; }
 
+    /// Set right before BattleDefeated fires, so subscribers can tell a death from a timeout.
+    public DefeatReason LastDefeatReason { get; private set; }
+
     /// The base clock plus the seconds the character's Timer stat has bought.
     private float StartingDuration => _battleBalance.BattleDuration + _characterService.Timer;
 
@@ -64,7 +74,7 @@ namespace Model
 
     void IInitializable.Initialize()
     {
-      _characterService.Died += DefeatBattle;
+      _characterService.Died += OnCharacterDied;
       _characterService.TimerBonusAdded += OnTimerBonusAdded;
     }
 
@@ -99,7 +109,7 @@ namespace Model
       {
         _defeatDelay -= Time.deltaTime;
         if (_defeatDelay <= 0f)
-          DefeatBattle();
+          DefeatBattle(DefeatReason.TimerExpired);
 
         return;
       }
@@ -126,7 +136,7 @@ namespace Model
 
     void IDisposable.Dispose()
     {
-      _characterService.Died -= DefeatBattle;
+      _characterService.Died -= OnCharacterDied;
       _characterService.TimerBonusAdded -= OnTimerBonusAdded;
     }
 
@@ -178,12 +188,15 @@ namespace Model
       BattleWon?.Invoke();
     }
 
-    private void DefeatBattle()
+    private void OnCharacterDied() => DefeatBattle(DefeatReason.CharacterDied);
+
+    private void DefeatBattle(DefeatReason reason)
     {
       if (!IsBattleActive)
         return;
 
       IsBattleActive = false;
+      LastDefeatReason = reason;
       HandleBattleEnd();
       BattleDefeated?.Invoke();
     }

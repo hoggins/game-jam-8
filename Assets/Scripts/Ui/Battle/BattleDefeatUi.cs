@@ -3,6 +3,7 @@ using App;
 using Metagame.MainMenu;
 using Model;
 using ScenesManagement;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using VContainer;
@@ -13,6 +14,14 @@ namespace Battle
   {
     [SerializeField] private GameObject _content;
     [SerializeField] private Button _continueButton;
+    [SerializeField] private TMP_Text _messageText;
+
+    [SerializeField, TextArea]
+    private string _diedMessage = "Out of <color=#FF4E4E>health</color>, out of the fight.\nEmpower yourself and get even.";
+
+    [SerializeField, TextArea]
+    private string _timerExpiredMessage = "The <color=#FF4E4E>clock</color> quacked before you did.\nEmpower yourself and beat it.";
+
     [SerializeField, Min(0f)] private float _transitionDuration = 0.2f;
     [SerializeField] private AnimationCurve _transitionCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
     [SerializeField, Min(0f)] private float _hiddenScale = 0.9f;
@@ -49,7 +58,17 @@ namespace Battle
       _continueButton.onClick.RemoveListener(Continue);
     }
 
-    private void Show() => SetVisible(true);
+    private void Show()
+    {
+      if (_messageText != null)
+      {
+        _messageText.text = _battleService.LastDefeatReason == DefeatReason.TimerExpired
+          ? _timerExpiredMessage
+          : _diedMessage;
+      }
+
+      SetVisible(true);
+    }
 
     private void Continue()
     {
