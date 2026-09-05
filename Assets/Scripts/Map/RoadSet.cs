@@ -10,6 +10,12 @@ namespace Map
     TwoWay,
   }
 
+  public enum RoadKind
+  {
+    NoLine,
+    Line,
+  }
+
   [Flags]
   public enum RoadConnections
   {
@@ -45,6 +51,7 @@ namespace Map
     public string name = "Road";
     public GameObject prefab;
     public RoadPieceShape shape;
+    public RoadKind kind = RoadKind.NoLine;
 
     [Tooltip("The arms this prefab is authored to satisfy at 0 degrees rotation, each with the " +
              "road width it expects on that side. Fill needs to rotate this in 90-degree steps " +

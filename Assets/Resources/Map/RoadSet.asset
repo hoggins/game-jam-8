@@ -14,49 +14,89 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Map.RoadSet
   pieces:
   - name: Isolated
-    prefab: {fileID: 3607606792022405278, guid: 5472b24594f764b3799a2b57f27109d9, type: 3}
+    prefab: {fileID: 6374624518989225873, guid: e1cfb4f9f87a1164ca27b42a5e03bab9, type: 3}
     shape: 0
+    kind: 0
+    connections: []
+    enabled: 1
+  - name: Isolated (Line)
+    prefab: {fileID: 2816683369796937795, guid: 8c16c7acced521b4f9e80429c9583b60, type: 3}
+    shape: 0
+    kind: 1
     connections: []
     enabled: 1
   - name: Dead End
-    prefab: {fileID: 1288141981208260646, guid: 5b4c717027fd84b6392fe6c2c4227c23, type: 3}
+    prefab: {fileID: 6374624518989225873, guid: e1cfb4f9f87a1164ca27b42a5e03bab9, type: 3}
     shape: 1
+    kind: 0
+    connections:
+    - direction: 1
+      width: 1
+    enabled: 1
+  - name: Dead End (Line)
+    prefab: {fileID: 2816683369796937795, guid: 8c16c7acced521b4f9e80429c9583b60, type: 3}
+    shape: 1
+    kind: 1
     connections:
     - direction: 1
       width: 1
     enabled: 1
   - name: Straight
-    prefab: {fileID: 1288141981208260646, guid: 5b4c717027fd84b6392fe6c2c4227c23, type: 3}
+    prefab: {fileID: 8872097106873305134, guid: 05e8f80f4a24a00439e495048e73f214, type: 3}
     shape: 2
+    kind: 0
     connections:
-    - direction: 1
+    - direction: 2
       width: 1
-    - direction: 4
+    - direction: 8
+      width: 1
+    enabled: 1
+  - name: Straight (Line)
+    prefab: {fileID: 2816683369796937795, guid: 8c16c7acced521b4f9e80429c9583b60, type: 3}
+    shape: 2
+    kind: 1
+    connections:
+    - direction: 2
+      width: 1
+    - direction: 8
       width: 1
     enabled: 1
   - name: Corner
-    prefab: {fileID: 1288141981208260646, guid: 5b4c717027fd84b6392fe6c2c4227c23, type: 3}
+    prefab: {fileID: 6740290517943118297, guid: 4a3e9c4011079b64ca79b8c93597510a, type: 3}
     shape: 3
+    kind: 0
     connections:
-    - direction: 1
+    - direction: 8
       width: 1
-    - direction: 2
+    - direction: 1
       width: 1
     enabled: 1
-  - name: T Junction
-    prefab: {fileID: 3607606792022405278, guid: 5472b24594f764b3799a2b57f27109d9, type: 3}
-    shape: 4
+  - name: Corner (Line)
+    prefab: {fileID: 6396494984914869935, guid: c6de029201e7d5d4c8ca1b686074f83e, type: 3}
+    shape: 3
+    kind: 1
     connections:
-    - direction: 1
-      width: 1
     - direction: 2
       width: 1
     - direction: 4
       width: 1
     enabled: 1
+  - name: T Junction
+    prefab: {fileID: 6942484369693787873, guid: bbf39f0844d746a4c9f380a25ff0f245, type: 3}
+    shape: 4
+    kind: 0
+    connections:
+    - direction: 8
+      width: 1
+    - direction: 2
+      width: 1
+    - direction: 1
+      width: 1
+    enabled: 1
   - name: Cross
-    prefab: {fileID: 3607606792022405278, guid: 5472b24594f764b3799a2b57f27109d9, type: 3}
+    prefab: {fileID: 5951429463193144775, guid: 2f09c107037d45545a1c21da816c6ec3, type: 3}
     shape: 5
+    kind: 0
     connections:
     - direction: 1
       width: 1
@@ -68,11 +108,38 @@ MonoBehaviour:
       width: 1
     enabled: 1
   - name: Corner (One-Way)
-    prefab: {fileID: 3811683999856341327, guid: adcab9ad5550f4e0db3da77a22879fe6, type: 3}
+    prefab: {fileID: 6740290517943118297, guid: 4a3e9c4011079b64ca79b8c93597510a, type: 3}
     shape: 3
+    kind: 1
     connections:
+    - direction: 8
+      width: 0
     - direction: 1
       width: 0
+    enabled: 1
+  - name: T Junction (Line)
+    prefab: {fileID: 7568319318893301860, guid: 0f61ba111cb8dc14fbcfc92c52d3c83f, type: 3}
+    shape: 4
+    kind: 1
+    connections:
+    - direction: 1
+      width: 1
     - direction: 2
-      width: 0
+      width: 1
+    - direction: 4
+      width: 1
+    enabled: 1
+  - name: Cross (Line)
+    prefab: {fileID: 452354946855410185, guid: 01c5d6ba9f2f85041ab46d79045f1c9d, type: 3}
+    shape: 5
+    kind: 1
+    connections:
+    - direction: 1
+      width: 1
+    - direction: 2
+      width: 1
+    - direction: 4
+      width: 1
+    - direction: 8
+      width: 1
     enabled: 1

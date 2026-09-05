@@ -114,12 +114,15 @@ namespace Map
         }
 
       if (roadSet != null)
-        foreach (var placement in RoadFiller.Fill(mapData, roadSet))
+        foreach (var placement in RoadFiller.Fill(mapData, roadSet, seed))
         {
+          var cellPosition = new Vector2(
+            placement.Cell.x + 0.5f + placement.CellOffset.x,
+            placement.Cell.y + 0.5f + placement.CellOffset.y);
           var position = new Vector3(
-            placement.Cell.x * cellSize + cellSize * 0.5f,
+            cellPosition.x * cellSize,
             0f,
-            placement.Cell.y * cellSize + cellSize * 0.5f);
+            cellPosition.y * cellSize);
           var rotation = Quaternion.Euler(0f, placement.RotationDegrees, 0f);
 
           SpawnInstance(placement.Piece.prefab, placement.Piece.name, position, rotation, container);
