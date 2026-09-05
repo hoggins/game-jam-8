@@ -18,8 +18,9 @@ namespace Arrow
   ///
   /// One timer arrow exists per battle. It is moved rather than duplicated when the timer respawns,
   /// and smashing it costs the player timer navigation for the rest of the run — see
-  /// <see cref="Timer.TimerRespawnService"/>, which reads <see cref="Current"/>. A goal arrow uses
-  /// the same controller but stays scene-authored and does not claim that timer slot.
+  /// <see cref="Timer.TimerRespawnService"/>, which reads <see cref="Current"/> and
+  /// <see cref="GoalCurrent"/>. A goal arrow uses the same controller but claims its own special
+  /// slot so it can be repositioned without replacing the timer arrow.
   /// </summary>
   [DisallowMultipleComponent]
   public sealed class BattleArrowObject : MonoBehaviour
@@ -35,7 +36,10 @@ namespace Arrow
     /// gets handed an arrow that is already on its way out.
     public static BattleArrowObject Current { get; private set; }
 
-    [Tooltip("Object this arrow points at. Timer arrows are moved by TimerRespawnService; the goal arrow stays scene-authored.")]
+    /// The one live goal arrow, or null after it has been smashed.
+    public static BattleArrowObject GoalCurrent { get; private set; }
+
+    [Tooltip("Object this arrow points at. Both timer and goal arrows are moved by TimerRespawnService.")]
     [SerializeField] private Target _target = Target.Timer;
 
     [Tooltip("The single destructible group that makes up the glyph. Found in children when unset.")]
@@ -65,6 +69,8 @@ namespace Arrow
 
       if (_target == Target.Timer)
         Current = this;
+      else
+        GoalCurrent = this;
     }
 
     private void OnEnable()
@@ -94,6 +100,9 @@ namespace Arrow
     {
       if (Current == this)
         Current = null;
+
+      if (GoalCurrent == this)
+        GoalCurrent = null;
     }
 
     /// Aiming happens in LateUpdate so the HUD camera is rolled after the game camera has finished
@@ -279,6 +288,9 @@ namespace Arrow
       // timer respawning in that window must treat the arrow as gone, not move a corpse.
       if (Current == this)
         Current = null;
+
+      if (GoalCurrent == this)
+        GoalCurrent = null;
 
       DisableHudCamera();
     }

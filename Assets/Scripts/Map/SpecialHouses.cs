@@ -15,5 +15,9 @@ namespace Map
     /// The player's health bar. Placed once at the start of a battle and never respawned or moved:
     /// smashing it is self-harm, so it must not come back offering a second chance to do it.
     Health = 3,
+
+    /// The compass arrow for the final goal. It is placed and moved with the other specials, but it
+    /// has its own slot so it can coexist with the timer arrow.
+    GoalArrow = 4,
   }
 }

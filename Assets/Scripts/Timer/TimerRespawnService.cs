@@ -79,7 +79,13 @@ namespace Timer
 
         if (special.type == SpecialHouses.Arrow)
         {
-          MoveArrow(anchor, player, minDistance, maxDistance);
+          MoveArrow(SpecialHouses.Arrow, BattleArrowObject.Current, anchor, player, minDistance, maxDistance);
+          continue;
+        }
+
+        if (special.type == SpecialHouses.GoalArrow)
+        {
+          MoveArrow(SpecialHouses.GoalArrow, BattleArrowObject.GoalCurrent, anchor, player, minDistance, maxDistance);
           continue;
         }
 
@@ -95,22 +101,22 @@ namespace Timer
     }
 
     /// <summary>
-    /// The compass arrow is the one special that is never respawned. There is exactly one per
-    /// battle: while it stands, a new timer moves it somewhere new along the route rather than
-    /// handing the player a second one, so the navigation aid has to be found again; once it is
-    /// smashed it is gone for the rest of the battle, and losing your bearings is the price of
-    /// having broken it.
+    /// Compass arrows are the specials that are never duplicated. There is one timer arrow and one
+    /// goal arrow per battle: while either stands, a new timer moves it somewhere new along the
+    /// route rather than handing the player a second one, so the navigation aid has to be found
+    /// again; once smashed it is gone for the rest of the battle.
     ///
     /// <see cref="BattleArrowObject.Current"/> is null in exactly that second case, which is why
     /// nothing here spawns a replacement.
     /// </summary>
-    private void MoveArrow(Vector3 anchor, Transform player, float minDistance, float maxDistance)
+    private void MoveArrow(
+      SpecialHouses type, BattleArrowObject arrow, Vector3 anchor, Transform player,
+      float minDistance, float maxDistance)
     {
-      var arrow = BattleArrowObject.Current;
       if (arrow == null)
         return;
 
-      _spawner.TryMoveSpecial(SpecialHouses.Arrow, arrow.gameObject, anchor, player, minDistance, maxDistance);
+      _spawner.TryMoveSpecial(type, arrow.gameObject, anchor, player, minDistance, maxDistance);
     }
   }
 }

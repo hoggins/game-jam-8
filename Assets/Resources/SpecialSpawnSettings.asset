@@ -45,3 +45,12 @@ MonoBehaviour:
       minDistance: 0
       maxDistance: 30
     respawns: []
+  - type: 4
+    initial:
+      minDistance: 0
+      maxDistance: 20
+    respawns:
+    - minDistance: 0
+      maxDistance: 30
+    - minDistance: 0
+      maxDistance: 50

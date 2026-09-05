@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Arrow;
 using Balance;
+using Map;
 using Movement;
 using SceneHud;
 using UnityEditor;
@@ -23,7 +24,10 @@ namespace Destruction.Editor
     private const string ArrowPrefabPath = "Assets/Resources/Descructable/BattleArrow.prefab";
     private const string GoalArrowPrefabPath = "Assets/Resources/Descructable/TheGoalArrow.prefab";
     private const string BattleHudPrefabPath = "Assets/Resources/Prefabs/UI/Battle/BattleHud.prefab";
+    private const string HouseSetPath = "Assets/Resources/Map/HouseSet.asset";
+    private const string SpecialSpawnSettingsPath = "Assets/Resources/SpecialSpawnSettings.asset";
     private const int DefaultGoalMaxHealth = 100;
+    private const int GoalArrowSpecialSize = 2;
 
     private GameObject _sourcePrefab;
     [SerializeField] private string _goalPrefabPath = DefaultGoalPrefabPath;
@@ -46,6 +50,7 @@ namespace Destruction.Editor
       {
         CreateGoalVariant(source, DefaultGoalPrefabPath, DefaultGoalMaxHealth),
         CreateGoalArrowVariant(),
+        EnsureGoalArrowSpecialSetup(),
         EnsureGoalHudWidget(),
       };
 
@@ -79,6 +84,9 @@ namespace Destruction.Editor
 
       if (GUILayout.Button("Create / Configure TheGoal Arrow Variant"))
         Debug.Log(CreateGoalArrowVariant());
+
+      if (GUILayout.Button("Configure TheGoal Arrow Special"))
+        Debug.Log(EnsureGoalArrowSpecialSetup());
 
       if (GUILayout.Button("Add TheGoal HUD Widget"))
         Debug.Log(EnsureGoalHudWidget());
@@ -158,6 +166,93 @@ namespace Destruction.Editor
       {
         DestroyImmediate(instance);
       }
+    }
+
+    public static string EnsureGoalArrowSpecialSetup()
+    {
+      return string.Join("\n", EnsureGoalArrowSpecialEntry(), EnsureGoalArrowSpawnRange());
+    }
+
+    private static string EnsureGoalArrowSpecialEntry()
+    {
+      var houseSet = AssetDatabase.LoadAssetAtPath<HouseSet>(HouseSetPath);
+      var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(GoalArrowPrefabPath);
+      if (houseSet == null)
+        return $"HouseSet asset was not found at {HouseSetPath}.";
+      if (prefab == null)
+        return $"TheGoal arrow prefab was not found at {GoalArrowPrefabPath}.";
+
+      var serialized = new SerializedObject(houseSet);
+      serialized.Update();
+      var specials = serialized.FindProperty("specials");
+      SerializedProperty entry = null;
+      for (var i = 0; i < specials.arraySize; i++)
+      {
+        var candidate = specials.GetArrayElementAtIndex(i);
+        if (candidate.FindPropertyRelative("type").intValue == (int)SpecialHouses.GoalArrow)
+        {
+          entry = candidate;
+          break;
+        }
+      }
+
+      if (entry == null)
+      {
+        specials.InsertArrayElementAtIndex(specials.arraySize);
+        entry = specials.GetArrayElementAtIndex(specials.arraySize - 1);
+      }
+
+      entry.FindPropertyRelative("type").intValue = (int)SpecialHouses.GoalArrow;
+      entry.FindPropertyRelative("prefab").objectReferenceValue = prefab;
+      entry.FindPropertyRelative("size").vector2IntValue =
+        new Vector2Int(GoalArrowSpecialSize, GoalArrowSpecialSize);
+      entry.FindPropertyRelative("enabled").boolValue = true;
+
+      serialized.ApplyModifiedPropertiesWithoutUndo();
+      EditorUtility.SetDirty(houseSet);
+      AssetDatabase.SaveAssets();
+      return $"TheGoal arrow special entry configured in {HouseSetPath}.";
+    }
+
+    private static string EnsureGoalArrowSpawnRange()
+    {
+      var settings = AssetDatabase.LoadAssetAtPath<SpecialSpawnSettings>(SpecialSpawnSettingsPath);
+      if (settings == null)
+        return $"SpecialSpawnSettings asset was not found at {SpecialSpawnSettingsPath}.";
+
+      var serialized = new SerializedObject(settings);
+      serialized.Update();
+      var ranges = serialized.FindProperty("ranges");
+      for (var i = 0; i < ranges.arraySize; i++)
+      {
+        var entry = ranges.GetArrayElementAtIndex(i);
+        if (entry.FindPropertyRelative("type").intValue == (int)SpecialHouses.GoalArrow)
+          return "TheGoal arrow spawn range is already configured.";
+      }
+
+      ranges.InsertArrayElementAtIndex(ranges.arraySize);
+      var range = ranges.GetArrayElementAtIndex(ranges.arraySize - 1);
+      range.FindPropertyRelative("type").intValue = (int)SpecialHouses.GoalArrow;
+
+      var initial = range.FindPropertyRelative("initial");
+      initial.FindPropertyRelative("minDistance").floatValue = 0f;
+      initial.FindPropertyRelative("maxDistance").floatValue = 20f;
+
+      var respawns = range.FindPropertyRelative("respawns");
+      respawns.arraySize = 2;
+      SetSpawnDistance(respawns.GetArrayElementAtIndex(0), 0f, 30f);
+      SetSpawnDistance(respawns.GetArrayElementAtIndex(1), 0f, 50f);
+
+      serialized.ApplyModifiedPropertiesWithoutUndo();
+      EditorUtility.SetDirty(settings);
+      AssetDatabase.SaveAssets();
+      return $"TheGoal arrow spawn range configured in {SpecialSpawnSettingsPath}.";
+    }
+
+    private static void SetSpawnDistance(SerializedProperty property, float minDistance, float maxDistance)
+    {
+      property.FindPropertyRelative("minDistance").floatValue = minDistance;
+      property.FindPropertyRelative("maxDistance").floatValue = maxDistance;
     }
 
     public static string EnsureGoalHudWidget()

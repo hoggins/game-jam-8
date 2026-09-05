@@ -12,6 +12,7 @@ namespace Map
     // Extra margin added on top of a special's real bounding box when clearing houses out of its
     // way, so the cleared area isn't drawn exactly flush with the mesh.
     private const float SpecialClearMargin = 5f;
+    private const int SpecialPlacementAttemptCount = 20;
     // The camera only shows a small part of the map at once. Keeping every child renderer of every
     // spawned map element registered with the renderer culler makes the CPU pay for tens of
     // thousands of renderers every frame, even when they are hundreds of metres away. Buildings
@@ -261,10 +262,11 @@ namespace Map
       if (!TryResolveSpecial(type, "TrySpawnSpecial", out var special))
         return false;
 
-      PickPlacement(anchor, lookTarget, minDistance, maxDistance, out var position, out var rotation);
       var worldHalfExtents = SpecialHalfExtents(special);
 
-      if (HasSpecialOverlap(position, rotation, worldHalfExtents, null))
+      if (!TryPickSpecialPlacement(
+            anchor, lookTarget, minDistance, maxDistance, worldHalfExtents, null,
+            out var position, out var rotation))
       {
         Debug.LogWarning($"MapEnvironmentSpawner.TrySpawnSpecial: '{type}' placement overlaps another special object; spawn skipped.");
         return false;
@@ -308,10 +310,11 @@ namespace Map
       if (!TryResolveSpecial(type, "TryMoveSpecial", out var special))
         return false;
 
-      PickPlacement(anchor, lookTarget, minDistance, maxDistance, out var position, out var rotation);
       var worldHalfExtents = SpecialHalfExtents(special);
 
-      if (HasSpecialOverlap(position, rotation, worldHalfExtents, instance.transform))
+      if (!TryPickSpecialPlacement(
+            anchor, lookTarget, minDistance, maxDistance, worldHalfExtents, instance.transform,
+            out var position, out var rotation))
       {
         Debug.LogWarning($"MapEnvironmentSpawner.TryMoveSpecial: '{type}' relocation overlaps another special object; move skipped.");
         return false;
@@ -359,6 +362,22 @@ namespace Map
           }
 
       Debug.LogWarning($"MapEnvironmentSpawner.{caller}: no enabled '{type}' entry configured on the HouseSet.");
+      return false;
+    }
+
+    private bool TryPickSpecialPlacement(
+      Vector3 anchor, Transform lookTarget, float minDistance, float maxDistance,
+      Vector2 worldHalfExtents, Transform exclude, out Vector3 position, out Quaternion rotation)
+    {
+      for (var attempt = 0; attempt < SpecialPlacementAttemptCount; attempt++)
+      {
+        PickPlacement(anchor, lookTarget, minDistance, maxDistance, out position, out rotation);
+        if (!HasSpecialOverlap(position, rotation, worldHalfExtents, exclude))
+          return true;
+      }
+
+      position = default;
+      rotation = Quaternion.identity;
       return false;
     }
 
