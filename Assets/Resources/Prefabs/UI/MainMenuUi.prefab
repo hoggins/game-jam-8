@@ -27,7 +27,7 @@ RectTransform:
   m_GameObject: {fileID: 33932286687966791}
   m_LocalRotation: {x: -0, y: -0, z: -0.13917309, w: 0.9902681}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.4226, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 7718166509634039761}
@@ -58,7 +58,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.5019608}
+  m_Color: {r: 0, g: 0, b: 0, a: 0.8509804}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -207,7 +207,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: f5d0b6642ab428341b1ee5b54ada7be6, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 82aa9ea46e98d5e469db36cb24925d8e, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -275,7 +275,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.5019608}
+  m_Color: {r: 0, g: 0, b: 0, a: 0.8509804}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -1774,6 +1774,14 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.x
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2631400072034875021, guid: dc5847794be89477eb53531a0c371f28, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2929776175106537701, guid: dc5847794be89477eb53531a0c371f28, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3922866051023020770, guid: dc5847794be89477eb53531a0c371f28, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -1827,6 +1835,18 @@ PrefabInstance:
       value: 650
       objectReference: {fileID: 0}
     - target: {fileID: 4279428745316008901, guid: dc5847794be89477eb53531a0c371f28, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.82
+      objectReference: {fileID: 0}
+    - target: {fileID: 4279428745316008901, guid: dc5847794be89477eb53531a0c371f28, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.82
+      objectReference: {fileID: 0}
+    - target: {fileID: 4279428745316008901, guid: dc5847794be89477eb53531a0c371f28, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.82
+      objectReference: {fileID: 0}
+    - target: {fileID: 4279428745316008901, guid: dc5847794be89477eb53531a0c371f28, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
       objectReference: {fileID: 0}
@@ -1873,6 +1893,30 @@ PrefabInstance:
     - target: {fileID: 4279428745316008901, guid: dc5847794be89477eb53531a0c371f28, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4279428745316008901, guid: dc5847794be89477eb53531a0c371f28, type: 3}
+      propertyPath: m_ConstrainProportionsScale
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6156660154259685038, guid: dc5847794be89477eb53531a0c371f28, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 1600
+      objectReference: {fileID: 0}
+    - target: {fileID: 6156660154259685038, guid: dc5847794be89477eb53531a0c371f28, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6156660154259685038, guid: dc5847794be89477eb53531a0c371f28, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6156660154259685038, guid: dc5847794be89477eb53531a0c371f28, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6156660154259685038, guid: dc5847794be89477eb53531a0c371f28, type: 3}
+      propertyPath: m_ConstrainProportionsScale
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7005743250181408527, guid: dc5847794be89477eb53531a0c371f28, type: 3}
       propertyPath: m_AnchorMax.y
