@@ -109,7 +109,7 @@ namespace Health
 
     public void TakeDamage(int damage, Vector3 origin)
     {
-      if (damage < 0 || !IsAlive || !_isLive)
+      if (damage < 0 || !IsAlive || !_isLive || _battleService.IsWinning)
         return;
 
       if (_hitFx != null)

@@ -149,7 +149,7 @@ MonoBehaviour:
     m_RotationOrder: 4
   _attachRotationMin: {x: -30, y: -180, z: -30}
   _attachRotationMax: {x: 30, y: 180, z: 30}
-  _flyUpSpeed: 12
+  _flyUpAcceleration: 36
 --- !u!114 &1475305018739610222
 MonoBehaviour:
   m_ObjectHideFlags: 0

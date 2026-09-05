@@ -40,7 +40,7 @@ namespace Combat
     [SerializeField] private Vector3 _attachRotationMax = new(30f, 180f, 30f);
 
     [Header("Victory")]
-    [SerializeField, Min(0f)] private float _flyUpSpeed = 12f;
+    [SerializeField, Min(0f)] private float _flyUpAcceleration = 24f;
 
     [Inject] private Pool _pool;
     [Inject] private CharacterService _characterService;
@@ -67,6 +67,7 @@ namespace Combat
     private bool _hasAttacked;
     private bool _isAttached;
     private bool _isFlyingUp;
+    private float _flyUpVelocity;
 
     public int CurrentHealth { get; private set; }
     public bool IsAlive => CurrentHealth > 0 && !_isDying;
@@ -93,6 +94,7 @@ namespace Combat
       _hasAttacked = false;
       _isAttached = false;
       _isFlyingUp = false;
+      _flyUpVelocity = 0f;
       _player = null;
       ApplyRandomAppearance();
       _death?.ResetVisual();
@@ -111,7 +113,8 @@ namespace Combat
 
       if (_isFlyingUp)
       {
-        transform.position += Vector3.up * (_flyUpSpeed * Time.deltaTime);
+        _flyUpVelocity += _flyUpAcceleration * Time.deltaTime;
+        transform.position += Vector3.up * (_flyUpVelocity * Time.deltaTime);
         return;
       }
 
@@ -173,6 +176,7 @@ namespace Combat
         return;
 
       _isFlyingUp = true;
+      _flyUpVelocity = 0f;
       _hasAttacked = true;
 
       if (_attachCoroutine != null)
@@ -522,7 +526,7 @@ namespace Combat
     private void OnValidate()
     {
       _attachDuration = Mathf.Max(0f, _attachDuration);
-      _flyUpSpeed = Mathf.Max(0f, _flyUpSpeed);
+      _flyUpAcceleration = Mathf.Max(0f, _flyUpAcceleration);
       _attachPositionCurve ??= DefaultAttachCurve();
       _attachRotationCurve ??= DefaultAttachCurve();
 
