@@ -70,7 +70,7 @@ Material:
     - _Float0: 1
     - _Inflate: 0
     - _Keyword0: 0
-    - _MainTexMul: 2
+    - _MainTexMul: 3
     - _Metal: 0
     - _PannerDuration: 24
     - _PannerJitterAmmount: 1

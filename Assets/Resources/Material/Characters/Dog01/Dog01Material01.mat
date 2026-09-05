@@ -88,7 +88,7 @@ Material:
     - _SpecularHighlights: 1
     - _XRMotionVectorsPass: 1
     m_Colors:
-    - _Color0: {r: 1, g: 0.63795877, b: 0, a: 0}
+    - _Color0: {r: 1, g: 1, b: 1, a: 0}
     - _Color1: {r: 1, g: 1, b: 1, a: 0}
     - _Color2: {r: 1, g: 1, b: 1, a: 0}
     - _PrintsColor: {r: 1, g: 1, b: 1, a: 0}
