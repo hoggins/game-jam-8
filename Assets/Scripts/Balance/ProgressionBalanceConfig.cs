@@ -7,7 +7,7 @@ namespace Balance
   {
     [Header("Starting Stats")]
     [SerializeField, Min(0)] private int _startingAttackPower = 1;
-    [SerializeField, Min(0)] private int _startingMaxHealth = 300000;
+    [SerializeField, Min(0)] private int _startingMaxHealth = 12;
     [SerializeField, Min(0)] private int _startingSpeed = 6;
     [SerializeField, Min(0)] private int _startingGunPower = 1;
     [Tooltip("Seconds added to the battle clock on top of BattleBalanceConfig.BattleDuration.")]

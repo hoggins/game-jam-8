@@ -45,6 +45,7 @@ namespace Balance
       new DestructibleMaxHealthEntry { type = DestructibleObjectType.TimerDigit, maxHealth = 15 },
       new DestructibleMaxHealthEntry { type = DestructibleObjectType.TimerDivider, maxHealth = 10 },
       new DestructibleMaxHealthEntry { type = DestructibleObjectType.Arrow, maxHealth = 12 },
+      new DestructibleMaxHealthEntry { type = DestructibleObjectType.HealthBar, maxHealth = 48 },
     };
 
     public float BattleDuration => _battleDuration;

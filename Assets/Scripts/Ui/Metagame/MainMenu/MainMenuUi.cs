@@ -1,4 +1,5 @@
 using App;
+using Model;
 using ScenesManagement;
 using UnityEngine;
 using UnityEngine.UI;
@@ -20,10 +21,12 @@ namespace Metagame.MainMenu
     [SerializeField] private Button _playButton;
     [SerializeField] private Button _progressionButton;
     [SerializeField] private Button _quitButton;
+    [SerializeField] private Button _resetButton;
     [SerializeField] private Button _progressionBackButton;
     [SerializeField] private Button _progressionPlayButton;
 
     [Inject] private SceneService _sceneService;
+    [Inject] private Storage _storage;
 
     private void Awake()
     {
@@ -36,6 +39,8 @@ namespace Metagame.MainMenu
       _playButton.onClick.AddListener(Play);
       _progressionButton.onClick.AddListener(OpenProgression);
       _quitButton.onClick.AddListener(Quit);
+      if (_resetButton != null)
+        _resetButton.onClick.AddListener(ResetProgress);
       _progressionBackButton.onClick.AddListener(ShowMainMenu);
       if (_progressionPlayButton != null)
         _progressionPlayButton.onClick.AddListener(Play);
@@ -51,6 +56,8 @@ namespace Metagame.MainMenu
       _playButton.onClick.RemoveListener(Play);
       _progressionButton.onClick.RemoveListener(OpenProgression);
       _quitButton.onClick.RemoveListener(Quit);
+      if (_resetButton != null)
+        _resetButton.onClick.RemoveListener(ResetProgress);
       _progressionBackButton.onClick.RemoveListener(ShowMainMenu);
       if (_progressionPlayButton != null)
         _progressionPlayButton.onClick.RemoveListener(Play);
@@ -68,6 +75,9 @@ namespace Metagame.MainMenu
 
     private static void Quit() =>
       Application.Quit();
+
+    private void ResetProgress() =>
+      _storage.Reset();
 
     private void ShowMainMenu()
     {

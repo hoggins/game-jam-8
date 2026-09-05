@@ -11,5 +11,8 @@ namespace SceneHud
 
     /// The compass arrow pointing at the current battle timer.
     Arrow = 1,
+
+    /// The player's health bar, standing in the world as 24 smashable pixels.
+    Hp = 2,
   }
 }

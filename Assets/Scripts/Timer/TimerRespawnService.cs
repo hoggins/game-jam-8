@@ -83,6 +83,13 @@ namespace Timer
           continue;
         }
 
+        // The health bar is the player's own health made physical, so putting a fresh one in front of
+        // him would hand back what he spent smashing the last one. It is placed once by
+        // MapEnvironmentSpawner.SpawnInitialSpecials and stays where it was put until the next
+        // battle.
+        if (special.type == SpecialHouses.Health)
+          continue;
+
         _spawner.TrySpawnSpecial(special.type, anchor, player, minDistance, maxDistance, out _);
       }
     }

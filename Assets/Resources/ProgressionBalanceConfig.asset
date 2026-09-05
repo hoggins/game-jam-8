@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: ProgressionBalanceConfig
   m_EditorClassIdentifier: Assembly-CSharp::Balance.ProgressionBalanceConfig
   _startingAttackPower: 5
-  _startingMaxHealth: 300000
+  _startingMaxHealth: 12
   _startingSpeed: 6
   _startingGunPower: 1
   _startingTimer: 0

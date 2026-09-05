@@ -18,6 +18,12 @@ namespace Model
     private const string GunPowerKey = "Player.GunPower";
     private const string TimerKey = "Player.Timer";
 
+    private static readonly string[] AllKeys =
+    {
+      AttackPowerKey, MaxHealthKey, DucksKilledKey, BuildingsDestroyedKey,
+      CurrentCoinsKey, SpeedKey, GunPowerKey, TimerKey,
+    };
+
     private int _attackPower;
     private int _maxHealth;
     private int _ducksKilled;
@@ -93,7 +99,24 @@ namespace Model
       set => SetValue(ref _timer, value, TimerKey);
     }
 
+    /// Wipes every stored player value and reloads the balance defaults.
+    public void Reset()
+    {
+      foreach (var key in AllKeys)
+        PlayerPrefs.DeleteKey(key);
+
+      PlayerPrefs.Save();
+      Load();
+      StatisticsChanged?.Invoke();
+    }
+
     void IInitializable.Initialize()
+    {
+      Load();
+      _isInitialized = true;
+    }
+
+    private void Load()
     {
       _attackPower = PlayerPrefs.GetInt(AttackPowerKey, _progressionBalance.StartingAttackPower);
       _maxHealth = PlayerPrefs.GetInt(MaxHealthKey, _progressionBalance.StartingMaxHealth);
@@ -103,7 +126,6 @@ namespace Model
       _speed = PlayerPrefs.GetInt(SpeedKey, _progressionBalance.StartingSpeed);
       _gunPower = PlayerPrefs.GetInt(GunPowerKey, _progressionBalance.StartingGunPower);
       _timer = PlayerPrefs.GetInt(TimerKey, _progressionBalance.StartingTimer);
-      _isInitialized = true;
     }
 
     void IDisposable.Dispose()

@@ -28,3 +28,6 @@ MonoBehaviour:
     respawnMaxDistances:
     - 30
     - 50
+  - type: 3
+    initialMaxDistance: 30
+    respawnMaxDistances: []

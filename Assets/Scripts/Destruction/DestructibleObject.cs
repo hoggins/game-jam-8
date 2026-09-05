@@ -67,6 +67,21 @@ namespace Destruction
       return true;
     }
 
+    /// <summary>
+    /// Knocks one specific part off. <see cref="FallOutRandomPart"/> is the right call when the parts
+    /// are interchangeable rubble; this one is for objects whose parts mean something in order — a
+    /// bar that has to empty from one end rather than developing holes in the middle.
+    /// </summary>
+    public bool FallOutPart(DecayPart part, Vector3 origin)
+    {
+      RemoveMissingParts();
+      if (_destroyed || part == null || !_parts.Remove(part))
+        return false;
+
+      DetachPart(part, origin, _breakMagnitude);
+      return true;
+    }
+
     public void Impulse(Vector3 origin, float magnitude)
     {
       if (_destroyed)

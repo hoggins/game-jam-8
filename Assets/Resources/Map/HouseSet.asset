@@ -81,6 +81,10 @@ MonoBehaviour:
     prefab: {fileID: 7020311343624116166, guid: cb625942f376c4375a3b6c0e80359604, type: 3}
     size: {x: 2, y: 2}
     enabled: 1
+  - type: 3
+    prefab: {fileID: 5628438009409716600, guid: 52d40c64033b448f68ad44fe8727e957, type: 3}
+    size: {x: 2, y: 1}
+    enabled: 1
   difficultyRanges:
   - minDistance: 0
     maxDistance: 5

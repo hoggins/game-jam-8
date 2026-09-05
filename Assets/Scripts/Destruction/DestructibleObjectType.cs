@@ -6,5 +6,6 @@ namespace Destruction
     TimerDigit = 1,
     TimerDivider = 2,
     Arrow = 3,
+    HealthBar = 4,
   }
 }
