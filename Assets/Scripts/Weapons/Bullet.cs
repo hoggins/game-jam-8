@@ -53,7 +53,12 @@ namespace Weapons
       _owner = null;
     }
 
-    public void Launch(Vector3 direction, int damage, Transform owner, float scale = 1f)
+    public void Launch(
+      Vector3 direction,
+      int damage,
+      Transform owner,
+      float scale = 1f,
+      float speedMultiplier = 1f)
     {
       if (damage < 0)
         throw new ArgumentOutOfRangeException(nameof(damage), damage, "Damage cannot be negative.");
@@ -65,8 +70,9 @@ namespace Weapons
       _damage = damage;
       _owner = owner;
       scale = Mathf.Max(0f, scale);
+      speedMultiplier = Mathf.Max(0f, speedMultiplier);
       var projectileScale = Mathf.Lerp(1f, scale, ProjectileScaleGrowth);
-      _launchSpeed = _speed * projectileScale;
+      _launchSpeed = _speed * projectileScale * speedMultiplier;
       _remainingLifetime = _lifetime * projectileScale;
       _launched = true;
     }
@@ -114,7 +120,7 @@ namespace Weapons
       if (!hasHit)
         return false;
 
-      if (damageable != null && damageable.IsAlive)
+      if (damageable != null && damageable.IsAlive && IsOnScreen(hitPosition))
       {
         if (damageable is IImpactDamageable impactDamageable)
           impactDamageable.TakeDamage(_damage, transform.position);
@@ -127,6 +133,20 @@ namespace Weapons
       // A bullet is consumed by the first non-owner collider on a damageable or actor layer.
       Release();
       return true;
+    }
+
+    private static bool IsOnScreen(Vector3 worldPosition)
+    {
+      var camera = Camera.main;
+      if (camera == null)
+        return true;
+
+      var viewportPosition = camera.WorldToViewportPoint(worldPosition);
+      return viewportPosition.z > 0f
+        && viewportPosition.x >= 0f
+        && viewportPosition.x <= 1f
+        && viewportPosition.y >= 0f
+        && viewportPosition.y <= 1f;
     }
 
     private bool TryGetMobHit(
