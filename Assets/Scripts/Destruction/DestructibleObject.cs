@@ -12,7 +12,7 @@ using VContainer;
 
 namespace Destruction
 {
-  [RequireComponent(typeof(FlowMapNoGoZone))]
+  // [RequireComponent(typeof(FlowMapNoGoZone))]
   public class DestructibleObject : MonoBehaviour
   {
     private static readonly ProfilerMarker ImpulseMarker =
