@@ -91,7 +91,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b5d7c088409d9a40b7b09aa707777f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineOrbitalFollow
-  TargetOffset: {x: 0, y: 18, z: 0}
+  TargetOffset: {x: 0, y: 30, z: 0}
   TrackerSettings:
     BindingMode: 4
     PositionDamping: {x: 1, y: 1, z: 1}
@@ -129,8 +129,8 @@ MonoBehaviour:
     Wrap: 0
     Recentering:
       Enabled: 1
-      Wait: 1
-      Time: 4
+      Wait: 0
+      Time: 2
     Restrictions: 0
   RadialAxis:
     Value: 3.75
