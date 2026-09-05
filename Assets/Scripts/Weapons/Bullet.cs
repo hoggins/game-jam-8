@@ -112,7 +112,7 @@ namespace Weapons
       {
         hasHit = true;
         closestDistance = physicsHit.distance;
-        damageable = FindDamageable(physicsHit.collider);
+        damageable = FindMobDamageable(physicsHit.collider);
         hitPosition = physicsHit.point;
         hitRotation = Quaternion.LookRotation(physicsHit.normal, Vector3.up);
       }
@@ -130,7 +130,8 @@ namespace Weapons
 
       SpawnHitFx(hitPosition, hitRotation);
 
-      // A bullet is consumed by the first non-owner collider on a damageable or actor layer.
+      // A bullet is consumed by the first non-owner collider on an actor or wall layer. Only
+      // mob colliders are damageable; destructible walls still produce a hit effect and stop it.
       Release();
       return true;
     }
@@ -245,16 +246,9 @@ namespace Weapons
       _pool.Get(_hitFxPrefab, position, rotation);
     }
 
-    private static IDamageable FindDamageable(Collider collider)
+    private static IDamageable FindMobDamageable(Collider collider)
     {
-      var components = collider.GetComponentsInParent<MonoBehaviour>();
-      for (var i = 0; i < components.Length; i++)
-      {
-        if (components[i] is IDamageable damageable)
-          return damageable;
-      }
-
-      return null;
+      return collider.GetComponentInParent<Mob>();
     }
 
     private void Release()
