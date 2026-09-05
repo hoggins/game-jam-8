@@ -314,7 +314,11 @@ namespace Movement
         {
           var zone = noGoZones[i];
           var collider = zone != null ? zone.Collider : null;
-          if (collider == null || !collider.enabled || !collider.gameObject.activeInHierarchy)
+          if (zone == null
+              || zone.IgnoreMobs
+              || collider == null
+              || !collider.enabled
+              || !collider.gameObject.activeInHierarchy)
             continue;
 
         var bounds = collider.bounds;

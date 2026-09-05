@@ -326,10 +326,11 @@ namespace Movement
 
       // The only colliders these physics queries can ever hit are the no-go zone boxes that
       // already mark flow-field cells blocked, so an agent nowhere near a blocked cell cannot be
-      // touching a wall. Skipping the queries there matters a lot on a map with many buildings,
-      // since most agents spend most of their time in open space between them.
+      // touching a wall. Props are intentionally omitted from the mob flow map, so keep the
+      // player's physical check unconditional; the player still collides with those props.
       var checkRadius = radius + _settings.WallSkin + displacement.magnitude;
-      if (!_flowMap.HasBlockedCellNear(position, checkRadius))
+      var isPlayer = agent.Controller.Layer == MovementLayer.Player;
+      if (!isPlayer && !_flowMap.HasBlockedCellNear(position, checkRadius))
       {
         position += displacement;
         position.y = agent.Position.y;
@@ -485,6 +486,8 @@ namespace Movement
       collider != null
       && !collider.transform.IsChildOf(agent.transform)
       && collider.GetComponentInParent<MovementAgent>() == null
+      && !(agent.Controller.Layer == MovementLayer.Mob
+           && collider.GetComponentInParent<FlowMapNoGoZone>()?.IgnoreMobs == true)
       && !Physics.GetIgnoreLayerCollision(
         agent.gameObject.layer,
         collider.gameObject.layer);

@@ -1,4 +1,5 @@
 using System;
+using Destruction;
 using UnityEngine;
 
 namespace Movement
@@ -16,6 +17,7 @@ namespace Movement
     internal event Action<FlowMapNoGoZone> Destroyed;
 
     internal Collider Collider { get; private set; }
+    internal bool IgnoreMobs { get; private set; }
 
     private void Awake() =>
       Initialize();
@@ -34,6 +36,12 @@ namespace Movement
     {
       if (Collider == null)
         Collider = GetComponent<Collider>();
+
+      // Sidewalk props are destructible, but mobs are allowed to walk through them. Keep this
+      // classification on the no-go zone so both the flow map and wall collision use the same rule.
+      var health = GetComponent<DestructibleHealth>();
+      IgnoreMobs = CompareTag("Prop")
+                   || (health != null && health.ObjectType == DestructibleObjectType.Prop);
     }
 
     internal bool OverlapsCircle(Vector2 center, float radius) =>
