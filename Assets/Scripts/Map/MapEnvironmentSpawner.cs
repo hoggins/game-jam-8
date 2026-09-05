@@ -10,11 +10,11 @@ namespace Map
   {
     private const string ContainerName = "SpawnedEnvironment";
     // The camera only shows a small part of the map at once. Keeping every child renderer of every
-    // destructible building registered with the renderer culler makes the CPU pay for tens of
+    // spawned map element registered with the renderer culler makes the CPU pay for tens of
     // thousands of renderers every frame, even when they are hundreds of metres away. Buildings
-    // remain active (their navigation colliders and destruction scripts still work); only their
-    // visual renderers are distance/frustum culled as a group. The distance bands are exposed in
-    // EnvironmentVisibilitySettings so they can be tuned without changing code.
+    // and ground cells remain active (their colliders and destruction scripts still work); only
+    // their visual renderers are distance/frustum culled as a group. The distance bands are
+    // exposed in EnvironmentVisibilitySettings so they can be tuned without changing code.
 
     private readonly Dictionary<int, RuntimeEnvironmentObject> _objects = new();
     private readonly HashSet<Vector2Int> _occupied = new();
@@ -67,12 +67,23 @@ namespace Map
       _cellSize = cellSize;
       var originCell = new Vector2(parent.position.x / cellSize, parent.position.z / cellSize);
 
-      var placements = MapFiller.Fill(mapData, houseSet, originCell, seed);
-      InitializeRenderCulling(placements.Count);
+      var housePlacements = MapFiller.Fill(mapData, houseSet, originCell, seed);
+      var roadPlacements = roadSet != null
+        ? RoadFiller.Fill(mapData, roadSet, seed)
+        : new List<RoadPlacement>();
+      var sidewalkPlacements = sidewalkSet != null
+        ? SidewalkFiller.Fill(mapData, sidewalkSet, seed)
+        : new List<SidewalkPlacement>();
 
-      for (var placementIndex = 0; placementIndex < placements.Count; placementIndex++)
+      // Reserve stable index ranges for each placement type. A skipped house can leave a hole
+      // in its range, but it must not shift the ground indices that were already allocated.
+      var roadCullingStart = housePlacements.Count;
+      var sidewalkCullingStart = roadCullingStart + roadPlacements.Count;
+      InitializeRenderCulling(sidewalkCullingStart + sidewalkPlacements.Count);
+
+      for (var placementIndex = 0; placementIndex < housePlacements.Count; placementIndex++)
       {
-        var placement = placements[placementIndex];
+        var placement = housePlacements[placementIndex];
         if (!TryReserve(placement.Cell, placement.House.size))
           continue;
 
@@ -95,33 +106,35 @@ namespace Map
           destructible.Destroyed += _ => Release(id);
       }
 
-      if (roadSet != null)
-        foreach (var placement in RoadFiller.Fill(mapData, roadSet, seed))
-        {
-          var cellPosition = new Vector2(
-            placement.Cell.x + 0.5f + placement.CellOffset.x,
-            placement.Cell.y + 0.5f + placement.CellOffset.y);
-          var position = new Vector3(
-            cellPosition.x * cellSize,
-            0f,
-            cellPosition.y * cellSize);
-          var rotation = Quaternion.Euler(0f, placement.RotationDegrees, 0f);
+      for (var placementIndex = 0; placementIndex < roadPlacements.Count; placementIndex++)
+      {
+        var placement = roadPlacements[placementIndex];
+        var cellPosition = new Vector2(
+          placement.Cell.x + 0.5f + placement.CellOffset.x,
+          placement.Cell.y + 0.5f + placement.CellOffset.y);
+        var position = new Vector3(
+          cellPosition.x * cellSize,
+          0f,
+          cellPosition.y * cellSize);
+        var rotation = Quaternion.Euler(0f, placement.RotationDegrees, 0f);
 
-          var instance = Object.Instantiate(placement.Piece.prefab, position, rotation, _container);
-          instance.name = placement.Piece.name;
-        }
+        var instance = Object.Instantiate(placement.Piece.prefab, position, rotation, _container);
+        instance.name = placement.Piece.name;
+        RegisterRenderers(roadCullingStart + placementIndex, instance);
+      }
 
-      if (sidewalkSet != null)
-        foreach (var placement in SidewalkFiller.Fill(mapData, sidewalkSet, seed))
-        {
-          var position = new Vector3(
-            placement.Cell.x * cellSize + cellSize * 0.5f,
-            0f,
-            placement.Cell.y * cellSize + cellSize * 0.5f);
+      for (var placementIndex = 0; placementIndex < sidewalkPlacements.Count; placementIndex++)
+      {
+        var placement = sidewalkPlacements[placementIndex];
+        var position = new Vector3(
+          placement.Cell.x * cellSize + cellSize * 0.5f,
+          0f,
+          placement.Cell.y * cellSize + cellSize * 0.5f);
 
-          var instance = Object.Instantiate(placement.Piece.prefab, position, Quaternion.identity, _container);
-          instance.name = placement.Piece.name;
-        }
+        var instance = Object.Instantiate(placement.Piece.prefab, position, Quaternion.identity, _container);
+        instance.name = placement.Piece.name;
+        RegisterRenderers(sidewalkCullingStart + placementIndex, instance);
+      }
 
       if (_cullingGroup != null)
       {
