@@ -9,5 +9,6 @@ namespace Destruction
     HealthBar = 4,
     Upgrade = 5,
     Goal = 6,
+    Prop = 7,
   }
 }

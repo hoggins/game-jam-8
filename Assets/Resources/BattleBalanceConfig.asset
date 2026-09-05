@@ -47,3 +47,5 @@ MonoBehaviour:
     maxHealth: 20
   - type: 6
     maxHealth: 100
+  - type: 7
+    maxHealth: 1

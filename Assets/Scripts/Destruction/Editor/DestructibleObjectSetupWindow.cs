@@ -8,6 +8,8 @@ namespace Destruction.Editor
 {
   public sealed class DestructibleObjectSetupWindow : EditorWindow
   {
+    private const string PropTag = "Prop";
+
     private GameObject _prefab;
     [SerializeField] private PartDecaySettings baseDecaySettings = new();
 
@@ -43,6 +45,9 @@ namespace Destruction.Editor
       {
         if (GUILayout.Button("Configure Prefab"))
           ConfigurePrefab(_prefab);
+
+        if (GUILayout.Button("Configure Prop"))
+          ConfigureProp(_prefab);
       }
 
       if (GUILayout.Button("Apply to All"))
@@ -81,6 +86,20 @@ namespace Destruction.Editor
 
     private void ConfigurePrefab(GameObject prefab)
     {
+      ConfigurePrefab(prefab, DestructibleObjectType.House, null, true);
+    }
+
+    private void ConfigureProp(GameObject prefab)
+    {
+      ConfigurePrefab(prefab, DestructibleObjectType.Prop, PropTag, false);
+    }
+
+    private void ConfigurePrefab(
+      GameObject prefab,
+      DestructibleObjectType objectType,
+      string tag,
+      bool spawnDestructionFx)
+    {
       var prefabPath = AssetDatabase.GetAssetPath(prefab);
       var root = PrefabUtility.LoadPrefabContents(prefabPath);
       if (root == null)
@@ -100,7 +119,7 @@ namespace Destruction.Editor
       try
       {
         var meshCount = ConfigureMeshParts(root, baseDecaySettings, decaySettings.MaxFallSpeedMultiplier);
-        ConfigureRoot(root);
+        ConfigureRoot(root, objectType, tag, spawnDestructionFx);
 
         EditorUtility.SetDirty(root);
         PrefabUtility.SaveAsPrefabAsset(root, prefabPath, out var saved);
@@ -179,7 +198,11 @@ namespace Destruction.Editor
 
     private const string HitFxMaterialName = "GenericMaterial02";
 
-    private static void ConfigureRoot(GameObject root)
+    private static void ConfigureRoot(
+      GameObject root,
+      DestructibleObjectType objectType,
+      string tag,
+      bool spawnDestructionFx)
     {
       var boxCollider = root.GetComponent<BoxCollider>();
       if (boxCollider == null)
@@ -197,14 +220,27 @@ namespace Destruction.Editor
       if (root.GetComponent<FlowMapNoGoZone>() == null)
         root.AddComponent<FlowMapNoGoZone>();
 
-      if (root.GetComponent<DestructibleObject>() == null)
-        root.AddComponent<DestructibleObject>();
+      var destructibleObject = root.GetComponent<DestructibleObject>();
+      if (destructibleObject == null)
+        destructibleObject = root.AddComponent<DestructibleObject>();
 
-      if (root.GetComponent<DestructibleHealth>() == null)
-        root.AddComponent<DestructibleHealth>();
+      var destructibleObjectSo = new SerializedObject(destructibleObject);
+      destructibleObjectSo.FindProperty("_spawnDestructionFx").boolValue = spawnDestructionFx;
+      destructibleObjectSo.ApplyModifiedPropertiesWithoutUndo();
+
+      var destructibleHealth = root.GetComponent<DestructibleHealth>();
+      if (destructibleHealth == null)
+        destructibleHealth = root.AddComponent<DestructibleHealth>();
+
+      var destructibleHealthSo = new SerializedObject(destructibleHealth);
+      destructibleHealthSo.FindProperty("_objectType").intValue = (int)objectType;
+      destructibleHealthSo.ApplyModifiedPropertiesWithoutUndo();
 
       if (root.GetComponent<HitFx>() == null)
         root.AddComponent<HitFx>();
+
+      if (!string.IsNullOrEmpty(tag))
+        root.tag = tag;
     }
 
     private static bool UsesHitFxMaterial(GameObject root)
