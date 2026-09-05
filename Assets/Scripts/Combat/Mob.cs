@@ -115,7 +115,7 @@ namespace Combat
 
       // Attached mobs are thrown from the player; unattached mobs are thrown from their current
       // position. Attached mobs also need their local attachment animation stopped first.
-      _death?.Play(_isAttached ? _player : transform, _movementAgent, OnDeathPlayed);
+      _death?.Play(_isAttached ? _player : null, _movementAgent, OnDeathPlayed);
     }
 
     private void OnDeathPlayed()
