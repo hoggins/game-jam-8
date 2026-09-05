@@ -59,6 +59,13 @@ namespace Map.Editor
       DrawObjectField(so.FindProperty("mapData"), "Map Data", typeof(MapData));
       DrawObjectField(so.FindProperty("houseSet"), "House Set", typeof(HouseSet));
       DrawObjectField(so.FindProperty("roadSet"), "Road Set", typeof(RoadSet));
+
+      using (new EditorGUI.DisabledScope(_levelData.RoadSet == null))
+      {
+        if (GUILayout.Button("Configure all"))
+          LevelEditorUtility.ConfigureAllRoadPieces(_levelData.RoadSet);
+      }
+
       DrawObjectField(so.FindProperty("sidewalkSet"), "Sidewalk Set", typeof(SidewalkSet));
       EditorGUILayout.PropertyField(so.FindProperty("seed"));
       EditorGUILayout.PropertyField(so.FindProperty("gridExtent"));

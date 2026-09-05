@@ -17,6 +17,161 @@ namespace Map.Editor
   public static class LevelEditorUtility
   {
     private const string ConstantHouseSetPath = "Assets/Resources/Map/HouseSet.asset";
+    private const string GroundLayerName = "Ground";
+    private const float MinimumGroundColliderThickness = 0.05f;
+
+    /// <summary>
+    /// Configures every unique prefab referenced by a RoadSet for ground physics.
+    /// A box collider is used because the road pieces only need a cheap, flat landing
+    /// surface; their visual mesh shape is not needed for movement collision.
+    /// </summary>
+    public static int ConfigureAllRoadPieces(RoadSet roadSet)
+    {
+      if (roadSet == null)
+      {
+        Debug.LogWarning("Cannot configure road pieces because no RoadSet is assigned.");
+        return 0;
+      }
+
+      var groundLayer = LayerMask.NameToLayer(GroundLayerName);
+      if (groundLayer < 0)
+      {
+        Debug.LogError($"Layer '{GroundLayerName}' is not defined; road pieces were not configured.");
+        return 0;
+      }
+
+      var configuredPaths = new HashSet<string>();
+      var configuredCount = 0;
+
+      foreach (var piece in roadSet.Pieces)
+      {
+        var prefab = piece?.prefab;
+        if (prefab == null)
+          continue;
+
+        var prefabPath = AssetDatabase.GetAssetPath(prefab);
+        if (string.IsNullOrEmpty(prefabPath) || !configuredPaths.Add(prefabPath))
+          continue;
+
+        if (!PrefabUtility.IsPartOfPrefabAsset(prefab))
+        {
+          Debug.LogWarning(
+            $"Road piece '{piece.name}' does not reference a prefab asset; skipping configuration.",
+            prefab);
+          continue;
+        }
+
+        var root = PrefabUtility.LoadPrefabContents(prefabPath);
+        if (root == null)
+        {
+          Debug.LogError($"Could not load road prefab contents: {prefabPath}");
+          continue;
+        }
+
+        try
+        {
+          ConfigureRoadPrefab(root, groundLayer);
+          EditorUtility.SetDirty(root);
+
+          PrefabUtility.SaveAsPrefabAsset(root, prefabPath, out var saved);
+          if (!saved)
+          {
+            Debug.LogError($"Could not save configured road prefab: {prefabPath}", root);
+            continue;
+          }
+
+          configuredCount++;
+        }
+        finally
+        {
+          PrefabUtility.UnloadPrefabContents(root);
+        }
+      }
+
+      AssetDatabase.SaveAssets();
+      Debug.Log($"Configured {configuredCount} unique road prefab(s) from RoadSet '{roadSet.name}'.");
+      return configuredCount;
+    }
+
+    private static void ConfigureRoadPrefab(GameObject root, int groundLayer)
+    {
+      foreach (var child in root.GetComponentsInChildren<Transform>(true))
+        child.gameObject.layer = groundLayer;
+
+      var collider = root.GetComponent<Collider>();
+      if (collider == null)
+        collider = root.AddComponent<BoxCollider>();
+
+      if (collider is not BoxCollider boxCollider)
+      {
+        Debug.LogWarning(
+          $"Road prefab '{root.name}' already has a {collider.GetType().Name}; leaving it unchanged.",
+          root);
+        return;
+      }
+
+      boxCollider.isTrigger = false;
+      if (!TryGetLocalRendererBounds(root, out var bounds))
+      {
+        Debug.LogWarning(
+          $"Road prefab '{root.name}' has no renderer bounds; using the default BoxCollider size.",
+          root);
+        return;
+      }
+
+      if (bounds.size.y < MinimumGroundColliderThickness)
+      {
+        var center = bounds.center;
+        center.y = bounds.max.y - MinimumGroundColliderThickness * 0.5f;
+        bounds.center = center;
+        bounds.size = new Vector3(
+          bounds.size.x,
+          MinimumGroundColliderThickness,
+          bounds.size.z);
+      }
+
+      boxCollider.center = bounds.center;
+      boxCollider.size = bounds.size;
+    }
+
+    private static bool TryGetLocalRendererBounds(GameObject root, out Bounds localBounds)
+    {
+      localBounds = default;
+      var hasBounds = false;
+
+      foreach (var renderer in root.GetComponentsInChildren<Renderer>(true))
+      {
+        foreach (var corner in GetBoundsCorners(renderer.bounds))
+        {
+          var localPoint = root.transform.InverseTransformPoint(corner);
+          if (!hasBounds)
+          {
+            localBounds = new Bounds(localPoint, Vector3.zero);
+            hasBounds = true;
+          }
+          else
+          {
+            localBounds.Encapsulate(localPoint);
+          }
+        }
+      }
+
+      return hasBounds;
+    }
+
+    private static IEnumerable<Vector3> GetBoundsCorners(Bounds bounds)
+    {
+      var min = bounds.min;
+      var max = bounds.max;
+      yield return new Vector3(min.x, min.y, min.z);
+      yield return new Vector3(min.x, min.y, max.z);
+      yield return new Vector3(min.x, max.y, min.z);
+      yield return new Vector3(min.x, max.y, max.z);
+      yield return new Vector3(max.x, min.y, min.z);
+      yield return new Vector3(max.x, min.y, max.z);
+      yield return new Vector3(max.x, max.y, min.z);
+      yield return new Vector3(max.x, max.y, max.z);
+    }
 
     /// <summary>
     /// Cells whose footprint is covered by the given material submesh, using the same
