@@ -17,11 +17,11 @@ MonoBehaviour:
   _startingSpeed: 6
   _startingGunPower: 0
   _startingTimer: 0
-  _attackPowerUpgradeCost: 100
-  _maxHealthUpgradeCost: 100
-  _speedUpgradeCost: 100
-  _gunPowerUpgradeCost: 100
-  _timerUpgradeCost: 100
+  _attackPowerUpgradeCost: 7
+  _maxHealthUpgradeCost: 5
+  _speedUpgradeCost: 6
+  _gunPowerUpgradeCost: 15
+  _timerUpgradeCost: 10
   _attackPowerUpgradeAmount: 1
   _maxHealthUpgradeAmount: 1
   _speedUpgradeAmount: 1
