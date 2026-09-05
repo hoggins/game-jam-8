@@ -1735,6 +1735,7 @@ Shader "Env/BaseEnvShader"
 }
 /*ASEBEGIN
 Version=19910
+{"type":"AmplifyShaderEditor.CommentaryNode, AmplifyShaderEditor","id":29,"pos":[-3687.164,864],"params":["Inherit","False","2006.951","1439.249","","22","48","47","46","45","44","43","42","41","40","39","38","37","33","32","28","27","30","26","51","52","53","54","PrintsCoordinates","0.4902767,1,0.4669811,1","0","0"]}
 {"type":"AmplifyShaderEditor.SimpleTimeNode, AmplifyShaderEditor","id":37,"pos":[-3540.437,1751.069],"params":["Inherit","False","1","0","FLOAT","1","False","5","FLOAT","0","FLOAT","1","FLOAT","2","FLOAT","3","FLOAT","4"]}
 {"type":"AmplifyShaderEditor.RangedFloatNode, AmplifyShaderEditor","id":38,"pos":[-3536,1928],"params":["Inherit","False","Property","_PannerDuration","PannerDuration","8","0","Create","True","0","0","0","False","0","False","Object","-1","","1","3.333333","0","0","0","1","FLOAT","0"]}
 {"type":"AmplifyShaderEditor.SimpleDivideOpNode, AmplifyShaderEditor","id":40,"pos":[-3300.437,1751.069],"params":["Inherit","False","2","0","FLOAT","0","False","1","FLOAT","0","False","1","FLOAT","0"]}
@@ -1784,7 +1785,6 @@ Version=19910
 {"type":"AmplifyShaderEditor.RangedFloatNode, AmplifyShaderEditor","id":24,"pos":[-1192,536],"params":["Inherit","False","Property","_PrintsNormalScale","PrintsNormalScale","3","0","Create","True","0","0","0","False","0","False","Object","-1","","1","0","0","0","0","1","FLOAT","0"]}
 {"type":"AmplifyShaderEditor.SimpleMultiplyOpNode, AmplifyShaderEditor","id":70,"pos":[304,1048],"params":["Inherit","False","3","3","0","FLOAT3","0,0,0","False","1","FLOAT","0","False","2","FLOAT","0","False","1","FLOAT3","0"]}
 {"type":"AmplifyShaderEditor.DynamicAppendNode, AmplifyShaderEditor","id":75,"pos":[1128,1216],"params":["Inherit","False","FLOAT3","4","0","FLOAT","0","False","1","FLOAT","0","False","2","FLOAT","0","False","3","FLOAT","0","False","1","FLOAT3","0"]}
-{"type":"AmplifyShaderEditor.CommentaryNode, AmplifyShaderEditor","id":29,"pos":[-3687.164,864],"params":["Inherit","False","2006.951","1439.249","","22","48","47","46","45","44","43","42","41","40","39","38","37","33","32","28","27","30","26","51","52","53","54","PrintsCoordinates","0.4902767,1,0.4669811,1","0","0"]}
 {"type":"AmplifyShaderEditor.ObjectPositionNode, AmplifyShaderEditor","id":28,"pos":[-2538,1224],"params":["Inherit","False","0","4","FLOAT3","0","FLOAT","1","FLOAT","2","FLOAT","3"]}
 {"type":"AmplifyShaderEditor.SimpleSubtractOpNode, AmplifyShaderEditor","id":27,"pos":[-2322,952],"params":["Inherit","False","2","0","FLOAT3","0,0,0","False","1","FLOAT3","0,0,0","False","1","FLOAT3","0"]}
 {"type":"AmplifyShaderEditor.TexturePropertyNode, AmplifyShaderEditor","id":18,"pos":[-1176,216],"params":["Inherit","True","Property","_PrintsColorTex","PrintsColorTex","1","0","Create","True","0","0","0","False","0","False","","None","None","False","black","Auto","Texture2D","False","-1","0","2","SAMPLER2D","0","SAMPLERSTATE","1"]}
@@ -1919,4 +1919,4 @@ Version=19910
 {"wire":[1,4,69,0]}
 {"wire":[1,8,79,0]}
 ASEEND*/
-//CHKSM=E93A9C47071204201C0A33E6E373E55E769FC5B6
+//CHKSM=9DD9FE128BF09E66EA42EDCD46D9676D35A168AB
