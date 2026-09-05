@@ -87,7 +87,9 @@ namespace App
         throw new System.InvalidOperationException("EnvironmentVisibilitySettings asset was not found in Resources.");
 
       builder.RegisterInstance(visibilitySettings);
-      builder.Register<MapEnvironmentSpawner>(Lifetime.Singleton).AsSelf();
+      builder.Register<MapEnvironmentSpawner>(Lifetime.Singleton)
+        .AsSelf()
+        .AsImplementedInterfaces();
 
       var specialSpawnSettings = Resources.Load<Map.SpecialSpawnSettings>("SpecialSpawnSettings");
       if (specialSpawnSettings == null)

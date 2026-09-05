@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Map
 {
-  public class MapEnvironmentSpawner
+  public class MapEnvironmentSpawner : System.IDisposable
   {
     private const string ContainerName = "SpawnedEnvironment";
     // The camera only shows a small part of the map at once. Keeping every child renderer of every
@@ -405,6 +405,8 @@ namespace Map
       _frustumVisibleByObject = System.Array.Empty<bool>();
       _hasVisibilityHysteresis = false;
     }
+
+    void System.IDisposable.Dispose() => DisposeRenderCulling();
 
     private bool TryReserve(Vector2Int origin, Vector2Int size)
     {
