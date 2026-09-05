@@ -120,7 +120,7 @@ MonoBehaviour:
     Recentering:
       Enabled: 1
       Wait: 0
-      Time: 2
+      Time: 5
     Restrictions: 0
   VerticalAxis:
     Value: 19.9
@@ -130,7 +130,7 @@ MonoBehaviour:
     Recentering:
       Enabled: 1
       Wait: 0
-      Time: 2
+      Time: 1
     Restrictions: 0
   RadialAxis:
     Value: 3.75
