@@ -70,7 +70,8 @@ namespace Metagame.Stats
     private void Refresh()
     {
       _nameText.text = GetName();
-      _valueText.text = $"+{GetBonus()}";
+      var bonus = GetBonus();
+      _valueText.text = bonus > 0 ? $"+{bonus}" : "NO BONUS";
       _priceText.text = $"{GetUpgradeCost()} COINS";
       _levelText.text = $"LVL {GetLevel()}";
       _upgradeButton.interactable = GetCanUpgrade();

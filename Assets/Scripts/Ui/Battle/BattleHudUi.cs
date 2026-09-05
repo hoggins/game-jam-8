@@ -44,16 +44,29 @@ namespace Battle
       base.OnDisable();
     }
 
+    /// Cancel closes the progression screen when it is open, and otherwise toggles pause.
+    /// Both screens drive Time.timeScale, so only one of them may react to a single press.
     protected override void OnCancel()
     {
+      if (_progressionUi != null && _progressionUi.IsShown)
+      {
+        _progressionUi.Hide();
+        return;
+      }
+
       if (_pauseMenuUi != null)
         _pauseMenuUi.TogglePause();
     }
 
     private void ToggleProgressionPerformed(InputAction.CallbackContext context)
     {
-      if (_progressionUi != null)
-        _progressionUi.Toggle();
+      if (_progressionUi == null)
+        return;
+
+      if (_pauseMenuUi != null && _pauseMenuUi.IsPaused)
+        return;
+
+      _progressionUi.Toggle();
     }
   }
 }

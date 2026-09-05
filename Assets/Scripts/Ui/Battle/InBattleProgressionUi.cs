@@ -1,11 +1,10 @@
 using System.Collections;
-using App;
 using UnityEngine;
 
 namespace Battle
 {
   [RequireComponent(typeof(CanvasGroup))]
-  public class InBattleProgressionUi : UiBase
+  public class InBattleProgressionUi : MonoBehaviour
   {
     [SerializeField, Min(0f)] private float _transitionDuration = 0.2f;
     [SerializeField] private AnimationCurve _transitionCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
@@ -37,10 +36,8 @@ namespace Battle
       gameObject.SetActive(false);
     }
 
-    protected override void OnDisable()
+    private void OnDisable()
     {
-      base.OnDisable();
-
       if (_transitionCoroutine == null)
         return;
 
@@ -48,8 +45,11 @@ namespace Battle
       _transitionCoroutine = null;
     }
 
-    protected override void OnCancel() =>
-      Hide();
+    private void OnDestroy()
+    {
+      if (IsShown)
+        Time.timeScale = 1f;
+    }
 
     private void SetShown(bool isShown)
     {
@@ -57,6 +57,7 @@ namespace Battle
         return;
 
       IsShown = isShown;
+      Time.timeScale = isShown ? 0f : 1f;
       SetVisible(isShown);
     }
 
