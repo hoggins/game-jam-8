@@ -734,13 +734,15 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5d4e61f203ff04e04b0a0023d8765a94, type: 3}
   m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::Metagame.Stats.ProgressionItemUi
+  m_EditorClassIdentifier: Assembly-CSharp::Metagame.Stats.CardItemUi
   _statType: 0
   _upgradeButton: {fileID: 1307780891688715086}
   _nameText: {fileID: 7550196266720414561}
   _valueText: {fileID: 7915561730044150053}
   _priceText: {fileID: 4825643537432711768}
   _levelText: {fileID: 4757956844710658359}
+  _affordablePriceColor: {r: 1, g: 0.98039216, b: 0.92941177, a: 1}
+  _unaffordablePriceColor: {r: 1, g: 0.30588236, b: 0.30588236, a: 1}
 --- !u!114 &1307780891688715086
 MonoBehaviour:
   m_ObjectHideFlags: 0

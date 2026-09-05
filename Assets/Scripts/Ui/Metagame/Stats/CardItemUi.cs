@@ -18,7 +18,7 @@ namespace Metagame.Stats
     Timer,
   }
 
-  public class ProgressionItemUi : MonoBehaviour
+  public class CardItemUi : MonoBehaviour
   {
     [SerializeField] private CharacterStatType _statType;
     [SerializeField] private Button _upgradeButton;
@@ -26,6 +26,8 @@ namespace Metagame.Stats
     [SerializeField] private TMP_Text _valueText;
     [SerializeField] private TMP_Text _priceText;
     [SerializeField] private TMP_Text _levelText;
+    [SerializeField] private Color _affordablePriceColor = new Color32(0xFF, 0xFA, 0xED, 0xFF);
+    [SerializeField] private Color _unaffordablePriceColor = new Color32(0xFF, 0x4E, 0x4E, 0xFF);
 
     [Inject] private readonly CharacterService _characterService;
     [Inject] private readonly ProgressionBalanceConfig _progressionBalance;
@@ -39,6 +41,7 @@ namespace Metagame.Stats
     {
       _upgradeButton.onClick.AddListener(UpgradeClick);
       _characterService.ProgressionChanged += Refresh;
+      _characterService.CoinsChanged += OnCoinsChanged;
       Refresh();
     }
 
@@ -46,7 +49,10 @@ namespace Metagame.Stats
     {
       _upgradeButton.onClick.RemoveListener(UpgradeClick);
       _characterService.ProgressionChanged -= Refresh;
+      _characterService.CoinsChanged -= OnCoinsChanged;
     }
+
+    private void OnCoinsChanged(int coins) => Refresh();
 
     private void UpgradeClick()
     {
@@ -77,8 +83,20 @@ namespace Metagame.Stats
       _nameText.text = GetName();
       var bonus = GetBonus();
       _valueText.text = bonus > 0 ? $"+{bonus}" : "NO BONUS";
-      _priceText.text = $"{GetUpgradeCost()} COINS";
-      _levelText.text = GetIsMaxLevel() ? "MAX LVL" : $"LVL {GetLevel()}";
+      _levelText.text = $"LVL {GetLevel()}";
+
+      if (GetIsMaxLevel())
+      {
+        _priceText.text = "MAX LEVEL";
+        _priceText.color = _affordablePriceColor;
+      }
+      else
+      {
+        var cost = GetUpgradeCost();
+        _priceText.text = $"{cost} COINS";
+        _priceText.color = _characterService.CurrentCoins >= cost ? _affordablePriceColor : _unaffordablePriceColor;
+      }
+
       _upgradeButton.interactable = GetCanUpgrade();
     }
 
