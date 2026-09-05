@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 5057993940892068245}
   - component: {fileID: 8466035769035164210}
   - component: {fileID: 556613718163932121}
+  - component: {fileID: -5559137354596886112}
   m_Layer: 0
   m_Name: FxSlashAttack01
   m_TagString: Untagged
@@ -48,7 +49,7 @@ ParticleSystem:
   ringBufferMode: 0
   ringBufferLoopRange: {x: 0, y: 1}
   emitterVelocityMode: 1
-  looping: 1
+  looping: 0
   prewarm: 0
   playOnAwake: 1
   useUnscaledTime: 0
@@ -499,7 +500,7 @@ ParticleSystem:
     startRotationY:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0
+      scalar: -1.5707963
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -607,7 +608,7 @@ ParticleSystem:
     maxNumParticles: 1000
     customEmitterVelocity: {x: 0, y: 0, z: 0}
     size3D: 0
-    rotation3D: 0
+    rotation3D: 1
     gravityModifier:
       serializedVersion: 2
       minMaxState: 0
@@ -4903,3 +4904,16 @@ ParticleSystemRenderer:
   m_MeshWeighting1: 1
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
+--- !u!114 &-5559137354596886112
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4957739243701182480}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91ce2eba10f484432a01229b16f60e26, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Pooling.PoolInSeconds
+  _seconds: 2

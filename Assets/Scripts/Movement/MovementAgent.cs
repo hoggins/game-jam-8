@@ -28,10 +28,10 @@ namespace Movement
     }
 
     private void OnEnable() =>
-      _movementUpdater.Register(this);
+      _movementUpdater?.Register(this);
 
     private void OnDisable() =>
-      _movementUpdater.Unregister(this);
+      _movementUpdater?.Unregister(this);
 
     internal void ReadTransform()
     {

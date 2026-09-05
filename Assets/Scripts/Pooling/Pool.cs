@@ -44,7 +44,8 @@ namespace Pooling
     public GameObject Get(
       GameObject prefab,
       Vector3 position,
-      Quaternion rotation)
+      Quaternion rotation,
+      Transform parent = null)
     {
       if (prefab == null)
         return null;
@@ -57,12 +58,14 @@ namespace Pooling
         if (instance == null)
           continue;
 
+        instance.transform.SetParent(parent, true);
         instance.transform.SetPositionAndRotation(position, rotation);
         instance.gameObject.SetActive(true);
         return instance;
       }
 
       var created = CreateInstance(prefab);
+      created.transform.SetParent(parent, true);
       created.transform.SetPositionAndRotation(position, rotation);
       created.gameObject.SetActive(true);
       return created;

@@ -18,6 +18,7 @@ namespace Weapons
     [SerializeField] private GameObject _attackFxPrefab;
     [SerializeField, Min(0)] private int _attackFxPrewarmCount = 8;
     [SerializeField] private Transform _attackFxPoint;
+    [SerializeField] private bool _attachAttackFxToPlayer;
 
     [Inject] private CharacterService _playerService;
     [Inject] private BattleService _battleService;
@@ -64,7 +65,8 @@ namespace Weapons
         return;
 
       var point = _attackFxPoint != null ? _attackFxPoint : transform;
-      SpawnFx(_attackFxPrefab, point.position, point.rotation);
+      var parent = _attachAttackFxToPlayer ? transform.root : null;
+      SpawnFx(_attackFxPrefab, point.position, point.rotation, parent);
     }
 
     protected void PrewarmFx(GameObject prefab, int count)
@@ -72,12 +74,16 @@ namespace Weapons
       _pool?.Prewarm(prefab, count);
     }
 
-    protected void SpawnFx(GameObject prefab, Vector3 position, Quaternion rotation)
+    protected void SpawnFx(
+      GameObject prefab,
+      Vector3 position,
+      Quaternion rotation,
+      Transform parent = null)
     {
       if (_pool == null || prefab == null)
         return;
 
-      _pool.Get(prefab, position, rotation);
+      _pool.Get(prefab, position, rotation, parent);
     }
 
     private void OnValidate()
