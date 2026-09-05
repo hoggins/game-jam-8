@@ -186,6 +186,15 @@ namespace Movement
       return !_blocked[index] && _costs[index] < float.PositiveInfinity;
     }
 
+    internal bool IsInside(Vector3 position)
+    {
+      if (!_hasField)
+        return false;
+
+      var cell = PositionToCell(position, _offset, _cellSize);
+      return TryGetIndex(cell, out _);
+    }
+
     private void Recalculate(
       Vector3 targetPosition,
       IReadOnlyList<MovementAgent> agents,

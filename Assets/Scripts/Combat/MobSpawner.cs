@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using App;
 using Balance;
+using Destruction;
 using Model;
 using Movement;
 using Pooling;
@@ -19,6 +20,8 @@ namespace Combat
     private const int TopSide = 3;
     private const int SideCount = 4;
     private const int RepositionCheckInterval = 5;
+    private const float SpawnRaycastHeight = 100f;
+    private const float SpawnRaycastDistance = 200f;
 
     [Serializable]
     private sealed class SpawnItem
@@ -84,10 +87,14 @@ namespace Combat
     private float _elapsedSeconds;
     private int _nextSpawnSide;
     private int _repositionFrame;
+    private int _damagableLayerMask;
     private bool _isSpawning;
 
-    private void Awake() =>
+    private void Awake()
+    {
       this.AsInjected();
+      _damagableLayerMask = LayerMask.GetMask(DestructibleLayers.Damagable);
+    }
 
     private void OnEnable()
     {
@@ -211,8 +218,10 @@ namespace Combat
         if (!TryGetGroundPoint(camera, viewportPoint, out var candidate))
           continue;
 
-        if (!_movementUpdater.IsWalkable(candidate)
-            || !IsOutsideCameraView(candidate, side))
+        if (!IsOutsideCameraView(candidate, side)
+            || IsOnDamagableLayer(candidate)
+            || (_movementUpdater.IsInsideFlowMap(candidate)
+                && !_movementUpdater.IsWalkable(candidate)))
           continue;
 
         position = candidate;
@@ -255,6 +264,14 @@ namespace Combat
       groundPoint = ray.GetPoint(distance);
       return true;
     }
+
+    private bool IsOnDamagableLayer(Vector3 position) =>
+      Physics.Raycast(
+        position + Vector3.up * SpawnRaycastHeight,
+        Vector3.down,
+        SpawnRaycastDistance,
+        _damagableLayerMask,
+        QueryTriggerInteraction.Ignore);
 
     private bool IsOutsideCameraView(Vector3 position, int requiredSide)
     {

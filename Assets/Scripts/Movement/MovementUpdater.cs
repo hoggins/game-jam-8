@@ -38,6 +38,9 @@ namespace Movement
     internal bool IsWalkable(Vector3 position) =>
       _flowMap.IsWalkable(position);
 
+    internal bool IsInsideFlowMap(Vector3 position) =>
+      _flowMap.IsInside(position);
+
     internal void Register(MovementAgent agent)
     {
       if (!_activeAgents.Contains(agent))
