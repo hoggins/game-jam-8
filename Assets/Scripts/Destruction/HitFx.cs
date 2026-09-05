@@ -96,9 +96,13 @@ namespace Destruction
         if (renderer == null)
           continue;
 
-        renderer.GetPropertyBlock(_propertyBlock);
-        _propertyBlock.SetFloat(HitId, value);
-        renderer.SetPropertyBlock(_propertyBlock);
+        var materials = renderer.sharedMaterials;
+        for (var materialIndex = 0; materialIndex < materials.Length; materialIndex++)
+        {
+          renderer.GetPropertyBlock(_propertyBlock, materialIndex);
+          _propertyBlock.SetFloat(HitId, value);
+          renderer.SetPropertyBlock(_propertyBlock, materialIndex);
+        }
       }
     }
 

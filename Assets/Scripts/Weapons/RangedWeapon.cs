@@ -1,5 +1,7 @@
 using System;
+using Balance;
 using UnityEngine;
+using VContainer;
 
 namespace Weapons
 {
@@ -12,6 +14,8 @@ namespace Weapons
     [SerializeField] private Transform _bulletPoint;
     [SerializeField, Min(0)] private int _bulletCount;
     [SerializeField, Range(0f, 360f)] private float _bulletConeAngle;
+
+    [Inject] private ProgressionBalanceConfig _progressionBalance;
 
     public int BulletCount => _bulletCount;
 
@@ -56,7 +60,12 @@ namespace Weapons
           : null;
 
         if (bullet != null)
-          bullet.Launch(direction, damage, owner, CharacterScaleFactor);
+          bullet.Launch(
+            direction,
+            damage,
+            owner,
+            CharacterScaleFactor,
+            GetBulletSpeedMultiplier());
         else if (bulletObject != null)
           Pool.Release(bulletObject);
       }
@@ -73,6 +82,14 @@ namespace Weapons
     private void RefreshStats()
     {
       _bulletCount = Mathf.Max(0, PlayerService.GunPower);
+    }
+
+    private float GetBulletSpeedMultiplier()
+    {
+      if (_progressionBalance == null || _progressionBalance.StartingSpeed <= 0)
+        return 1f;
+
+      return Mathf.Max(0f, (float)PlayerService.Speed / _progressionBalance.StartingSpeed);
     }
 
     private Vector3 GetBulletDirection(Vector3 forward, int index, int bulletCount)

@@ -96,7 +96,12 @@ namespace Timer
         if (special.type == SpecialHouses.Health)
           continue;
 
-        _spawner.TrySpawnSpecial(special.type, anchor, player, minDistance, maxDistance, out _);
+        // A special respawns alongside every Timer death; if one is already standing from an earlier
+        // respawn, relocate it instead of spawning a duplicate on top of the world.
+        if (_spawner.TryGetCurrentSpecial(special.type, out var existing))
+          _spawner.TryMoveSpecial(special.type, existing, anchor, player, minDistance, maxDistance);
+        else
+          _spawner.TrySpawnSpecial(special.type, anchor, player, minDistance, maxDistance, out _);
       }
     }
 
