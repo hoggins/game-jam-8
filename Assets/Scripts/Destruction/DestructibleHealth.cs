@@ -12,12 +12,17 @@ namespace Destruction
   [RequireComponent(typeof(DestructibleObject))]
   public sealed class DestructibleHealth : MonoBehaviour, IImpactDamageable
   {
+    private const float MinPartFalloutHealthPercentage = 0.25f;
+    private const float MaxPartFalloutHealthPercentage = 0.35f;
+
     [SerializeField] private DestructibleObjectType _objectType;
 
     [Inject] private CharacterService _characterService;
 
     private DestructibleObject _destructibleObject;
     private HitFx _hitFx;
+    private int _maxHealth;
+    private float _nextPartFalloutDamage;
     private bool _isDestroyed;
 
     public int CurrentHealth { get; private set; }
@@ -29,7 +34,9 @@ namespace Destruction
       this.AsInjected();
       _destructibleObject = GetComponent<DestructibleObject>();
       _hitFx = GetComponent<HitFx>();
-      CurrentHealth = BattleBalance.GetDestructibleMaxHealth(_objectType);
+      _maxHealth = BattleBalance.GetDestructibleMaxHealth(_objectType);
+      CurrentHealth = _maxHealth;
+      _nextPartFalloutDamage = RollPartFalloutDamage();
     }
 
     public void TakeDamage(int damage) =>
@@ -48,6 +55,14 @@ namespace Destruction
       if (_hitFx != null)
         _hitFx.PlayHit();
 
+      var damageTaken = _maxHealth - CurrentHealth;
+      while (CurrentHealth > 0
+        && damageTaken >= _nextPartFalloutDamage
+        && _destructibleObject.FallOutRandomPart(origin))
+      {
+        _nextPartFalloutDamage += RollPartFalloutDamage();
+      }
+
       if (CurrentHealth == 0)
       {
         _isDestroyed = true;
@@ -60,5 +75,10 @@ namespace Destruction
         _destructibleObject.Break(origin);
       }
     }
+
+    private float RollPartFalloutDamage() =>
+      _maxHealth * UnityEngine.Random.Range(
+        MinPartFalloutHealthPercentage,
+        MaxPartFalloutHealthPercentage);
   }
 }
