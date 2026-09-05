@@ -38,8 +38,9 @@ namespace Map
     // spawned map element registered with the renderer culler makes the CPU pay for tens of
     // thousands of renderers every frame, even when they are hundreds of metres away. Buildings
     // and ground cells remain active (their colliders and destruction scripts still work); only
-    // their visual renderers are distance/frustum culled as a group. The distance bands are
-    // exposed in EnvironmentVisibilitySettings so they can be tuned without changing code.
+    // their visual renderers are distance culled as a group. Unity's renderer still performs its
+    // normal camera-frustum culling, while the distance bands are exposed in
+    // EnvironmentVisibilitySettings so they can be tuned without changing code.
 
     private readonly Dictionary<int, RuntimeEnvironmentObject> _objects = new();
     // Index of ids in _objects that are specials (Timer, Arrow, ...) rather than grid houses, so a
@@ -67,7 +68,6 @@ namespace Map
     private Renderer[][] _renderersByObject = System.Array.Empty<Renderer[]>();
     private BoundingSphere[] _boundingSpheres = System.Array.Empty<BoundingSphere>();
     private bool[] _distanceVisibleByObject = System.Array.Empty<bool>();
-    private bool[] _frustumVisibleByObject = System.Array.Empty<bool>();
     private bool _hasVisibilityHysteresis;
 
     public MapEnvironmentSpawner(
@@ -869,7 +869,6 @@ namespace Map
       _renderersByObject = new Renderer[objectCount][];
       _boundingSpheres = new BoundingSphere[objectCount];
       _distanceVisibleByObject = new bool[objectCount];
-      _frustumVisibleByObject = new bool[objectCount];
 
       var camera = Camera.main;
       if (camera == null)
@@ -881,6 +880,10 @@ namespace Map
       if (camera == null)
         return;
 
+      // Keep targetCamera assigned so Unity runs the CullingGroup state updates. The callback below
+      // intentionally ignores CullingGroupEvent.isVisible: that value is frustum visibility, not
+      // distance eligibility, and using it would make the configured near-player band collapse to
+      // the current viewport after movement.
       _cullingGroup = new CullingGroup
       {
         targetCamera = camera,
@@ -910,7 +913,6 @@ namespace Map
 
       _renderersByObject[index] = renderers;
       _distanceVisibleByObject[index] = true;
-      _frustumVisibleByObject[index] = true;
 
       var bounds = new Bounds(instance.transform.position, Vector3.zero);
       if (renderers.Length > 0)
@@ -941,14 +943,12 @@ namespace Map
       if (index < 0 || index >= _renderersByObject.Length)
         return;
 
-      _frustumVisibleByObject[index] = eventData.isVisible;
-
       if (eventData.currentDistance == 0)
         _distanceVisibleByObject[index] = true;
       else if (!_hasVisibilityHysteresis || eventData.currentDistance > 1)
         _distanceVisibleByObject[index] = false;
 
-      ApplyVisibility(index, _frustumVisibleByObject[index] && _distanceVisibleByObject[index]);
+      ApplyVisibility(index, _distanceVisibleByObject[index]);
     }
 
     private void ApplyVisibility(int index, bool visible)
@@ -980,7 +980,6 @@ namespace Map
       _renderersByObject = System.Array.Empty<Renderer[]>();
       _boundingSpheres = System.Array.Empty<BoundingSphere>();
       _distanceVisibleByObject = System.Array.Empty<bool>();
-      _frustumVisibleByObject = System.Array.Empty<bool>();
       _hasVisibilityHysteresis = false;
     }
 
