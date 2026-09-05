@@ -70,7 +70,8 @@ namespace Map
 
         var instance = Object.Instantiate(placement.House.prefab, position, Quaternion.identity, _container);
         instance.name = placement.House.name;
-        RegisterRenderers(placementIndex, instance);
+        if (!placement.House.unique)
+          RegisterRenderers(placementIndex, instance);
 
         var destructible = instance.GetComponentInChildren<DestructibleObject>();
         var id = _nextId++;
