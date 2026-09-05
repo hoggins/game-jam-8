@@ -52,5 +52,5 @@ MonoBehaviour:
   _bulletPrefab: {fileID: 8567486410392552277, guid: 58d27cd0443a54de8892d121e14aeab6, type: 3}
   _bulletPrewarmCount: 8
   _bulletPoint: {fileID: 0}
-  _bulletCount: 3
+  _bulletCount: 0
   _bulletConeAngle: 90

@@ -15,7 +15,7 @@ MonoBehaviour:
   _startingAttackPower: 5
   _startingMaxHealth: 12
   _startingSpeed: 6
-  _startingGunPower: 1
+  _startingGunPower: 0
   _startingTimer: 0
   _attackPowerUpgradeCost: 100
   _maxHealthUpgradeCost: 100
