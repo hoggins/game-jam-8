@@ -158,6 +158,7 @@ namespace Model
       IsWinning = true;
       _winGraceDelay = _battleBalance.WinGraceDuration;
       Time.timeScale = 1f;
+      _characterService.BeginVictoryProtection();
       BattleWinStarted?.Invoke();
 
       if (_winGraceDelay <= 0f)
@@ -171,6 +172,7 @@ namespace Model
 
       IsWinning = false;
       _winGraceDelay = 0f;
+      _characterService.EndVictoryProtection();
       HandleBattleEnd();
       BattleWon?.Invoke();
     }
@@ -200,6 +202,7 @@ namespace Model
       IsWinning = false;
       _defeatDelay = 0f;
       _winGraceDelay = 0f;
+      _characterService.EndVictoryProtection();
       Timer = StartingDuration;
       Time.timeScale = 1f;
       foreach (IBattleEnd handler in _battleEndHandlers)

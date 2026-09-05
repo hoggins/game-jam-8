@@ -106,6 +106,9 @@ namespace Combat
 
     private void Update()
     {
+      if (_battleService != null && _battleService.IsWinning && !_isFlyingUp)
+        FlyUp();
+
       if (_isFlyingUp)
       {
         transform.position += Vector3.up * (_flyUpSpeed * Time.deltaTime);

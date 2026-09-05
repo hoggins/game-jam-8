@@ -9,6 +9,7 @@ namespace Model
     private readonly Storage _storage;
     private readonly ProgressionBalanceConfig _progressionBalance;
     private readonly BattleBalanceConfig _battleBalance;
+    private bool _isVictoryProtected;
 
     public event Action Died;
     public event Action Damaged;
@@ -78,17 +79,24 @@ namespace Model
 
     void IBattleStarted.OnBattleStarted()
     {
+      _isVictoryProtected = false;
       IsInvincible = false;
       CurrentHealth = _storage.MaxHealth;
       HealthChanged?.Invoke(CurrentHealth);
     }
+
+    internal void BeginVictoryProtection() =>
+      _isVictoryProtected = true;
+
+    internal void EndVictoryProtection() =>
+      _isVictoryProtected = false;
 
     public void TakeDamage(int damage)
     {
       if (damage < 0)
         throw new ArgumentOutOfRangeException(nameof(damage), damage, "Damage cannot be negative.");
 
-      if (IsInvincible || !IsAlive)
+      if (IsInvincible || _isVictoryProtected || !IsAlive)
         return;
 
       var previousHealth = CurrentHealth;
@@ -217,7 +225,7 @@ namespace Model
 
     public void Die()
     {
-      if (!IsAlive)
+      if (_isVictoryProtected || !IsAlive)
         return;
 
       CurrentHealth = 0;
