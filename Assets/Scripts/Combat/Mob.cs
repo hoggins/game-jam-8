@@ -225,13 +225,41 @@ namespace Combat
     {
       var colliders = actor.GetComponentsInChildren<Collider>(true);
       if (TryGetRandomClosestPoint(colliders, sourcePosition, out var colliderPoint))
-        return colliderPoint;
+        return AddRandomHeight(actor, colliderPoint);
 
       var renderers = actor.GetComponentsInChildren<Renderer>(true);
       if (TryGetRandomClosestPoint(renderers, sourcePosition, out var rendererPoint))
-        return rendererPoint;
+        return AddRandomHeight(actor, rendererPoint);
 
-      return actor.position;
+      return AddRandomHeight(actor, actor.position);
+    }
+
+    private static Vector3 AddRandomHeight(Transform actor, Vector3 point)
+    {
+      var hasBounds = false;
+      var bounds = default(Bounds);
+      var colliders = actor.GetComponentsInChildren<Collider>(true);
+      for (var i = 0; i < colliders.Length; i++)
+      {
+        var collider = colliders[i];
+        if (collider == null || !collider.enabled)
+          continue;
+
+        if (hasBounds)
+          bounds.Encapsulate(collider.bounds);
+        else
+        {
+          bounds = collider.bounds;
+          hasBounds = true;
+        }
+      }
+
+      if (!hasBounds)
+        return point;
+
+      var minHeight = Mathf.Max(actor.position.y, bounds.min.y);
+      point.y = RandomBetween(minHeight, Mathf.Max(minHeight, bounds.max.y));
+      return point;
     }
 
     private static bool TryGetRandomClosestPoint(

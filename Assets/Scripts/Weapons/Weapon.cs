@@ -1,3 +1,4 @@
+using System;
 using App;
 using Model;
 using Pooling;
@@ -8,6 +9,8 @@ namespace Weapons
 {
   public abstract class Weapon : MonoBehaviour
   {
+    public event Action AttackPerformed;
+
     [Header("Attack")]
     [SerializeField, Min(0f)] private float _attackCooldown = 0.5f;
 
@@ -49,6 +52,7 @@ namespace Weapons
       _nextAttackTime = Time.time + _attackCooldown;
       SpawnAttackFx();
       Attack(_playerService.AttackPower);
+      AttackPerformed?.Invoke();
       return true;
     }
 

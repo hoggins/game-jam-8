@@ -5,6 +5,7 @@ namespace Movement
 {
   [DisallowMultipleComponent]
   [RequireComponent(typeof(MovementAgent))]
+  [RequireComponent(typeof(PlayerAnimator))]
   public sealed class PlayerMovement : MonoBehaviour, IMovementController
   {
     [Header("Input")]
@@ -20,6 +21,12 @@ namespace Movement
     [SerializeField] private MovementLayer _collidesWith = MovementLayer.Mob;
 
     private bool _enabledMoveAction;
+
+    private void Awake()
+    {
+      if (GetComponent<PlayerAnimator>() == null)
+        gameObject.AddComponent<PlayerAnimator>();
+    }
 
     float IMovementController.Speed => _speed;
     float IMovementController.Radius => _radius;
