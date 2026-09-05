@@ -265,7 +265,7 @@ MonoBehaviour:
   seed: 0
   gridExtent: 10
   showGrid: 1
-  isEditing: 1
+  isEditing: 0
 --- !u!4 &190080260
 Transform:
   m_ObjectHideFlags: 0
@@ -1226,7 +1226,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6988501443091066571, guid: 57291ee2d4b612f419a552ccd9b9850a, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -3.04
       objectReference: {fileID: 0}
     - target: {fileID: 6988501443091066571, guid: 57291ee2d4b612f419a552ccd9b9850a, type: 3}
       propertyPath: m_LocalPosition.y
@@ -1234,7 +1234,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6988501443091066571, guid: 57291ee2d4b612f419a552ccd9b9850a, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: 0.71
       objectReference: {fileID: 0}
     - target: {fileID: 6988501443091066571, guid: 57291ee2d4b612f419a552ccd9b9850a, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1263,6 +1263,10 @@ PrefabInstance:
     - target: {fileID: 6988501443091066571, guid: 57291ee2d4b612f419a552ccd9b9850a, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8384280883836899191, guid: 57291ee2d4b612f419a552ccd9b9850a, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
