@@ -354,6 +354,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a5f761aa34c145a2a29b1a79952b41c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Battle.InBattleProgressionUi
+  _closeButton: {fileID: 910362182501080475}
   _transitionDuration: 0.2
   _transitionCurve:
     serializedVersion: 2
@@ -552,6 +553,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a4cc3d4769c754d85a4ccf159f5b50a1, type: 3}
+--- !u!114 &910362182501080475 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1062715643614157053, guid: a4cc3d4769c754d85a4ccf159f5b50a1, type: 3}
+  m_PrefabInstance: {fileID: 152497502777656678}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
 --- !u!224 &7328611672068536318 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 7469698093598864024, guid: a4cc3d4769c754d85a4ccf159f5b50a1, type: 3}
