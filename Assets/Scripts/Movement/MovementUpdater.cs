@@ -9,12 +9,11 @@ namespace Movement
   {
     private const string PlayerTag = "Player";
 
-    // Ground (roads, sidewalks, terrain) only exists to give falling debris something solid to
-    // land on - it never blocks movement, and its non-convex mesh colliders don't support the
-    // ClosestPoint call ResolveWallOverlaps relies on. Excluding it here keeps wall queries to
-    // colliders that are actually walls.
+    // Houses use the Damagable layer for their movement-blocking collider. Visual child meshes
+    // use Destructable and must not participate in wall resolution: they can have different
+    // geometry from the movement collider and produce incorrect slide normals.
     private static readonly int WallLayerMask =
-      Physics.DefaultRaycastLayers & ~(1 << LayerMask.NameToLayer("Ground"));
+      1 << LayerMask.NameToLayer("Damagable");
 
     private readonly MovementSettings _settings;
 
