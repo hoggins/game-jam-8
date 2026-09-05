@@ -36,6 +36,7 @@ namespace Arrow
     private GameObject _hudCameraObject;
     private Transform _hudCamera;
     private Transform _player;
+    private Camera _viewCamera;
     private Timer.BattleTimerObject _timer;
     private bool _isDead;
 
@@ -78,8 +79,8 @@ namespace Arrow
         Current = null;
     }
 
-    /// Aiming happens in LateUpdate so the camera is rolled after the player has finished turning
-    /// for the frame; reading a stale facing shows up as the needle lagging a rotation by a frame.
+    /// Aiming happens in LateUpdate so the HUD camera is rolled after the game camera has finished
+    /// moving for the frame; reading a stale facing shows up as the needle lagging a turn by a frame.
     private void LateUpdate()
     {
       if (_isDead)
@@ -110,7 +111,10 @@ namespace Arrow
     ///
     /// The bearing is measured from the *player*, not from the arrow — the arrow is a signpost for
     /// where the player has to go, so it has to answer "which way do I turn", not "which way is the
-    /// timer from this patch of road".
+    /// timer from this patch of road". It is measured against the *camera's* facing rather than the
+    /// player's, because that is the frame the player actually reads the HUD in: with a free camera
+    /// the character can be turned anywhere while "up" on screen stays whatever the camera faces,
+    /// and a needle keyed to the character would swing every time they turned on the spot.
     /// </summary>
     private void Aim()
     {
@@ -132,8 +136,7 @@ namespace Arrow
       var toTimer = _timer.transform.position - _player.position;
       toTimer.y = 0f;
 
-      var forward = _player.forward;
-      forward.y = 0f;
+      var forward = GetCameraForward();
 
       if (toTimer.sqrMagnitude < 0.0001f || forward.sqrMagnitude < 0.0001f)
         return;
@@ -149,6 +152,29 @@ namespace Arrow
       // World rotation, not local: the roll is measured against the world, and reading it as an
       // offset from the root would apply the root's own yaw twice.
       _hudCamera.rotation = Quaternion.Euler(90f, glyphYaw - bearing, 0f);
+    }
+
+    /// <summary>
+    /// The camera's facing flattened onto the ground plane, which is what "up" on the HUD means.
+    ///
+    /// A camera looking straight down has no forward left once the vertical is dropped, so it falls
+    /// back to its up vector — the same substitution <see cref="Movement.PlayerMovement"/> makes to
+    /// keep steering usable from a top-down rig.
+    /// </summary>
+    private Vector3 GetCameraForward()
+    {
+      if (_viewCamera == null)
+        _viewCamera = Camera.main;
+
+      if (_viewCamera == null)
+        return Vector3.zero;
+
+      var cameraTransform = _viewCamera.transform;
+      var forward = Vector3.ProjectOnPlane(cameraTransform.forward, Vector3.up);
+      if (forward.sqrMagnitude < 0.000001f)
+        forward = Vector3.ProjectOnPlane(cameraTransform.up, Vector3.up);
+
+      return forward;
     }
 
     /// <summary>
