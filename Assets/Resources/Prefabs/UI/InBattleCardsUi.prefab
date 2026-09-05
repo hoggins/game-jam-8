@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 7746315659964868117}
   - component: {fileID: 5143545436888678966}
   m_Layer: 5
-  m_Name: InBattleProgressionUi
+  m_Name: InBattleCardsUi
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -150,7 +150,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.6}
+  m_Color: {r: 0.2264151, g: 0.060875755, b: 0.14649957, a: 0.80784315}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
