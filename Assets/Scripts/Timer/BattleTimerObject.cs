@@ -35,6 +35,8 @@ namespace Timer
     [Inject] private BattleService _battleService;
 
     private DestructibleObject[] _destructibles;
+    private GameObject _hudCamera;
+    private bool _isDead;
 
     private readonly int[] _places = new int[PlaceCount];
     private readonly int[] _survivors = new int[PlaceCount];
@@ -43,11 +45,15 @@ namespace Timer
     private void Awake()
     {
       this.AsInjected();
+      WarnIfRootIsDestructible();
 
       _destructibles = new DestructibleObject[_digits.Length];
       for (var i = 0; i < _digits.Length; i++)
         if (_digits[i] != null)
           _destructibles[i] = _digits[i].GetComponent<DestructibleObject>();
+
+      var hudCamera = GetComponentInChildren<Camera>(true);
+      _hudCamera = hudCamera != null ? hudCamera.gameObject : null;
     }
 
     private void OnEnable()
@@ -66,7 +72,30 @@ namespace Timer
           destructible.Destroyed -= OnDigitDestroyed;
     }
 
-    private void Update() => PushTime();
+    private void Update()
+    {
+      if (_isDead)
+      {
+        // Only the digits and the divider are destructible; nothing owns this root, so once the
+        // decay manager has retired the last of them the husk has to clear itself up. Left alone it
+        // would linger with its HUD camera and render texture, one more for every respawn.
+        if (!HasDestructibleChildren())
+          Destroy(gameObject);
+
+        return;
+      }
+
+      PushTime();
+    }
+
+    private bool HasDestructibleChildren()
+    {
+      for (var i = 0; i < transform.childCount; i++)
+        if (transform.GetChild(i).GetComponent<DestructibleObject>() != null)
+          return true;
+
+      return false;
+    }
 
     private void PushTime()
     {
@@ -113,8 +142,31 @@ namespace Timer
 
       _battleService.SetTimer(remainingSeconds);
 
-      if (newCount == 0)
-        _battleService.DestroyTimer();
+      if (newCount != 0)
+        return;
+
+      // DestroyTimer is what triggers the replacement timer, so it registers its HUD element before
+      // this one stands down; SceneHudService ignores the stale unregister that follows.
+      _battleService.DestroyTimer();
+      _isDead = true;
+
+      // The divider carries no time, so it can still be standing when the last digit dies. A lone
+      // colon in a field is not a clock: collapse whatever is left so the whole thing decays away
+      // together and this husk can retire.
+      BreakRemainingParts();
+
+      if (_hudCamera != null)
+        _hudCamera.SetActive(false);
+    }
+
+    private void BreakRemainingParts()
+    {
+      for (var i = 0; i < transform.childCount; i++)
+      {
+        var destructible = transform.GetChild(i).GetComponent<DestructibleObject>();
+        if (destructible != null)
+          destructible.Break(destructible.transform.position);
+      }
     }
 
     /// Fills <see cref="_survivors"/> with the indices of the digits still standing, left to right.
@@ -160,6 +212,28 @@ namespace Timer
     {
       if (_digits.Length != PlaceCount)
         System.Array.Resize(ref _digits, PlaceCount);
+
+      WarnIfRootIsDestructible();
+    }
+
+    /// <summary>
+    /// The clock is only ever destroyed a digit at a time, and each digit owns its own
+    /// <see cref="DestructibleObject"/>. One on this root instead shatters all 62 pixels in a single
+    /// break and silently bypasses everything above it: the digits are never told they died, the
+    /// remaining time is never recomputed, and <see cref="BattleService.DestroyTimer"/> never fires,
+    /// so the timer never respawns either. Running Tools > Destruction > Destructible Object Setup
+    /// on this prefab adds exactly that, so say so out loud instead of just misbehaving.
+    /// </summary>
+    private void WarnIfRootIsDestructible()
+    {
+      if (GetComponent<DestructibleObject>() == null && GetComponent<DestructibleHealth>() == null)
+        return;
+
+      Debug.LogError(
+        $"{name}: the timer root carries a DestructibleObject/DestructibleHealth, which breaks the "
+        + "whole clock in one hit instead of digit by digit. Remove them from the prefab root, or "
+        + "rebuild it with Tools > Destruction > Rebuild Battle Timer Prefab.",
+        this);
     }
   }
 }
