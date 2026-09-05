@@ -169,6 +169,7 @@ namespace Destruction
       if (Application.isPlaying && _decayManager != null)
         body.useGravity = true;
 
+      body.interpolation = RigidbodyInterpolation.Interpolate;
       var hitPoint = ClosestPoint(colliders, origin);
       var direction = (hitPoint - origin).normalized;
       body.AddForceAtPosition(direction * magnitude, hitPoint, ForceMode.Impulse);
