@@ -8,8 +8,8 @@ namespace Movement
   /// <summary>
   /// Grows the player a little with every max-health upgrade, so a tankier character visibly
   /// occupies more of the field. Scales the whole root, which carries the collider and the weapon
-  /// children with it; the flocking radius on <see cref="IMovementController"/> is a plain number
-  /// and does not follow.
+  /// children with it; the movement footprint follows the same factor through
+  /// <see cref="IMovementController.Radius"/>.
   /// </summary>
   [DisallowMultipleComponent]
   public sealed class PlayerScale : MonoBehaviour

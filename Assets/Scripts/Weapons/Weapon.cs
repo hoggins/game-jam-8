@@ -29,6 +29,7 @@ namespace Weapons
     protected CharacterService PlayerService => _playerService;
     protected Pool Pool => _pool;
     protected float CharacterScaleFactor => _playerService?.CharacterScaleFactor ?? 1f;
+    protected virtual float AttackFxScaleMultiplier => 1f;
 
     // Melee attacks are the attacks that drive the player's attack animation. Other weapons
     // can fire independently without making the player play that animation.
@@ -80,7 +81,7 @@ namespace Weapons
 
       // Pool.Get preserves world scale while parenting, so restore the authored local scale. This
       // lets a player-attached effect inherit the player's current scale from its parent.
-      var scale = _attackFxPrefab.transform.localScale;
+      var scale = _attackFxPrefab.transform.localScale * AttackFxScaleMultiplier;
       scale.x = Mathf.Abs(scale.x) * (mirrored ? -1f : 1f);
       attackFx.transform.localScale = scale;
     }

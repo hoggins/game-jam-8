@@ -1,11 +1,13 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Battle
 {
   [RequireComponent(typeof(CanvasGroup))]
   public class InBattleProgressionUi : MonoBehaviour
   {
+    [SerializeField] private Button _closeButton;
     [SerializeField, Min(0f)] private float _transitionDuration = 0.2f;
     [SerializeField] private AnimationCurve _transitionCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
     [SerializeField, Min(0f)] private float _hiddenScale = 1.2f;
@@ -36,8 +38,17 @@ namespace Battle
       gameObject.SetActive(false);
     }
 
+    private void OnEnable()
+    {
+      if (_closeButton != null)
+        _closeButton.onClick.AddListener(Hide);
+    }
+
     private void OnDisable()
     {
+      if (_closeButton != null)
+        _closeButton.onClick.RemoveListener(Hide);
+
       if (_transitionCoroutine == null)
         return;
 

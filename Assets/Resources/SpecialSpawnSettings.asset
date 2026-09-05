@@ -14,20 +14,34 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Map.SpecialSpawnSettings
   ranges:
   - type: 0
-    initialMaxDistance: 10
-    respawnMaxDistances:
-    - 30
-    - 50
+    initial:
+      minDistance: 10
+      maxDistance: 30
+    respawns:
+    - minDistance: 20
+      maxDistance: 40
+    - minDistance: 30
+      maxDistance: 50
   - type: 1
-    initialMaxDistance: 30
-    respawnMaxDistances:
-    - 30
-    - 50
+    initial:
+      minDistance: 0
+      maxDistance: 30
+    respawns:
+    - minDistance: 0
+      maxDistance: 30
+    - minDistance: 0
+      maxDistance: 50
   - type: 2
-    initialMaxDistance: 20
-    respawnMaxDistances:
-    - 30
-    - 50
+    initial:
+      minDistance: 0
+      maxDistance: 20
+    respawns:
+    - minDistance: 0
+      maxDistance: 30
+    - minDistance: 0
+      maxDistance: 50
   - type: 3
-    initialMaxDistance: 30
-    respawnMaxDistances: []
+    initial:
+      minDistance: 0
+      maxDistance: 30
+    respawns: []

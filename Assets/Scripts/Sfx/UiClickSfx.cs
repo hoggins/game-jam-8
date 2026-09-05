@@ -21,17 +21,17 @@ namespace Sfx
 
     private void OnEnable()
     {
-      _button.onClick.AddListener(PlayClick);
+      _button.onClick.AddListener(PlayQuack);
     }
 
     private void OnDisable()
     {
-      _button.onClick.RemoveListener(PlayClick);
+      _button.onClick.RemoveListener(PlayQuack);
     }
 
-    private void PlayClick()
+    private void PlayQuack()
     {
-      _uiSfxService.PlayClick();
+      _uiSfxService.PlayQuack();
     }
   }
 }

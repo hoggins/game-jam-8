@@ -186,13 +186,13 @@ namespace Map
         if (special.type != SpecialHouses.Timer || !special.enabled || special.prefab == null)
           continue;
 
-        if (_specialSpawnSettings == null || !_specialSpawnSettings.TryGetInitialMaxDistance(special.type, out var timerMaxDistance))
+        if (_specialSpawnSettings == null || !_specialSpawnSettings.TryGetInitialDistance(special.type, out var timerMinDistance, out var timerMaxDistance))
         {
           Debug.LogWarning($"MapEnvironmentSpawner.SpawnInitialSpecials: no initial spawn distance configured for '{special.type}' in SpecialSpawnSettings.");
           continue;
         }
 
-        TrySpawnSpecial(special.type, fallbackAnchor, lookTarget, 0f, timerMaxDistance, out timerInstance);
+        TrySpawnSpecial(special.type, fallbackAnchor, lookTarget, timerMinDistance, timerMaxDistance, out timerInstance);
       }
 
       foreach (var special in _houseSet.Specials)
@@ -207,10 +207,9 @@ namespace Map
         {
           GetOtherSpecialPlacement(timerInstance.transform.position, player.transform.position, out anchor, out minDistance, out maxDistance);
         }
-        else if (_specialSpawnSettings != null && _specialSpawnSettings.TryGetInitialMaxDistance(special.type, out maxDistance))
+        else if (_specialSpawnSettings != null && _specialSpawnSettings.TryGetInitialDistance(special.type, out minDistance, out maxDistance))
         {
           anchor = fallbackAnchor;
-          minDistance = 0f;
         }
         else
         {

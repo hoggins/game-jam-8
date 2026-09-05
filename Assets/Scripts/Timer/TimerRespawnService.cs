@@ -52,10 +52,10 @@ namespace Timer
       if (player == null)
         return;
 
-      if (_spawnSettings == null || !_spawnSettings.TryGetRespawnMaxDistance(SpecialHouses.Timer, _respawnCount, out var maxDistance))
+      if (_spawnSettings == null || !_spawnSettings.TryGetRespawnDistance(SpecialHouses.Timer, _respawnCount, out var minDistance, out var maxDistance))
         return;
 
-      if (!_spawner.TrySpawnSpecial(SpecialHouses.Timer, player.transform.position, player.transform, 0f, maxDistance, out var timerInstance))
+      if (!_spawner.TrySpawnSpecial(SpecialHouses.Timer, player.transform.position, player.transform, minDistance, maxDistance, out var timerInstance))
         return;
 
       _respawnCount++;

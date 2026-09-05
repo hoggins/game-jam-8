@@ -1,30 +1,45 @@
+using System;
+using Model;
 using UnityEngine;
 using UnityEngine.Scripting;
 using VContainer.Unity;
 
 namespace Sfx
 {
-  /// Owns the single AudioSource used for UI feedback. Registered in AppScope, so it survives
-  /// scene loads together with the source it creates.
+  /// Owns the single AudioSource used for the quack feedback sound - UI clicks, plus the
+  /// gameplay beats that share the same clip. Registered in AppScope, so it survives scene
+  /// loads together with the source it creates.
   [Preserve]
-  public class UiSfxService : IInitializable
+  public class UiSfxService : IInitializable, IDisposable
   {
-    private const string ClickClipResourcePath = "SFX/quackSfx";
+    private const string QuackClipResourcePath = "SFX/quackSfx";
 
-    private AudioClip _clickClip;
+    /// A wave of ducks can die within the same frame - without this floor they stack into one
+    /// loud smear instead of reading as separate quacks.
+    private const float DuckKillQuackCooldown = 0.25f;
+
+    private readonly CharacterService _characterService;
+
+    private AudioClip _quackClip;
     private AudioSource _source;
+    private float _lastDuckKillQuackTime = float.NegativeInfinity;
+
+    public UiSfxService(CharacterService characterService)
+    {
+      _characterService = characterService;
+    }
 
     void IInitializable.Initialize()
     {
-      _clickClip = Resources.Load<AudioClip>(ClickClipResourcePath);
-      if (_clickClip == null)
+      _quackClip = Resources.Load<AudioClip>(QuackClipResourcePath);
+      if (_quackClip == null)
       {
-        Debug.LogError($"UI click clip was not found at Resources/{ClickClipResourcePath}.");
+        Debug.LogError($"Quack clip was not found at Resources/{QuackClipResourcePath}.");
         return;
       }
 
       var host = new GameObject(nameof(UiSfxService));
-      Object.DontDestroyOnLoad(host);
+      UnityEngine.Object.DontDestroyOnLoad(host);
 
       _source = host.AddComponent<AudioSource>();
       _source.playOnAwake = false;
@@ -34,14 +49,31 @@ namespace Sfx
       _source.dopplerLevel = 0f;
       // The pause menu sets Time.timeScale to 0 - the click still has to be audible there.
       _source.ignoreListenerPause = true;
+
+      _characterService.DuckKilled += OnDuckKilled;
     }
 
-    public void PlayClick()
+    void IDisposable.Dispose()
     {
-      if (_source == null || _clickClip == null)
+      _characterService.DuckKilled -= OnDuckKilled;
+    }
+
+    /// Unscaled: the cooldown has to keep running while a slow-motion or paused frame is up.
+    private void OnDuckKilled()
+    {
+      if (Time.unscaledTime - _lastDuckKillQuackTime < DuckKillQuackCooldown)
         return;
 
-      _source.PlayOneShot(_clickClip);
+      _lastDuckKillQuackTime = Time.unscaledTime;
+      PlayQuack();
+    }
+
+    public void PlayQuack()
+    {
+      if (_source == null || _quackClip == null)
+        return;
+
+      _source.PlayOneShot(_quackClip);
     }
   }
 }

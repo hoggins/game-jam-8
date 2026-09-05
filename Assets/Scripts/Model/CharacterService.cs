@@ -14,6 +14,7 @@ namespace Model
     public event Action Damaged;
     public event Action<int> HealthChanged;
     public event Action HealthDestroyed;
+    public event Action DuckKilled;
     public event Action ProgressionChanged;
     public event Action<int> CoinsChanged;
 
@@ -115,6 +116,7 @@ namespace Model
     public int RegisterDuckKill()
     {
       _storage.DucksKilled += 1;
+      DuckKilled?.Invoke();
 
       var droppedCoins = _battleBalance.RollDuckCoinDrop();
       if (droppedCoins > 0)
