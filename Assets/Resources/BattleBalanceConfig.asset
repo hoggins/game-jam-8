@@ -16,17 +16,18 @@ MonoBehaviour:
   _battleDuration: 90
   _specialBetweenMaxDistance: 50
   _specialBetweenMinDistance: 40
-  _duckMaxHealth: 2
+  _duckMaxHealth: 1
   _duckAttackDamage: 1
   _duckAttackDistance: 3
   _duckRepositionDistance: 40
+  _meleeAttackRadius: 2
   _duckCoinDropChances:
   - 0.6
   - 0.3
   - 0.1
   _destructibleMaxHealth:
   - type: 0
-    maxHealth: 7
+    maxHealth: 10
   - type: 1
     maxHealth: 15
   - type: 2
