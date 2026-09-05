@@ -88,6 +88,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3614559905059733436, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: -1062243159, guid: e831094bd88b14452a178aa2972c4c56, type: 3}
     - target: {fileID: 5719777227461545449, guid: 73eba33522c3f4fbdae60ddebf542f18, type: 3}
       propertyPath: m_Name
       value: AttackCard

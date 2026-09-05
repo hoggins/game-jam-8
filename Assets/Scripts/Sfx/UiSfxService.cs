@@ -45,13 +45,11 @@ namespace Sfx
       // The pause menu sets Time.timeScale to 0 - the click still has to be audible there.
       _source.ignoreListenerPause = true;
 
-      _characterService.Damaged += PlayQuack;
       _characterService.DuckKilled += PlayQuack;
     }
 
     void IDisposable.Dispose()
     {
-      _characterService.Damaged -= PlayQuack;
       _characterService.DuckKilled -= PlayQuack;
     }
 
