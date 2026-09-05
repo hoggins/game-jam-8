@@ -17,6 +17,9 @@ namespace SceneHud
     [Tooltip("Which in-world element this widget shows.")]
     [SerializeField] private SceneHudElementId _id;
 
+    [Tooltip("Optional image shown while the in-world element is destroyed.")]
+    [SerializeField] private Image _destroyedImage;
+
     [Inject] private SceneHudService _sceneHud;
 
     private RawImage _image;
@@ -45,6 +48,8 @@ namespace SceneHud
     {
       _image.texture = texture;
       _image.enabled = texture != null;
+      if (_destroyedImage != null)
+        _destroyedImage.enabled = texture == null;
     }
   }
 }
