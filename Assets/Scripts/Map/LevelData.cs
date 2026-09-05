@@ -159,7 +159,9 @@ namespace Map
 
       var container = CreateContainer();
       var cellSize = mapData.CellSize;
-      var originCell = new Vector2(transform.position.x / cellSize, transform.position.z / cellSize);
+      var player = GameObject.FindGameObjectWithTag("Player");
+      var originPosition = player != null ? player.transform.position : transform.position;
+      var originCell = new Vector2(originPosition.x / cellSize, originPosition.z / cellSize);
 
       if (houseSet != null)
         foreach (var placement in MapFiller.Fill(mapData, houseSet, originCell, seed))

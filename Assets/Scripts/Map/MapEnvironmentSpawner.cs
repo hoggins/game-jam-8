@@ -129,7 +129,9 @@ namespace Map
       _houseSet = houseSet;
       var cellSize = mapData.CellSize;
       _cellSize = cellSize;
-      var originCell = new Vector2(parent.position.x / cellSize, parent.position.z / cellSize);
+      var player = GameObject.FindGameObjectWithTag("Player");
+      var originPosition = player != null ? player.transform.position : parent.position;
+      var originCell = new Vector2(originPosition.x / cellSize, originPosition.z / cellSize);
 
       var housePlacements = MapFiller.Fill(mapData, houseSet, originCell, seed);
       var roadPlacements = roadSet != null
