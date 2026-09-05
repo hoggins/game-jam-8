@@ -9,7 +9,7 @@ namespace Sfx
   [RequireComponent(typeof(Button))]
   public class UiClickSfx : MonoBehaviour
   {
-    [Inject] private UiSfxService _uiSfxService;
+    [Inject] private SfxService _sfxService;
 
     private Button _button;
 
@@ -21,17 +21,17 @@ namespace Sfx
 
     private void OnEnable()
     {
-      _button.onClick.AddListener(PlayQuack);
+      _button.onClick.AddListener(PlayClick);
     }
 
     private void OnDisable()
     {
-      _button.onClick.RemoveListener(PlayQuack);
+      _button.onClick.RemoveListener(PlayClick);
     }
 
-    private void PlayQuack()
+    private void PlayClick()
     {
-      _uiSfxService.PlayQuack();
+      _sfxService.PlayButtonClick();
     }
   }
 }

@@ -77,7 +77,7 @@ namespace App
       builder.Register<CameraDistanceController>(Lifetime.Singleton)
         .AsSelf()
         .AsImplementedInterfaces();
-      builder.Register<Sfx.UiSfxService>(Lifetime.Singleton)
+      builder.Register<Sfx.SfxService>(Lifetime.Singleton)
         .AsSelf()
         .AsImplementedInterfaces();
 

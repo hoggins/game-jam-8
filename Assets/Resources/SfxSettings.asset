@@ -13,5 +13,29 @@ MonoBehaviour:
   m_Name: SfxSettings
   m_EditorClassIdentifier: Assembly-CSharp::Sfx.SfxSettings
   volume: 0.7
-  quackVolumeMin: 0.6
-  quackVolumeMax: 1
+  duckKilledClips:
+  - {fileID: 8300000, guid: 7ce0b9291ea5f4316aec404f89d63e65, type: 3}
+  - {fileID: 8300000, guid: 84fcfca595d9d45c7ad9abbc4eb966a4, type: 3}
+  - {fileID: 8300000, guid: da121729ed05a46079392479b17f907f, type: 3}
+  duckKilledVolumeMin: 0.6
+  duckKilledVolumeMax: 1
+  duckKilledSpread: 0.5
+  duckKilledCooldown: 0.15
+  duckKilledMaxQueued: 8
+  buttonClickClips:
+  - {fileID: 8300000, guid: 7ce0b9291ea5f4316aec404f89d63e65, type: 3}
+  - {fileID: 8300000, guid: 84fcfca595d9d45c7ad9abbc4eb966a4, type: 3}
+  - {fileID: 8300000, guid: da121729ed05a46079392479b17f907f, type: 3}
+  buttonClickVolumeMin: 0.6
+  buttonClickVolumeMax: 1
+  playerDamagedClips:
+  - {fileID: 8300000, guid: c50dfd0cf85b2484bb036fb64d802306, type: 3}
+  playerDamagedVolumeMin: 0.2
+  playerDamagedVolumeMax: 0.3
+  playerDamagedSpread: 0.2
+  playerDamagedCooldown: 0.5
+  playerDamagedMaxQueued: 1
+  battleWinClip: {fileID: 8300000, guid: b5157531740fa44d78514c8401e19ebb, type: 3}
+  battleWinVolume: 1
+  battleDefeatClip: {fileID: 8300000, guid: d44dd194cebc94a898145df879db8c5a, type: 3}
+  battleDefeatVolume: 1
