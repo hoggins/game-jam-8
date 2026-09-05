@@ -11,6 +11,7 @@ namespace Balance
     public static int DuckMaxHealth => 2;
     public static int DuckAttackDamage => 1;
     public static float DuckAttackDistance => 3f;
+    public static float DuckRepositionDistance => 40f;
 
     private static readonly Dictionary<DestructibleObjectType, int> DestructibleMaxHealth = new()
     {

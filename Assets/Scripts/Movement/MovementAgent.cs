@@ -39,6 +39,15 @@ namespace Movement
       Rotation = transform.rotation;
     }
 
+    internal void Teleport(Vector3 position)
+    {
+      transform.position = position;
+      Position = position;
+      Velocity = Vector3.zero;
+      SmoothedVelocity = Vector3.zero;
+      DesiredVelocity = Vector3.zero;
+    }
+
     internal void ApplyResult()
     {
       transform.SetPositionAndRotation(Position, Rotation);

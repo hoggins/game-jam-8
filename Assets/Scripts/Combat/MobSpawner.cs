@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using App;
+using Balance;
 using Model;
 using Movement;
 using Pooling;
@@ -17,6 +18,7 @@ namespace Combat
     private const int BottomSide = 2;
     private const int TopSide = 3;
     private const int SideCount = 4;
+    private const int RepositionCheckInterval = 5;
 
     [Serializable]
     private sealed class SpawnItem
@@ -80,6 +82,7 @@ namespace Combat
 
     private float _elapsedSeconds;
     private int _nextSpawnSide;
+    private int _repositionFrame;
 
     private void Awake() =>
       this.AsInjected();
@@ -88,6 +91,7 @@ namespace Combat
     {
       _elapsedSeconds = 0f;
       _nextSpawnSide = 0;
+      _repositionFrame = 0;
       for (var i = 0; i < _mobs.Count; i++)
         _mobs[i]?.ResetRuntime();
     }
@@ -106,6 +110,12 @@ namespace Combat
           || !_movementUpdater.HasWalkableFlowMap)
         return;
 
+      if (++_repositionFrame >= RepositionCheckInterval)
+      {
+        _repositionFrame = 0;
+        RepositionMobs();
+      }
+
       for (var i = 0; i < _mobs.Count; i++)
       {
         var item = _mobs[i];
@@ -120,6 +130,35 @@ namespace Combat
 
           item.ConsumeSpawn();
         }
+      }
+    }
+
+    private void RepositionMobs()
+    {
+      var agents = _movementUpdater.ActiveAgents;
+      var repositionDistance = BattleBalance.DuckRepositionDistance;
+      var repositionDistanceSquared = repositionDistance * repositionDistance;
+
+      for (var i = 0; i < agents.Count; i++)
+      {
+        var agent = agents[i];
+        if (agent == null || !agent.isActiveAndEnabled)
+          continue;
+
+        var mob = agent.GetComponent<Mob>();
+        if (mob == null || !mob.IsAlive || mob.IsAttached)
+          continue;
+
+        var offset = agent.Position - _player.position;
+        offset.y = 0f;
+        if (offset.sqrMagnitude <= repositionDistanceSquared)
+          continue;
+
+        if (!TryGetSpawnPosition(out var position))
+          continue;
+
+        agent.Teleport(position);
+        _nextSpawnSide = (_nextSpawnSide + 1) % SideCount;
       }
     }
 
