@@ -5,16 +5,14 @@ using UnityEngine;
 
 namespace Combat
 {
-  // Plays a duck's death: dissolve in place, or throw-then-dissolve when it dies
-  // mid-attach. Rigidbody/Collider for the throw are added only for that instant,
-  // since most ducks never attach and don't need to carry physics components.
+  // Plays a duck's death: dissolve in place, or detach-then-dissolve when it dies while attached.
   [DisallowMultipleComponent]
   public sealed class MobDeath : MonoBehaviour
   {
     [SerializeField, Min(0f)] private float _dissolveDuration = 1f;
     [SerializeField] private AnimationCurve _dissolveCurve = DefaultDissolveCurve();
 
-    [Header("Throw (death while attached)")]
+    [Header("Detach (death while attached)")]
     [SerializeField, Min(0f)] private float _throwDistance = 10f;
     [SerializeField, Min(0f)] private float _throwLaunchAngle = 45f;
     [SerializeField, Min(0f)] private float _throwSpinTorque = 5f;
@@ -42,7 +40,10 @@ namespace Combat
     public void Play(Transform throwAwayFrom, MovementAgent movementAgent, Action onComplete) =>
       _playCoroutine = StartCoroutine(PlayRoutine(throwAwayFrom, movementAgent, onComplete));
 
-    private IEnumerator PlayRoutine(Transform throwAwayFrom, MovementAgent movementAgent, Action onComplete)
+    private IEnumerator PlayRoutine(
+      Transform throwAwayFrom,
+      MovementAgent movementAgent,
+      Action onComplete)
     {
       if (throwAwayFrom != null)
       {
@@ -67,14 +68,18 @@ namespace Combat
 
     private void ThrowAway(Vector3 throwOrigin, MovementAgent movementAgent)
     {
+      var startPosition = transform.position;
+      var startRotation = transform.rotation;
       var direction = transform.position - throwOrigin;
       direction.y = 0f;
       if (direction.sqrMagnitude < 0.0001f)
         direction = UnityEngine.Random.insideUnitSphere;
       direction.Normalize();
 
+      // Preserve the attached duck's current world position. The old implementation snapped it
+      // to throwOrigin here, which made the detach animation start from the player instead.
       transform.SetParent(null, true);
-      transform.position = throwOrigin;
+      transform.SetPositionAndRotation(startPosition, startRotation);
 
       if (movementAgent != null)
         movementAgent.enabled = false;
@@ -83,6 +88,7 @@ namespace Combat
       capsule.radius = _throwColliderRadius;
       capsule.height = _throwColliderHeight;
       capsule.center = new Vector3(0f, _throwColliderHeight * 0.5f, 0f);
+      capsule.isTrigger = true;
       _throwCollider = capsule;
 
       var rigidbody = gameObject.AddComponent<Rigidbody>();
@@ -94,6 +100,9 @@ namespace Combat
       rigidbody.AddForce(launchVelocity, ForceMode.VelocityChange);
       rigidbody.AddTorque(UnityEngine.Random.insideUnitSphere * _throwSpinTorque, ForceMode.VelocityChange);
       rigidbody.interpolation = RigidbodyInterpolation.Interpolate;
+      // The detach is visual. Keep gravity and launch force, but prevent the duck from being
+      // deflected or pushed by any physics object.
+      rigidbody.detectCollisions = false;
       _throwRigidbody = rigidbody;
     }
 

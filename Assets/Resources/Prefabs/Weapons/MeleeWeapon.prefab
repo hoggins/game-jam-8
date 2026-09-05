@@ -51,5 +51,6 @@ MonoBehaviour:
   _attachAttackFxToPlayer: 1
   _attackRadius: 5
   _attackConeAngle: 120
+  _alternateAttackFx: 1
   _hitFxPrefab: {fileID: 2847630276705505541, guid: 90495a52fe2ab4865b2f3cb56c99a68c, type: 3}
   _hitFxPrewarmCount: 8

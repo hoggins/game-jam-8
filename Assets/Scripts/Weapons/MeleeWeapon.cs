@@ -12,6 +12,7 @@ namespace Weapons
   {
     [SerializeField, Min(0f)] private float _attackRadius = 2f;
     [SerializeField, Range(0f, 360f)] private float _attackConeAngle = 90f;
+    [SerializeField] private bool _alternateAttackFx;
     [SerializeField] private GameObject _hitFxPrefab;
     [SerializeField, Min(0)] private int _hitFxPrewarmCount = 8;
 
@@ -22,6 +23,14 @@ namespace Weapons
     private readonly Collider[] _destructibleHits = new Collider[16];
 
     private int _damagableLayerMask;
+    private bool _nextAttackFxMirrored = true;
+
+    protected override void SpawnAttackFx()
+    {
+      SpawnAttackFx(_alternateAttackFx && _nextAttackFxMirrored);
+      if (_alternateAttackFx)
+        _nextAttackFxMirrored = !_nextAttackFxMirrored;
+    }
 
     protected override void Awake()
     {

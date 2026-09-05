@@ -67,12 +67,23 @@ namespace Weapons
 
     protected virtual void SpawnAttackFx()
     {
+      SpawnAttackFx(false);
+    }
+
+    protected void SpawnAttackFx(bool mirrored)
+    {
       if (_pool == null || _attackFxPrefab == null)
         return;
 
       var point = _attackFxPoint != null ? _attackFxPoint : transform;
       var parent = _attachAttackFxToPlayer ? transform.root : null;
-      SpawnFx(_attackFxPrefab, point.position, point.rotation, parent);
+      var attackFx = SpawnFx(_attackFxPrefab, point.position, point.rotation, parent);
+      if (attackFx == null)
+        return;
+
+      var scale = attackFx.transform.localScale;
+      scale.x = Mathf.Abs(scale.x) * (mirrored ? -1f : 1f);
+      attackFx.transform.localScale = scale;
     }
 
     protected void PrewarmFx(GameObject prefab, int count)
@@ -80,16 +91,16 @@ namespace Weapons
       _pool?.Prewarm(prefab, count);
     }
 
-    protected void SpawnFx(
+    protected GameObject SpawnFx(
       GameObject prefab,
       Vector3 position,
       Quaternion rotation,
       Transform parent = null)
     {
       if (_pool == null || prefab == null)
-        return;
+        return null;
 
-      _pool.Get(prefab, position, rotation, parent);
+      return _pool.Get(prefab, position, rotation, parent);
     }
 
     private void OnValidate()

@@ -122,6 +122,12 @@ namespace Combat
     private void BeginDeath()
     {
       _isDying = true;
+
+      // Dead mobs must stop participating in movement and avoidance immediately. Otherwise an
+      // unattached mob can still be moved by MovementUpdater while it dissolves.
+      if (_movementAgent != null)
+        _movementAgent.enabled = false;
+
       SpawnCoinPickups(_characterService?.RegisterDuckKill() ?? 0);
 
       ResolvePlayer();
@@ -132,8 +138,8 @@ namespace Combat
         _attachCoroutine = null;
       }
 
-      // Attached mobs are thrown from the player; unattached mobs are thrown from their current
-      // position. Attached mobs also need their local attachment animation stopped first.
+      // MobDeath detaches attached mobs while preserving their current world position, then plays
+      // the detach throw from that position.
       _death?.Play(_isAttached ? _player : null, _movementAgent, OnDeathPlayed);
     }
 
