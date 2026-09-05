@@ -11,7 +11,9 @@ GameObject:
   - component: {fileID: 4231465612085911531}
   - component: {fileID: 687073742337203793}
   - component: {fileID: 6464725744389196554}
-  m_Layer: 0
+  - component: {fileID: 2769697522804488819}
+  - component: {fileID: 2727795891210281135}
+  m_Layer: 7
   m_Name: Cube.267
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -91,6 +93,42 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &2769697522804488819
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 171304956753515665}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 6.6, y: 0.9765434, z: 6.6}
+  m_Center: {x: 0, y: 3.4882717, z: 0}
+--- !u!114 &2727795891210281135
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 171304956753515665}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1ffcf3825c854634ab23b78c6c177b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Destruction.DecayPart
+  settings:
+    baseFallSpeed: 1
+    speedMultiplier: 5
 --- !u!1 &983258834262627453
 GameObject:
   m_ObjectHideFlags: 0
@@ -102,7 +140,9 @@ GameObject:
   - component: {fileID: 3914574042837324350}
   - component: {fileID: 2462473802997059620}
   - component: {fileID: 2649661368531079997}
-  m_Layer: 0
+  - component: {fileID: 8584613683174337394}
+  - component: {fileID: 8554297557254305592}
+  m_Layer: 7
   m_Name: House02_Windows.009
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -182,6 +222,42 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &8584613683174337394
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 983258834262627453}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.8190973, y: 0.81909776, z: 0.15000057}
+  m_Center: {x: -0.71671855, y: 1.854904, z: 3.1249993}
+--- !u!114 &8554297557254305592
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 983258834262627453}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1ffcf3825c854634ab23b78c6c177b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Destruction.DecayPart
+  settings:
+    baseFallSpeed: 1
+    speedMultiplier: 0.100638494
 --- !u!1 &1093647219095580267
 GameObject:
   m_ObjectHideFlags: 0
@@ -193,7 +269,9 @@ GameObject:
   - component: {fileID: 6626117581957567434}
   - component: {fileID: 7824686732587437743}
   - component: {fileID: 2921284415612594474}
-  m_Layer: 0
+  - component: {fileID: 1163352311334092142}
+  - component: {fileID: 9023102106978307578}
+  m_Layer: 7
   m_Name: House02_Walls.007
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -272,6 +350,42 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &1163352311334092142
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1093647219095580267}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 4, y: 3, z: 0.25}
+  m_Center: {x: 0, y: 1.5, z: 2.8749993}
+--- !u!114 &9023102106978307578
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1093647219095580267}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1ffcf3825c854634ab23b78c6c177b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Destruction.DecayPart
+  settings:
+    baseFallSpeed: 1
+    speedMultiplier: 3
 --- !u!1 &1318570466654881610
 GameObject:
   m_ObjectHideFlags: 0
@@ -283,7 +397,9 @@ GameObject:
   - component: {fileID: 1107193490559517221}
   - component: {fileID: 8705697097936003685}
   - component: {fileID: 2843338208926761512}
-  m_Layer: 0
+  - component: {fileID: 7669069960191380369}
+  - component: {fileID: 3506414890111412401}
+  m_Layer: 7
   m_Name: House02_Walls.008
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -362,6 +478,42 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &7669069960191380369
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1318570466654881610}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.25, y: 3, z: 4}
+  m_Center: {x: 2.875, y: 1.5, z: -0.00000047683716}
+--- !u!114 &3506414890111412401
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1318570466654881610}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1ffcf3825c854634ab23b78c6c177b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Destruction.DecayPart
+  settings:
+    baseFallSpeed: 1
+    speedMultiplier: 3
 --- !u!1 &2066973251658201395
 GameObject:
   m_ObjectHideFlags: 0
@@ -373,7 +525,9 @@ GameObject:
   - component: {fileID: 7268882242313830470}
   - component: {fileID: 8746579863742262709}
   - component: {fileID: 1727294497444935544}
-  m_Layer: 0
+  - component: {fileID: 8328877610796445037}
+  - component: {fileID: 2150183485927821080}
+  m_Layer: 7
   m_Name: House02_Windows.021
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -453,6 +607,42 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &8328877610796445037
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2066973251658201395}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.3000009, y: 1.5701181, z: 1.3048334}
+  m_Center: {x: 3.1499996, y: 1.8931713, z: 0.97019255}
+--- !u!114 &2150183485927821080
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2066973251658201395}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1ffcf3825c854634ab23b78c6c177b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Destruction.DecayPart
+  settings:
+    baseFallSpeed: 1
+    speedMultiplier: 0.6146246
 --- !u!1 &2847438664094949316
 GameObject:
   m_ObjectHideFlags: 0
@@ -464,7 +654,9 @@ GameObject:
   - component: {fileID: 7114020738221073530}
   - component: {fileID: 8393688764408665985}
   - component: {fileID: 1688098198209309949}
-  m_Layer: 0
+  - component: {fileID: 2416141692786768040}
+  - component: {fileID: 4369912054772801735}
+  m_Layer: 7
   m_Name: House02_Windows.019
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -544,6 +736,42 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &2416141692786768040
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2847438664094949316}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.3000009, y: 1.5701181, z: 1.3048337}
+  m_Center: {x: 3.1499996, y: 1.8931713, z: -1.0298076}
+--- !u!114 &4369912054772801735
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2847438664094949316}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1ffcf3825c854634ab23b78c6c177b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Destruction.DecayPart
+  settings:
+    baseFallSpeed: 1
+    speedMultiplier: 0.61462474
 --- !u!1 &3030201247340238662
 GameObject:
   m_ObjectHideFlags: 0
@@ -555,7 +783,9 @@ GameObject:
   - component: {fileID: 1613228276666199192}
   - component: {fileID: 5043505278913613194}
   - component: {fileID: 5813891277328816369}
-  m_Layer: 0
+  - component: {fileID: 3555737279853832062}
+  - component: {fileID: 1842713994447112061}
+  m_Layer: 7
   m_Name: House02_Walls.001
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -634,6 +864,42 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &3555737279853832062
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3030201247340238662}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.25, y: 3, z: 4}
+  m_Center: {x: -2.875, y: 1.5, z: -0.00000047683716}
+--- !u!114 &1842713994447112061
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3030201247340238662}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1ffcf3825c854634ab23b78c6c177b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Destruction.DecayPart
+  settings:
+    baseFallSpeed: 1
+    speedMultiplier: 3
 --- !u!1 &3295693142315413081
 GameObject:
   m_ObjectHideFlags: 0
@@ -645,7 +911,9 @@ GameObject:
   - component: {fileID: 5692722801228936373}
   - component: {fileID: 4380826480040916959}
   - component: {fileID: 6833096557095714734}
-  m_Layer: 0
+  - component: {fileID: 4438935650327950400}
+  - component: {fileID: 615982004264933932}
+  m_Layer: 7
   m_Name: House02_Corners.002
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -724,6 +992,42 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &4438935650327950400
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3295693142315413081}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.1772149, y: 3, z: 1.1772156}
+  m_Center: {x: -2.5886078, y: 1.5, z: -2.5886083}
+--- !u!114 &615982004264933932
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3295693142315413081}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1ffcf3825c854634ab23b78c6c177b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Destruction.DecayPart
+  settings:
+    baseFallSpeed: 1
+    speedMultiplier: 4.157507
 --- !u!1 &3482337165314410524
 GameObject:
   m_ObjectHideFlags: 0
@@ -735,7 +1039,9 @@ GameObject:
   - component: {fileID: 4543014876559891012}
   - component: {fileID: 8911864472392539844}
   - component: {fileID: 2057312639754017757}
-  m_Layer: 0
+  - component: {fileID: 5932141683881092092}
+  - component: {fileID: 2842298966113071120}
+  m_Layer: 7
   m_Name: House02_Windows.008
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -815,6 +1121,42 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &5932141683881092092
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3482337165314410524}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.819098, y: 0.81909776, z: 0.15000033}
+  m_Center: {x: 0.99277616, y: 1.854904, z: -3.1250014}
+--- !u!114 &2842298966113071120
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3482337165314410524}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1ffcf3825c854634ab23b78c6c177b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Destruction.DecayPart
+  settings:
+    baseFallSpeed: 1
+    speedMultiplier: 0.10063843
 --- !u!1 &3532468553686096352
 GameObject:
   m_ObjectHideFlags: 0
@@ -826,7 +1168,9 @@ GameObject:
   - component: {fileID: 127433839218433844}
   - component: {fileID: 5849024887532296057}
   - component: {fileID: 7731472656231470088}
-  m_Layer: 0
+  - component: {fileID: 5970847539379908858}
+  - component: {fileID: 4241439153682859834}
+  m_Layer: 7
   m_Name: House02_Walls.009
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -905,6 +1249,42 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &5970847539379908858
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3532468553686096352}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 4, y: 3, z: 0.25000048}
+  m_Center: {x: 0, y: 1.5, z: -2.8750007}
+--- !u!114 &4241439153682859834
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3532468553686096352}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1ffcf3825c854634ab23b78c6c177b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Destruction.DecayPart
+  settings:
+    baseFallSpeed: 1
+    speedMultiplier: 3.0000057
 --- !u!1 &4825011895995581110
 GameObject:
   m_ObjectHideFlags: 0
@@ -916,7 +1296,9 @@ GameObject:
   - component: {fileID: 5409708745903062786}
   - component: {fileID: 2625104994563360092}
   - component: {fileID: 6478148655172238832}
-  m_Layer: 0
+  - component: {fileID: 5061756201525322918}
+  - component: {fileID: 5803133992578789229}
+  m_Layer: 7
   m_Name: House02_Doors.003
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -996,6 +1378,42 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &5061756201525322918
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4825011895995581110}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.6007519, y: 2.6194222, z: 0.3000002}
+  m_Center: {x: -0.7168169, y: 1.3097111, z: 3.0499995}
+--- !u!114 &5803133992578789229
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4825011895995581110}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1ffcf3825c854634ab23b78c6c177b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Destruction.DecayPart
+  settings:
+    baseFallSpeed: 1
+    speedMultiplier: 1.2579143
 --- !u!1 &4932635956402746611
 GameObject:
   m_ObjectHideFlags: 0
@@ -1007,7 +1425,9 @@ GameObject:
   - component: {fileID: 4773113487025863783}
   - component: {fileID: 1130097174634104718}
   - component: {fileID: 2424566065566234602}
-  m_Layer: 0
+  - component: {fileID: 210450936626680300}
+  - component: {fileID: 2173632596800230331}
+  m_Layer: 7
   m_Name: House02_Stairs.001
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1086,6 +1506,42 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &210450936626680300
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4932635956402746611}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.0697092, y: 0.40000007, z: 0.7500007}
+  m_Center: {x: 0.9927749, y: 0.20000003, z: -3.4250007}
+--- !u!114 &2173632596800230331
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4932635956402746611}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1ffcf3825c854634ab23b78c6c177b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Destruction.DecayPart
+  settings:
+    baseFallSpeed: 1
+    speedMultiplier: 0.3209131
 --- !u!1 &5086931695152885513
 GameObject:
   m_ObjectHideFlags: 0
@@ -1095,7 +1551,12 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8881875843647165024}
-  m_Layer: 0
+  - component: {fileID: 8456176744299919484}
+  - component: {fileID: 759546135270146121}
+  - component: {fileID: 2904324356304637808}
+  - component: {fileID: 2001743473918921260}
+  - component: {fileID: 3436112023110809892}
+  m_Layer: 9
   m_Name: House02_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1137,6 +1598,79 @@ Transform:
   - {fileID: 7268882242313830470}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &8456176744299919484
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5086931695152885513}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 6.6000004, y: 5.2590933, z: 7.6000023}
+  m_Center: {x: 0.00000023841858, y: 2.6295464, z: 0}
+--- !u!114 &759546135270146121
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5086931695152885513}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f903e9399414745ada58a14464dc2c85, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Movement.FlowMapNoGoZone
+--- !u!114 &2904324356304637808
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5086931695152885513}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae3a31e081dac4ba2acd27782b575bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Destruction.DestructibleObject
+  _breakMagnitude: 5
+  _spawnDestructionFx: 1
+  _houseDifficultyLevel: 1
+--- !u!114 &2001743473918921260
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5086931695152885513}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2bb62d9dcd49f449fb9f45585be7cb37, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Destruction.DestructibleHealth
+  _objectType: 0
+--- !u!114 &3436112023110809892
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5086931695152885513}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 802cd6f481491405aa7b70c12b14dd71, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Destruction.HitFx
 --- !u!1 &5921634149302198688
 GameObject:
   m_ObjectHideFlags: 0
@@ -1148,7 +1682,9 @@ GameObject:
   - component: {fileID: 1522224914648576651}
   - component: {fileID: 1551124603010590570}
   - component: {fileID: 2404462027709269811}
-  m_Layer: 0
+  - component: {fileID: 4784006760976881424}
+  - component: {fileID: 1882790800173809970}
+  m_Layer: 7
   m_Name: Cube.268
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1228,6 +1764,42 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &4784006760976881424
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5921634149302198688}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.3136026, y: 1.7162576, z: 1.3136024}
+  m_Center: {x: 1.3161564, y: 4.4009647, z: -1.3646781}
+--- !u!114 &1882790800173809970
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5921634149302198688}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1ffcf3825c854634ab23b78c6c177b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Destruction.DecayPart
+  settings:
+    baseFallSpeed: 1
+    speedMultiplier: 2.9614909
 --- !u!1 &5952481596245267882
 GameObject:
   m_ObjectHideFlags: 0
@@ -1239,7 +1811,9 @@ GameObject:
   - component: {fileID: 4634977565732257985}
   - component: {fileID: 8845571504495775773}
   - component: {fileID: 3833290585215970645}
-  m_Layer: 0
+  - component: {fileID: 7970085214883657687}
+  - component: {fileID: 4171430824837617799}
+  m_Layer: 7
   m_Name: House02_Windows.004
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1319,6 +1893,42 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &7970085214883657687
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5952481596245267882}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.0887274, y: 1.5139068, z: 0.20000958}
+  m_Center: {x: -0.84066457, y: 1.8549042, z: -3.100006}
+--- !u!114 &4171430824837617799
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5952481596245267882}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1ffcf3825c854634ab23b78c6c177b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Destruction.DecayPart
+  settings:
+    baseFallSpeed: 1
+    speedMultiplier: 0.32966214
 --- !u!1 &6383728597415326397
 GameObject:
   m_ObjectHideFlags: 0
@@ -1330,7 +1940,9 @@ GameObject:
   - component: {fileID: 3464603535915907712}
   - component: {fileID: 2440282851809020495}
   - component: {fileID: 34039470820856898}
-  m_Layer: 0
+  - component: {fileID: 5451887189726548331}
+  - component: {fileID: 5700390205996411363}
+  m_Layer: 7
   m_Name: House02_Stairs.003
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1409,6 +2021,42 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &5451887189726548331
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6383728597415326397}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.0697095, y: 0.40000007, z: 0.7500005}
+  m_Center: {x: -0.7167194, y: 0.20000003, z: 3.4250011}
+--- !u!114 &5700390205996411363
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6383728597415326397}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1ffcf3825c854634ab23b78c6c177b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Destruction.DecayPart
+  settings:
+    baseFallSpeed: 1
+    speedMultiplier: 0.3209131
 --- !u!1 &7556473770877040570
 GameObject:
   m_ObjectHideFlags: 0
@@ -1420,7 +2068,9 @@ GameObject:
   - component: {fileID: 5508523615063753304}
   - component: {fileID: 7459581320561207709}
   - component: {fileID: 2069156450524115992}
-  m_Layer: 0
+  - component: {fileID: 2742641626635848309}
+  - component: {fileID: 1916229621986787370}
+  m_Layer: 7
   m_Name: House02_Corners.084
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1499,6 +2149,42 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &2742641626635848309
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7556473770877040570}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.1772155, y: 3, z: 1.1772151}
+  m_Center: {x: 2.5886073, y: 1.5, z: -2.5886085}
+--- !u!114 &1916229621986787370
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7556473770877040570}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1ffcf3825c854634ab23b78c6c177b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Destruction.DecayPart
+  settings:
+    baseFallSpeed: 1
+    speedMultiplier: 4.1575074
 --- !u!1 &7716967412870981130
 GameObject:
   m_ObjectHideFlags: 0
@@ -1510,7 +2196,9 @@ GameObject:
   - component: {fileID: 3824332994631931035}
   - component: {fileID: 360880041280449568}
   - component: {fileID: 7541737017202803481}
-  m_Layer: 0
+  - component: {fileID: 7451441682503340386}
+  - component: {fileID: 9008260697952407318}
+  m_Layer: 7
   m_Name: House02_Corners.068
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1589,6 +2277,42 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &7451441682503340386
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7716967412870981130}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.1772156, y: 3, z: 1.1772153}
+  m_Center: {x: 2.5886078, y: 1.5, z: 2.5886073}
+--- !u!114 &9008260697952407318
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7716967412870981130}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1ffcf3825c854634ab23b78c6c177b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Destruction.DecayPart
+  settings:
+    baseFallSpeed: 1
+    speedMultiplier: 4.157509
 --- !u!1 &7930196720566037419
 GameObject:
   m_ObjectHideFlags: 0
@@ -1600,7 +2324,9 @@ GameObject:
   - component: {fileID: 7299399315098319867}
   - component: {fileID: 5844287893257535076}
   - component: {fileID: 7106587433749815765}
-  m_Layer: 0
+  - component: {fileID: 2336256125804164223}
+  - component: {fileID: 7001067199834575562}
+  m_Layer: 7
   m_Name: House02_Corners.070
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1679,6 +2405,42 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &2336256125804164223
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7930196720566037419}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.1772151, y: 3, z: 1.1772149}
+  m_Center: {x: -2.5886075, y: 1.5, z: 2.5886073}
+--- !u!114 &7001067199834575562
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7930196720566037419}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1ffcf3825c854634ab23b78c6c177b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Destruction.DecayPart
+  settings:
+    baseFallSpeed: 1
+    speedMultiplier: 4.1575055
 --- !u!1 &8895589681606646045
 GameObject:
   m_ObjectHideFlags: 0
@@ -1690,7 +2452,9 @@ GameObject:
   - component: {fileID: 1958680520218596487}
   - component: {fileID: 6689532820004751262}
   - component: {fileID: 6304955877604883187}
-  m_Layer: 0
+  - component: {fileID: 2224212053361789784}
+  - component: {fileID: 2698722154248836820}
+  m_Layer: 7
   m_Name: House02_Doors.001
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1770,6 +2534,42 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &2224212053361789784
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8895589681606646045}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.600752, y: 2.6194224, z: 0.30000043}
+  m_Center: {x: 0.9926773, y: 1.309711, z: -3.0500011}
+--- !u!114 &2698722154248836820
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8895589681606646045}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1ffcf3825c854634ab23b78c6c177b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Destruction.DecayPart
+  settings:
+    baseFallSpeed: 1
+    speedMultiplier: 1.2579155
 --- !u!1 &9204840620663933591
 GameObject:
   m_ObjectHideFlags: 0
@@ -1781,7 +2581,9 @@ GameObject:
   - component: {fileID: 5085831718943047438}
   - component: {fileID: 3277849433006400443}
   - component: {fileID: 3130554845119170212}
-  m_Layer: 0
+  - component: {fileID: 2047168954461762758}
+  - component: {fileID: 799264775919666139}
+  m_Layer: 7
   m_Name: House02_Windows.002
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1861,3 +2663,39 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &2047168954461762758
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9204840620663933591}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.3000002, y: 1.5701175, z: 1.3048334}
+  m_Center: {x: -3.0500987, y: 1.8368778, z: 0.008861899}
+--- !u!114 &799264775919666139
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9204840620663933591}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1ffcf3825c854634ab23b78c6c177b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Destruction.DecayPart
+  settings:
+    baseFallSpeed: 1
+    speedMultiplier: 0.6146229
