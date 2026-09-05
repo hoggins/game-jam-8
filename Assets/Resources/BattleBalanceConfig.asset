@@ -12,22 +12,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7037fc6b267f44c228536aa48a008d98, type: 3}
   m_Name: BattleBalanceConfig
   m_EditorClassIdentifier: Assembly-CSharp::Balance.BattleBalanceConfig
-  _timerExpiredDefeatDelay: 2
   _battleDuration: 90
   _specialBetweenMaxDistance: 50
   _specialBetweenMinDistance: 40
-  _duckMaxHealth: 1
+  _duckMaxHealth: 6
   _duckAttackDamage: 1
   _duckAttackDistance: 3
   _duckRepositionDistance: 40
-  _meleeAttackRadius: 2
+  _meleeAttackRadius: 5
   _duckCoinDropChances:
   - 0.6
   - 0.3
   - 0.1
   _destructibleMaxHealth:
   - type: 0
-    maxHealth: 10
+    maxHealth: 20
   - type: 1
     maxHealth: 15
   - type: 2

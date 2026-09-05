@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d24dffd7118724dc1b66a231477a79f0, type: 3}
   m_Name: ProgressionBalanceConfig
   m_EditorClassIdentifier: Assembly-CSharp::Balance.ProgressionBalanceConfig
-  _startingAttackPower: 1
+  _startingAttackPower: 5
   _startingMaxHealth: 300000
   _startingSpeed: 6
   _startingGunPower: 1

@@ -35,6 +35,7 @@ namespace Timer
     [Inject] private BattleService _battleService;
 
     private DestructibleObject[] _destructibles;
+    private HitFx[] _hitFx;
     private GameObject _hudCamera;
     private bool _isDead;
 
@@ -52,9 +53,13 @@ namespace Timer
       WarnIfRootIsDestructible();
 
       _destructibles = new DestructibleObject[_digits.Length];
+      _hitFx = new HitFx[_digits.Length];
       for (var i = 0; i < _digits.Length; i++)
         if (_digits[i] != null)
+        {
           _destructibles[i] = _digits[i].GetComponent<DestructibleObject>();
+          _hitFx[i] = _digits[i].GetComponent<HitFx>();
+        }
 
       var hudCamera = GetComponentInChildren<Camera>(true);
       _hudCamera = hudCamera != null ? hudCamera.gameObject : null;
@@ -66,6 +71,9 @@ namespace Timer
         if (destructible != null)
           destructible.Destroyed += OnDigitDestroyed;
 
+      if (_battleService != null)
+        _battleService.TimerExpired += OnTimerExpired;
+
       PushTime();
     }
 
@@ -74,6 +82,18 @@ namespace Timer
       foreach (var destructible in _destructibles)
         if (destructible != null)
           destructible.Destroyed -= OnDigitDestroyed;
+
+      if (_battleService != null)
+        _battleService.TimerExpired -= OnTimerExpired;
+    }
+
+    /// The clock hit 00:00; blink every surviving digit's hit material for the duration of the
+    /// timeout defeat delay so the player can see the countdown is really over before the loss lands.
+    private void OnTimerExpired(float duration)
+    {
+      foreach (var hitFx in _hitFx)
+        if (hitFx != null)
+          hitFx.PlayBlink(duration);
     }
 
     private void Update()

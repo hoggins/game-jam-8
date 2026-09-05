@@ -22,7 +22,6 @@ namespace Weapons
     [SerializeField] private Vector3 _hitFxOffset;
 
     [Inject] private CharacterService _playerService;
-    [Inject] private BattleService _battleService;
     [Inject] private Pool _pool;
 
     private float _nextAttackTime;
@@ -49,10 +48,6 @@ namespace Weapons
 
     public bool TryAttack()
     {
-      // Checked before the cooldown is consumed, so the suspension does not eat a swing.
-      if (_battleService != null && _battleService.IsCombatSuspended)
-        return false;
-
       if (_playerService == null || Time.time < _nextAttackTime)
         return false;
 

@@ -133,7 +133,7 @@ namespace Battle
       if (!_battleService.IsBattleActive)
         return "Inactive";
 
-      return _battleService.IsCombatSuspended ? "Suspended" : "Active";
+      return _battleService.IsTimingOut ? "Timing Out" : "Active";
     }
 
     private int GetActiveAgentCount() =>

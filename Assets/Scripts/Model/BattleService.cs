@@ -10,6 +10,9 @@ namespace Model
   [Preserve]
   public sealed class BattleService : IInitializable, ITickable, IDisposable
   {
+    /// Fixed hold on 00:00, blinking the timer's hit material, before the timeout defeat lands.
+    private const float TimerExpiredBlinkDuration = 5f;
+
     private readonly IEnumerable<IBattleStarted> _battleStartedHandlers;
     private readonly IEnumerable<IBattleEnd> _battleEndHandlers;
     private readonly CharacterService _characterService;
@@ -22,13 +25,17 @@ namespace Model
     public event Action BattleDefeated;
     public event Action TimerDestroyed;
 
+    /// Fired once the clock hits 00:00 and the timeout defeat has been scheduled, carrying the delay
+    /// in seconds until it lands. Lets the in-world timer blink a warning for that same window.
+    public event Action<float> TimerExpired;
+
     public bool IsBattleActive { get; private set; }
     public bool IsTimerDestroyed { get; private set; }
     public bool IsTimerInfinite { get; private set; }
 
-    /// True while the clock sits on 00:00 waiting for the timeout defeat. Nothing deals damage in
-    /// that window, so the player can read the zero instead of being hit during it.
-    public bool IsCombatSuspended { get; private set; }
+    /// True while the clock sits on 00:00, blinking, waiting for the timeout defeat. Combat keeps
+    /// running during this window — it is bonus time, not a pause.
+    public bool IsTimingOut { get; private set; }
 
     public float Timer { get; private set; }
 
@@ -58,7 +65,7 @@ namespace Model
     /// battle the stat is picked up by the next StartBattle instead.
     private void OnTimerBonusAdded(int seconds)
     {
-      if (!IsBattleActive || IsTimerDestroyed || IsCombatSuspended)
+      if (!IsBattleActive || IsTimerDestroyed)
         return;
 
       SetTimer(Timer + seconds);
@@ -72,7 +79,7 @@ namespace Model
       if (IsTimerInfinite)
         return;
 
-      if (IsCombatSuspended)
+      if (IsTimingOut)
       {
         _defeatDelay -= Time.deltaTime;
         if (_defeatDelay <= 0f)
@@ -91,19 +98,14 @@ namespace Model
 
     /// <summary>
     /// Smashing a digit can drop the clock straight to zero, which used to defeat the player on the
-    /// very next frame and read as a bug. Hold on 00:00 for a beat first, with damage suspended in
-    /// both directions so nothing can resolve during the pause.
+    /// very next frame and read as a bug. Hold on 00:00 for a beat first instead — a fixed grace
+    /// window with combat still running, so a lucky last stand can still turn the battle around.
     /// </summary>
     private void BeginTimeout()
     {
-      _defeatDelay = _battleBalance.TimerExpiredDefeatDelay;
-      if (_defeatDelay <= 0f)
-      {
-        DefeatBattle();
-        return;
-      }
-
-      IsCombatSuspended = true;
+      _defeatDelay = TimerExpiredBlinkDuration;
+      IsTimingOut = true;
+      TimerExpired?.Invoke(_defeatDelay);
     }
 
     void IDisposable.Dispose()
@@ -120,7 +122,7 @@ namespace Model
       IsBattleActive = true;
       IsTimerDestroyed = false;
       IsTimerInfinite = false;
-      IsCombatSuspended = false;
+      IsTimingOut = false;
       _defeatDelay = 0f;
       Timer = StartingDuration;
       Time.timeScale = 1f;
@@ -161,7 +163,7 @@ namespace Model
       IsBattleActive = false;
       IsTimerDestroyed = false;
       IsTimerInfinite = false;
-      IsCombatSuspended = false;
+      IsTimingOut = false;
       _defeatDelay = 0f;
       Timer = StartingDuration;
       Time.timeScale = 1f;
@@ -171,6 +173,11 @@ namespace Model
 
     public void DestroyTimer()
     {
+      // Smashing the last digit while the clock is blinking out its timeout is how the player earns
+      // extra time: cancel the pending defeat, a fresh timer is on its way in via TimerRespawnService.
+      IsTimingOut = false;
+      _defeatDelay = 0f;
+
       IsTimerDestroyed = true;
       TimerDestroyed?.Invoke();
     }
@@ -186,7 +193,7 @@ namespace Model
     public void EnableInfiniteTimer()
     {
       IsTimerInfinite = true;
-      IsCombatSuspended = false;
+      IsTimingOut = false;
       _defeatDelay = 0f;
 
       if (Timer <= 0f)
@@ -195,12 +202,22 @@ namespace Model
 
     /// Overwrites the remaining time. Used when part of the in-world timer is destroyed and the
     /// countdown has to continue from whatever the surviving digits still spell out.
-    public void SetTimer(float seconds) =>
+    public void SetTimer(float seconds)
+    {
       Timer = Mathf.Max(0f, seconds);
+
+      // Time found its way back above zero while the timeout blink was already running (e.g. a
+      // Timer stat bonus lands mid-blink) — call off the pending defeat instead of still landing it.
+      if (IsTimingOut && Timer > 0f)
+      {
+        IsTimingOut = false;
+        _defeatDelay = 0f;
+      }
+    }
 
     private void HandleBattleEnd()
     {
-      IsCombatSuspended = false;
+      IsTimingOut = false;
       _defeatDelay = 0f;
       Time.timeScale = 0f;
       foreach (IBattleEnd handler in _battleEndHandlers)

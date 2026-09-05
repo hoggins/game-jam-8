@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using App;
 using Combat;
-using Model;
 using Movement;
 using Pooling;
 using UnityEngine;
@@ -22,7 +21,6 @@ namespace Weapons
     [SerializeField, Min(0)] private int _hitFxPrewarmCount = 8;
 
     [Inject] private Pool _pool;
-    [Inject] private BattleService _battleService;
     [Inject] private MovementUpdater _movementUpdater;
 
     private readonly RaycastHit[] _hits = new RaycastHit[16];
@@ -66,7 +64,7 @@ namespace Weapons
 
     private void Update()
     {
-      if (!_launched || (_battleService != null && _battleService.IsCombatSuspended))
+      if (!_launched)
         return;
 
       var deltaTime = Time.deltaTime;

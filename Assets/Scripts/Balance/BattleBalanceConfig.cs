@@ -16,8 +16,6 @@ namespace Balance
   public sealed class BattleBalanceConfig : ScriptableObject
   {
     [Header("Timing")]
-    [Tooltip("Beat held on 00:00, with damage switched off, before the timeout defeat lands.")]
-    [SerializeField, Min(0f)] private float _timerExpiredDefeatDelay = 2f;
     [SerializeField, Min(0f)] private float _battleDuration = 90f;
 
     [Header("Special Object Respawn")]
@@ -49,7 +47,6 @@ namespace Balance
       new DestructibleMaxHealthEntry { type = DestructibleObjectType.Arrow, maxHealth = 12 },
     };
 
-    public float TimerExpiredDefeatDelay => _timerExpiredDefeatDelay;
     public float BattleDuration => _battleDuration;
     public float SpecialBetweenMaxDistance => _specialBetweenMaxDistance;
     public float SpecialBetweenMinDistance => _specialBetweenMinDistance;
@@ -84,7 +81,6 @@ namespace Balance
 
     private void OnValidate()
     {
-      _timerExpiredDefeatDelay = Mathf.Max(0f, _timerExpiredDefeatDelay);
       _battleDuration = Mathf.Max(0f, _battleDuration);
       _specialBetweenMaxDistance = Mathf.Max(0f, _specialBetweenMaxDistance);
       _specialBetweenMinDistance = Mathf.Max(0f, _specialBetweenMinDistance);
