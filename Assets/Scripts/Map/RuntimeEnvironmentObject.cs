@@ -14,10 +14,11 @@ namespace Map
     /// (e.g. a special object dropped at an arbitrary position/rotation).
     public readonly Vector3 WorldCenter;
     public readonly Vector2 WorldHalfExtents;
+    public readonly Quaternion WorldRotation;
 
     public RuntimeEnvironmentObject(
       int id, Vector2Int cell, Vector2Int size, DestructibleObject destructible,
-      Vector3 worldCenter, Vector2 worldHalfExtents)
+      Vector3 worldCenter, Vector2 worldHalfExtents, Quaternion worldRotation)
     {
       Id = id;
       Cell = cell;
@@ -25,6 +26,7 @@ namespace Map
       Destructible = destructible;
       WorldCenter = worldCenter;
       WorldHalfExtents = worldHalfExtents;
+      WorldRotation = worldRotation;
     }
   }
 }
