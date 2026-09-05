@@ -68,6 +68,7 @@ Material:
     - _Cutoff: 0.5
     - _EnvironmentReflections: 1
     - _Float0: 0
+    - _Hit: 0
     - _Inflate: 0
     - _Keyword0: 0
     - _MainTexMul: 3
@@ -90,8 +91,8 @@ Material:
     - _SpecularHighlights: 1
     - _XRMotionVectorsPass: 1
     m_Colors:
-    - _Color0: {r: 1, g: 0.4764151, b: 0.77312964, a: 0}
-    - _Color1: {r: 1, g: 0.71589655, b: 0.08018869, a: 0}
+    - _Color0: {r: 0.19531606, g: 0.51349217, b: 0.608, a: 0}
+    - _Color1: {r: 0.6855345, g: 0.29854333, b: 0.0840749, a: 0}
     - _Color2: {r: 0.4056604, g: 0.4056604, b: 0.4056604, a: 0}
     - _PrintsColor: {r: 1, g: 1, b: 1, a: 0}
     - _PrintsScale: {r: 0.1, g: 0.1, b: 0, a: 0}
