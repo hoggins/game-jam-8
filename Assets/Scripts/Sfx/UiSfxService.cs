@@ -14,10 +14,15 @@ namespace Sfx
   {
     private const string QuackClipResourcePath = "SFX/quackSfx";
 
+    /// A wave of ducks can die within the same frame - without this floor they stack into one
+    /// loud smear instead of reading as separate quacks.
+    private const float DuckKillQuackCooldown = 0.25f;
+
     private readonly CharacterService _characterService;
 
     private AudioClip _quackClip;
     private AudioSource _source;
+    private float _lastDuckKillQuackTime = float.NegativeInfinity;
 
     public UiSfxService(CharacterService characterService)
     {
@@ -45,12 +50,22 @@ namespace Sfx
       // The pause menu sets Time.timeScale to 0 - the click still has to be audible there.
       _source.ignoreListenerPause = true;
 
-      _characterService.DuckKilled += PlayQuack;
+      _characterService.DuckKilled += OnDuckKilled;
     }
 
     void IDisposable.Dispose()
     {
-      _characterService.DuckKilled -= PlayQuack;
+      _characterService.DuckKilled -= OnDuckKilled;
+    }
+
+    /// Unscaled: the cooldown has to keep running while a slow-motion or paused frame is up.
+    private void OnDuckKilled()
+    {
+      if (Time.unscaledTime - _lastDuckKillQuackTime < DuckKillQuackCooldown)
+        return;
+
+      _lastDuckKillQuackTime = Time.unscaledTime;
+      PlayQuack();
     }
 
     public void PlayQuack()
