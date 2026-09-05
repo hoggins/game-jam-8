@@ -14,6 +14,8 @@ namespace Weapons
   public sealed class Bullet : MonoBehaviour
   {
     private const float ProjectileScaleGrowth = 0.1f;
+    private const float ProjectileSpeedGrowth = 0.5f;
+    private const float MaxProjectileSpeed = 50f;
 
     [SerializeField, Min(0f)] private float _speed = 20f;
     [SerializeField, Min(0.01f)] private float _lifetime = 3f;
@@ -72,7 +74,10 @@ namespace Weapons
       scale = Mathf.Max(0f, scale);
       speedMultiplier = Mathf.Max(0f, speedMultiplier);
       var projectileScale = Mathf.Lerp(1f, scale, ProjectileScaleGrowth);
-      _launchSpeed = _speed * projectileScale * speedMultiplier;
+      var projectileSpeedMultiplier = Mathf.Lerp(1f, speedMultiplier, ProjectileSpeedGrowth);
+      _launchSpeed = Mathf.Min(
+        _speed * projectileScale * projectileSpeedMultiplier,
+        MaxProjectileSpeed);
       _remainingLifetime = _lifetime * projectileScale;
       _launched = true;
     }
