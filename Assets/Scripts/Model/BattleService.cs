@@ -25,6 +25,7 @@ namespace Model
     public event Action BattleWinStarted;
     public event Action BattleWon;
     public event Action BattleDefeated;
+    public event Action BattleAbandoned;
     public event Action TimerDestroyed;
 
     /// Fired once the clock hits 00:00 and the timeout defeat has been scheduled, carrying the delay
@@ -207,6 +208,7 @@ namespace Model
       Time.timeScale = 1f;
       foreach (IBattleEnd handler in _battleEndHandlers)
         handler.OnBattleEnd();
+      BattleAbandoned?.Invoke();
     }
 
     public void DestroyTimer()

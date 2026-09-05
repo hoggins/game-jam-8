@@ -1,6 +1,9 @@
 using System.Collections;
+using App;
+using Telemetry;
 using UnityEngine;
 using UnityEngine.UI;
+using VContainer;
 
 namespace Battle
 {
@@ -15,6 +18,8 @@ namespace Battle
     private CanvasGroup _canvasGroup;
     private Coroutine _transitionCoroutine;
 
+    [Inject] private EconomyTelemetryService _telemetry;
+
     public bool IsShown { get; private set; }
 
     public void Show() =>
@@ -28,6 +33,7 @@ namespace Battle
 
     private void Awake()
     {
+      this.AsInjected();
       _canvasGroup = GetComponent<CanvasGroup>();
       if (_canvasGroup == null)
         _canvasGroup = gameObject.AddComponent<CanvasGroup>();
@@ -68,6 +74,7 @@ namespace Battle
         return;
 
       IsShown = isShown;
+      _telemetry?.SetUpgradeUiShown(isShown);
       Time.timeScale = isShown ? 0f : 1f;
       SetVisible(isShown);
     }

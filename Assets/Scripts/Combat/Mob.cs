@@ -126,7 +126,7 @@ namespace Combat
         return;
 
       _hasAttacked = true;
-      _characterService?.TakeDamage(_battleBalance.DuckAttackDamage);
+      _characterService?.TakeDamage(_battleBalance.DuckAttackDamage, true);
       AttachToPlayer();
     }
 

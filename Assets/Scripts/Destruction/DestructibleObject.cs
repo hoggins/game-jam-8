@@ -24,6 +24,7 @@ namespace Destruction
 
     [SerializeField, Min(0f)] private float _breakMagnitude = 5f;
     [SerializeField] private bool _spawnDestructionFx = true;
+    [SerializeField, Range(1, 5)] private int _houseDifficultyLevel = 1;
 
     [Inject] private EnvironmentDecayManager _decayManager;
     [Inject] private Pool _pool;
@@ -39,6 +40,8 @@ namespace Destruction
     private static GameObject _coinPickupPrefab;
 
     public event Action<DestructibleObject> Destroyed;
+
+    public int HouseDifficultyLevel => _houseDifficultyLevel;
 
     private static LayerMask? _partLayer;
     private static PhysicsMaterial _frictionMaterial;

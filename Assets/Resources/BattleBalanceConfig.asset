@@ -23,6 +23,7 @@ MonoBehaviour:
   _duckAttackDamage: 1
   _duckAttackDistance: 3
   _duckRepositionDistance: 40
+  _maxLiveMobs: 150
   _meleeAttackRadius: 5
   _duckCoinDropChances:
   - 0.6
@@ -34,7 +35,7 @@ MonoBehaviour:
   _buildingCoinDropDistance: 1
   _destructibleMaxHealth:
   - type: 0
-    maxHealth: 20
+    maxHealth: 50
   - type: 1
     maxHealth: 15
   - type: 2
@@ -44,8 +45,15 @@ MonoBehaviour:
   - type: 4
     maxHealth: 48
   - type: 5
-    maxHealth: 20
+    maxHealth: 50
   - type: 6
-    maxHealth: 100
+    maxHealth: 1250
   - type: 7
     maxHealth: 1
+  _houseMaxHealthByDifficulty:
+  - difficultyLevel: 1
+    maxHealth: 50
+  - difficultyLevel: 2
+    maxHealth: 250
+  - difficultyLevel: 3
+    maxHealth: 1250

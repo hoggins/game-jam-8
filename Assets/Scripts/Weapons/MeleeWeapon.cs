@@ -3,6 +3,7 @@ using Balance;
 using Combat;
 using Destruction;
 using Movement;
+using Telemetry;
 using UnityEngine;
 using VContainer;
 
@@ -23,6 +24,7 @@ namespace Weapons
 
     [Inject] private MovementUpdater _movementUpdater;
     [Inject] private BattleBalanceConfig _battleBalance;
+    [Inject] private EconomyTelemetryService _telemetry;
 
     private readonly List<MovementAgent> _targets = new(16);
     private readonly HashSet<Mob> _hitMobs = new();
@@ -116,6 +118,8 @@ namespace Weapons
         if (IsInsideAttackCone(target.transform.position))
           DamageDestructible(target, damage);
       }
+
+      _telemetry?.RecordMeleeSwing(_hitMobs.Count);
     }
 
     private void DamageTarget(MovementAgent target, int damage)

@@ -2,6 +2,7 @@ using System;
 using Balance;
 using App;
 using Combat;
+using Telemetry;
 using UnityEngine;
 using VContainer;
 
@@ -17,6 +18,7 @@ namespace Destruction
     [SerializeField] private DestructibleObjectType _objectType;
 
     [Inject] private BattleBalanceConfig _battleBalance;
+    [Inject] private EconomyTelemetryService _telemetry;
 
     private DestructibleObject _destructibleObject;
     private HitFx _hitFx;
@@ -33,7 +35,9 @@ namespace Destruction
       this.AsInjected();
       _destructibleObject = GetComponent<DestructibleObject>();
       _hitFx = GetComponent<HitFx>();
-      _maxHealth = _battleBalance.GetDestructibleMaxHealth(_objectType);
+      _maxHealth = _objectType == DestructibleObjectType.House
+        ? _battleBalance.GetHouseMaxHealth(_destructibleObject.HouseDifficultyLevel)
+        : _battleBalance.GetDestructibleMaxHealth(_objectType);
       CurrentHealth = _maxHealth;
       _nextPartFalloutDamage = RollPartFalloutDamage();
     }
@@ -48,6 +52,9 @@ namespace Destruction
 
       if (!IsAlive)
         return;
+
+      if (_objectType == DestructibleObjectType.House)
+        _telemetry?.RecordBuildingHit();
 
       CurrentHealth = Mathf.Max(0, CurrentHealth - damage);
 
