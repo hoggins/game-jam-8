@@ -204,8 +204,15 @@ namespace Telemetry
 
     private void OnDamageTaken(int damage, bool fromMob)
     {
-      if (_runActive)
-        _currentSlice.damageTaken += Mathf.Max(0, damage);
+      if (!_runActive)
+        return;
+
+      var amount = Mathf.Max(0, damage);
+      _currentSlice.damageTaken += amount;
+      if (fromMob)
+        _currentSlice.damageTakenFromMobs += amount;
+      else
+        _currentSlice.damageTakenFromOther += amount;
     }
 
     private void OnMobConnected()
@@ -395,6 +402,8 @@ namespace Telemetry
         totals.timerCoinsSpent += slice.timerCoinsSpent;
         totals.distanceTravelled += slice.distanceTravelled;
         totals.damageTaken += slice.damageTaken;
+        totals.damageTakenFromMobs += slice.damageTakenFromMobs;
+        totals.damageTakenFromOther += slice.damageTakenFromOther;
         totals.mobsConnected += slice.mobsConnected;
         totals.buildingsDestroyed += slice.buildingsDestroyed;
         totals.buildingHits += slice.buildingHits;
@@ -545,6 +554,8 @@ namespace Telemetry
       public float straightLineDisplacement;
       public float detourRatio;
       public int damageTaken;
+      public int damageTakenFromMobs;
+      public int damageTakenFromOther;
       public int mobsConnected;
       public int buildingsDestroyed;
       public int buildingHits;
@@ -581,6 +592,8 @@ namespace Telemetry
       public float distanceTravelled;
       public float straightLineDisplacement;
       public int damageTaken;
+      public int damageTakenFromMobs;
+      public int damageTakenFromOther;
       public int mobsConnected;
       public int buildingsDestroyed;
       public int buildingHits;

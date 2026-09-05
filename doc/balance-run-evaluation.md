@@ -9,20 +9,66 @@ modelled.
 | 19:16 | defeat | 62.9 s | 542 | 392 | 0.72 | **0** | 189 | 105 | 10.8× |
 | 19:17 | defeat | 22.0 s | 150 | 63 | 0.42 | **0** | 23 | 0 | 8.6× |
 | 19:27 | **win** | 163.7 s | 900 | 760 | 0.84 | 10 | 432 | 408 | 11.5× |
+| **20:11** | defeat | 69.5 s | 371 | 223 | 0.60 | **13** | 200 | 82 | 13.1× |
+
+> **Runs 1–3 are invalid for evaluating the building loop.** House difficulty was centered on the
+> map spawner transform rather than the player (`MapFiller` / `MapEnvironmentSpawner` used
+> `transform.position` as the origin cell), fixed in `d5ab8c7`. The player was dropped into the
+> wrong difficulty band and surrounded by houses far above their damage tier. Run 4 is the first
+> valid measurement. §1 below is the corrected reading; §2–§4 describe runs 1–3 and are retained
+> only where they still hold.
 
 ---
 
-## 1. Verdict
+## 1. Verdict (corrected after `d5ab8c7`)
 
-**The per-unit models were right. The volume assumptions were wrong.**
+**The per-unit models were right. The volume assumptions were mostly right too, once the spawn bug
+was fixed. My earlier "buildings never engage" conclusion was an artefact of that bug.**
 
-Everything the theory computed *per event* — coins per kill, coins per building, swings per second,
-spawns per second, attack purchases required — matched the telemetry closely. Everything it assumed
-about *how many* of those events a run contains was off, in one case by a factor of three.
+Run 4 changes the picture completely:
 
-The headline failure: **the building/tier loop never engaged.** Across all three runs, **zero
-buildings were destroyed in the first 90 seconds** — the entire span the three-tier design describes.
-The winning run destroyed its first building at t ≈ 90 s and only 10 in total.
+| | Runs 1–3 (bugged) | Run 4 (fixed) | Theory |
+|---|---:|---:|---:|
+| Buildings per minute | 3.7 | **11.2** | — |
+| Buildings in first 30 s | **0** | **5** | ~6 |
+| Building share of income | 17% | **47%** | ~59% |
+| Coins per building | 7.3 | 7.2 | 7.0 |
+| Damage at t = 30 s | 10 | **50** | **50** |
+| Attack purchases by t = 30 s | 0 | **4** | **4** |
+
+**Tier 0 played out exactly as designed.** The theory said the player starts at damage 10, buys
+four attack upgrades in the first 30 seconds, and arrives at tier 1 with damage 50 able to one-shot
+a 50 HP T1 house. That is precisely what run 4 shows, to the purchase. Speed reached 10 against a
+predicted 12.
+
+So the tier ladder works. The earlier conclusion that buildings lose an incentive trade to the mob
+crowd was **wrong** — the player simply had no houses they could destroy, because the difficulty
+bands were centered on the wrong origin.
+
+### What is still true after the fix
+
+- **The mob cap still governs the economy.** Slice 0 spawns 224 against 225 nominal, but slice 1
+  drops to 140 against 375 nominal (0.37). The opening backlog still pins the population.
+- **The opening is still under-powered.** Slice 0 kill fraction is 0.50 — better than the bugged
+  run's 0.38, but still below 1.0, so a backlog forms.
+- **Detour is still ~13×.** The radial leg model remains inapplicable.
+- **Health→radius coupling is unchanged** (run 4 was too short to max it, but the mechanism stands).
+
+### New findings from run 4
+
+1. **The swing telemetry is corrupted.** Run 4 reports 2413 melee swings in 69.5 s (34.7/s) and a
+   nonsensical 0.09 mobs per swing. Cause: the Player prefab now carries a second `MeleeWeapon` —
+   a props-shredding aura with `_attackCooldown: 0.02`, `_attackConeAngle: 360`,
+   `_damageOnlyProps: true`. It fires every frame and calls `RecordMeleeSwing(0)` each time,
+   because the props path skips the mob loop entirely.
+   **Fix: only call `RecordMeleeSwing` when `_damageOnlyProps` is false.**
+   Corrected figures for run 4: ~139 real swings, **1.59 mobs/swing, kill capacity 3.18/s** — which
+   is consistent with run 3's measured 2.83/s at base power, so the capacity envelope still holds.
+2. **Props are now an unmodelled damage source.** Slice 2 took 45 damage with only **one** mob
+   connecting — roughly 44 damage came from props. Nothing in the balance model accounts for this.
+3. **Income was earned but not converted.** The player died holding **118 unspent coins**, having
+   earned 104 in slice 1 and spent nothing: zero shop visits after t = 30 s. The bottleneck late in
+   run 4 was shop *access*, not income.
 
 ---
 

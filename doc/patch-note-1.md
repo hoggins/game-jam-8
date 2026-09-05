@@ -1,145 +1,136 @@
 # Patch note 1 — post-telemetry balance pass
 
-Derived from [`balance-run-evaluation.md`](balance-run-evaluation.md) and the three runs in
-`artifacts/`. Every change below is justified by a measured number, not a model.
+**Revised after `d5ab8c7` (house difficulty centering fix) and run 4.** The first draft of this note
+was written against runs 1–3, which were invalid: house difficulty was centered on the map spawner
+transform instead of the player, so the player was surrounded by houses above their damage tier. Two
+recommendations have been **retracted** as a result — see the end.
+
+Basis: [`balance-run-evaluation.md`](balance-run-evaluation.md) and `artifacts/`.
 
 ---
 
-## The organising principle
+## What the fix already proved
 
-The telemetry gives us something the theory never had: **the actual kill-capacity curve.**
+Run 4 shows **Tier 0 working exactly as designed**: start at damage 10, buy four attack upgrades in
+the first 30 seconds, arrive at tier 1 with damage 50 — to the purchase. Buildings went from 3.7/min
+to **11.2/min**, and building income from 17% to **47%** of the total, with no balance change at all.
 
-| Player state | Melee radius | Mobs / swing | Kill capacity |
-|---|---:|---:|---:|
-| Base (damage 10, health 120) | 6.0 wu | 1.44 | **2.8 /s** |
-| Maxed health (29 upgrades) | 9.5 wu | 6.69 | **12.7 /s** |
-
-Note the mid-game slices: capacity and spawn rate track each other almost exactly (2.70 vs 3.07,
-4.73 vs 4.73, 5.37 vs 5.40). That is a **saturated** system — the player kills precisely what
-arrives, because the cap is holding the population flat. Capacity is only truly visible at the two
-ends, where the player is swamped.
-
-**Every balance decision follows from one rule: spawn rate must stay under kill capacity, or a
-backlog forms and the mob cap silently takes over the economy.** The shipped 5→20 ramp violated this
-at t=0 by 2.6× (7.5/s spawn against 2.8/s capacity), which is the root cause of everything that went
-wrong.
+**The tier ladder is sound. Do not re-derive it.** The remaining problems are narrower than they
+looked.
 
 ---
 
 ## Changes
 
-### 1. Melee radius 5 → 7 `BattleBalanceConfig`
+### 1. Fix the melee swing telemetry — **blocking** `MeleeWeapon.cs`
 
-`_meleeAttackRadius: 5` → **7**
+Run 4 reports 2413 swings in 69.5 s (34.7/s) and 0.09 mobs per swing. Both are wrong. The Player
+prefab now carries a second `MeleeWeapon` — a props aura with a 0.02 s cooldown, 360° cone and
+`_damageOnlyProps: true` — which fires every frame and calls `RecordMeleeSwing(0)`, because the
+props path skips the mob loop.
 
-The opening is unclearable at base power: 1.44 mobs per swing is simply too few against 7.5/s. Rather
-than gutting the spawn rate to match a weak swing, raise the swing.
+Guard the call so only the real combat weapon reports:
 
-Effective radius goes 6.0 → 8.4 wu (×1.2 prefab multiplier), area ×1.96, so early mobs/swing should
-land near 2.8 and capacity near **5.5/s**.
+```csharp
+if (!_damageOnlyProps)
+  _telemetry?.RecordMeleeSwing(_hitMobs.Count);
+```
 
-*This is the change that preserves the swarm feel. The run was fun; the fix should not be "fewer
-mobs" alone.*
+Corrected run-4 figures: ~139 real swings, **1.59 mobs/swing, capacity 3.18/s**. Fix this first —
+`meanMobsPerSwing` is the metric every other decision below is calibrated against, and right now the
+instrumentation is lying.
 
-### 2. Spawn ramp 5→20 becomes 4→12 `BattleScene.unity`
+### 2. Melee radius 5 → 6.5 `BattleBalanceConfig`
+
+`_meleeAttackRadius: 5` → **6.5**
+
+The opening is still under-powered: slice-0 capacity is 3.18/s against 7.5/s of spawn, a 2.4×
+deficit that builds a backlog and hands the economy to the mob cap. Effective radius goes 6.0 → 7.8
+wu, area ×1.69, so capacity should land near **5.4/s**.
+
+### 3. Spawn ramp 5→20 becomes 4→12 `BattleScene.unity`
 
 `_mobsPerSecStart: 5` → **4**  ·  `_mobPerSecondEnd: 20` → **12**  ·  `_secondEnd: 90` (keep)
 
-With change 1, capacity runs ~5.5/s at base and ~9–12/s once upgraded. The new ramp sits just under
-that at both ends:
-
-| Slice | New nominal spawns | Capacity |
+| Slice | Mean spawn rate | Capacity (with change 2) |
 |---|---:|---:|
-| 0–30 s | 160 | ~165 |
-| 30–60 s | 240 | rising |
-| 60–90 s | 320 | ~12/s |
+| 0–30 s | 5.3 /s | ~5.4 /s |
+| 30–60 s | 8.0 /s | rising with upgrades |
+| 60–90 s | 10.7 /s | ~12.7 /s at max |
 
-20/s was never reachable — measured peak capacity is 12.7/s, and only with health fully maxed.
-
-### 3. Per-difficulty building drops — **new field** `BattleBalanceConfig`
-
-Add `_buildingCoinDropByDifficulty`, mirroring the existing `_houseMaxHealthByDifficulty`:
-
-| Difficulty | HP | Coins |
-|---|---:|---:|
-| 1 | 50 | **12** |
-| 2 | 250 | **40** |
-| 3 | 1250 | **120** |
-
-Replaces the flat 5–9 roll for houses. This is the single biggest cause of the tier loop never
-engaging: **7 coins for 2.5 seconds of standing still, while the swarm closes, loses to just swinging
-at the crowd.** At 12 coins a T1 house pays ~4.8 coins/s against the crowd's ~2.4 — now worth
-stopping for, and the reward scales with the tier ladder as the design always intended.
-
-*(The summary proposed 7/20/50 per tier; it was never implemented. These are higher because the
-telemetry showed buildings losing the trade badly at 7.)*
+20/s was never reachable — measured peak capacity is 12.7/s and only with health fully maxed.
+Together with change 2 this should keep the population off the cap, which returns spawn rate to
+being a real dial. Currently slice 1 delivers 0.37 of nominal.
 
 ### 4. Health repricing and decoupling `ProgressionBalanceConfig`
 
 `_maxHealthUpgradeCost: 5` → **10**  ·  `_maxHealthScalePerLevel: 0.02` → **0.01**
 
-Health was the cheapest upgrade in the game (5, against attack 7 and speed 6) *and* bought survival
-*and* bought 2.5× melee area — therefore income. The player maxed it: **29 of 29 possible purchases,
-36% of all spend**, on a stat the theory treated as optional.
+Health is the cheapest upgrade in the game (5, against attack 7 and speed 6) *and* buys survival
+*and* scales melee radius — therefore income. In run 3 the player maxed it: 29 of 29 purchases, 36%
+of all spend. Halving the scale gives ×1.29 at max instead of ×1.58, and doubling the cost makes it
+compete with attack. Raising the base radius (change 2) makes the coupling absolutely stronger, so
+these two belong in the same pass.
 
-Halving the scale gives ×1.29 at max instead of ×1.58 (area ×1.66, not ×2.50), and doubling the cost
-makes it compete with attack. The coupling stays as a real build choice; it stops being a free
-dominant strategy.
+### 5. Timer respawn preserves remaining time `BattleService`
 
-### 5. Flat tier distribution `HouseSet.asset`
+Run 3 lasted **163.7 s on a 90 s clock with zero timer purchases**. Destroying and respawning the
+timer resets it to full duration; it should restore remaining time.
 
-Replace the radial `difficultyRanges` bands with flat weights: **T1 50% / T2 35% / T3 15%**.
+### 6. Investigate shop access — needs diagnosis, not a number
 
-This is the decision that has been pending. Measured detour ratio is **8.6–11.5×** — the player
-orbits near spawn rather than travelling outward, so radial banding describes a run shape this game
-does not have. T1-heavy weighting keeps the opening viable, since a 250 HP T2 house is 25 hits at
-damage 10 and acts as a soft wall until attack comes up.
+Run 4's player died holding **118 unspent coins**, having earned 104 in slice 1 and spent nothing:
+**zero shop visits after t = 30 s**. Late-run progression stalled on shop *access*, not income —
+damage sat at 50 from t=30 to death.
 
-### 6. Timer respawn preserves remaining time `BattleService`
+Check whether Upgrade houses respawn often enough and near enough once the player has moved.
+`SpecialSpawnSettings` puts Upgrade at 0–30 wu initially, then 0–30 / 0–50 on respawn. If that is
+the constraint, widening it is cheaper than any economy change.
 
-The winning run lasted **163.7 s on a 90 s clock with zero timer purchases**. Destroying and
-respawning the timer resets it to the full duration. Respawn should restore the remaining time, not
-reset the clock.
+### 7. Price the props damage
 
-### 7. Mob cap stays at 150 — but stops being the governor
+Slice 2 of run 4 took **45 damage with only one mob connecting** — roughly 44 damage from props,
+about 4.6 dps. Against 120–180 max health that is a major unmodelled threat, and it is what killed
+that run. Either reduce it, or make it intentional and telegraphed, but it needs a number in the
+balance model rather than arriving as a surprise.
 
-No value change. With changes 1 and 2 the population should no longer saturate, returning the cap to
-its intended role as a pure performance guard.
+### 8. Mob cap stays at 150
 
-**Diagnostic:** in the next run, compare actual spawns per slice against the nominal ramp. If any
-slice reads below ~0.9 of nominal, the cap is *still* governing the economy and spawn-rate tuning is
-a no-op. Last run read 0.25–0.27 across the middle slices.
+No change. With 2 and 3 the population should stop saturating, returning the cap to a pure
+performance guard.
 
----
-
-## Not changing
-
-The damage/HP ladder is validated and should be left alone. The attack chain needed 23 purchases
-against a predicted 24, coin EVs matched within noise (mob 359 vs 380 expected, building 73 vs 70),
-and swing cadence matched to 2.5%. **The arithmetic was never the problem** — the behavioural
-assumptions layered on top of it were.
-
-Mob coin EV (0.5/kill) also stays put this pass, deliberately: changing income on both sides at once
-would make the next run uninterpretable.
+**Diagnostic:** compare actual spawns per slice against the nominal ramp. Below ~0.9 means the cap is
+still governing and spawn tuning is a no-op. Run 4 read 1.00 / 0.37.
 
 ---
 
-## Predicted outcomes — check these against run 4
+## Retracted from the first draft
 
-| Metric | Last run | Target |
+- ~~Raise building drops to 12 / 40 / 120.~~ **Not needed.** Buildings deliver 47% of income at the
+  existing 5–9 roll, and coins-per-building measured 7.2 against a model EV of 7.0. The premise —
+  that buildings lose an incentive trade to the mob crowd — was an artefact of the centering bug.
+  Note the tier ladder keeps time-to-kill constant at 5 hits per tier, so a flat 7 coins is already
+  rate-neutral when fighting your own tier.
+- ~~Flatten `HouseSet` to random tier weights 50/35/15.~~ **Not needed.** With difficulty correctly
+  centered on the player, radial banding does exactly what the design intended: T1 near spawn,
+  higher tiers outward. Run 4's 5 buildings in the first 30 seconds is that working. Leave the bands
+  alone and tune their radii only if telemetry shows a tier starving.
+
+---
+
+## Predicted outcomes — check against run 5
+
+| Metric | Run 4 | Target |
 |---|---:|---:|
-| Slice-0 kill fraction | 0.38 | **> 0.80** |
-| Spawns actual ÷ nominal, all slices | 0.25–0.27 | **> 0.90** |
-| Buildings destroyed | 10 | **> 25** |
-| Buildings destroyed in first 90 s | **0** | **> 8** |
-| Building share of income | 17% | **> 40%** |
-| Health purchases | 29 (capped out) | **12–18** |
-| Run duration | 163.7 s | **~90 s** |
-| Deaths in opening 30 s | 2 of 3 runs | rare |
+| Reported swings/s | 34.7 (bug) | **~2.0** |
+| Mobs per swing | 1.59 (corrected) | **> 2.5** |
+| Slice-0 kill fraction | 0.50 | **> 0.85** |
+| Spawns actual ÷ nominal, all slices | 1.00 / 0.37 | **> 0.90** |
+| Buildings destroyed per minute | 11.2 | **hold ≥ 10** |
+| Unspent coins at end | 118 | **< 40** |
+| Damage at t = 60 s | 50 | **250** |
+| Run duration | 69.5 s | **~90 s** |
 
-If buildings are still not being destroyed after change 3, the problem is not price — it is that
-nothing *requires* the player to engage them, and the next lever is making them gate progress rather
-than being optional scenery.
-
-If total income exceeds roughly 2× mandatory spend (~400 coins), trim mob EV from 0.5 to 0.3 on the
-following pass rather than touching building drops again.
+Damage at t=60 is the one to watch. Tier 0 hit its mark exactly; tier 1 stalled because the player
+could not spend. If change 6 lands and damage still sits at 50 by t=60, the problem is the tier-1
+income curve rather than shop access.

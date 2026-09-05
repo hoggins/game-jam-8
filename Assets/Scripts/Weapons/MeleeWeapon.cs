@@ -119,7 +119,8 @@ namespace Weapons
           DamageDestructible(target, damage);
       }
 
-      _telemetry?.RecordMeleeSwing(_hitMobs.Count);
+      if (!_damageOnlyProps)
+        _telemetry?.RecordMeleeSwing(_hitMobs.Count);
     }
 
     private void DamageTarget(MovementAgent target, int damage)
