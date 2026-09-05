@@ -3,6 +3,7 @@ using Metagame.PauseMenu;
 using Model;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 using VContainer;
 
 namespace Battle
@@ -11,6 +12,7 @@ namespace Battle
   {
     [SerializeField] private PauseMenuUi _pauseMenuUi;
     [SerializeField] private InBattleProgressionUi _progressionUi;
+    [SerializeField] private Button _upgradeButton;
     [SerializeField] private InputActionReference _toggleProgressionAction;
 
     [Inject] private BattleService _battleService;
@@ -28,6 +30,12 @@ namespace Battle
       if (_battleService != null)
         _battleService.BattleStarted += OnBattleStarted;
 
+      if (_upgradeButton != null)
+      {
+        _upgradeButton.onClick.AddListener(ToggleProgression);
+        _upgradeButton.interactable = _progressionInputEnabled;
+      }
+
       if (_toggleProgressionAction == null)
         return;
 
@@ -41,6 +49,9 @@ namespace Battle
     {
       if (_battleService != null)
         _battleService.BattleStarted -= OnBattleStarted;
+
+      if (_upgradeButton != null)
+        _upgradeButton.onClick.RemoveListener(ToggleProgression);
 
       if (_subscribedToggleAction != null)
       {
@@ -61,6 +72,9 @@ namespace Battle
     public void SetProgressionInputEnabled(bool enabled)
     {
       _progressionInputEnabled = enabled;
+      if (_upgradeButton != null)
+        _upgradeButton.interactable = enabled;
+
       ApplyProgressionInputState();
     }
 
@@ -80,7 +94,12 @@ namespace Battle
 
     private void ToggleProgressionPerformed(InputAction.CallbackContext context)
     {
-      if (_progressionUi == null)
+      ToggleProgression();
+    }
+
+    private void ToggleProgression()
+    {
+      if (!_progressionInputEnabled || _progressionUi == null)
         return;
 
       if (_pauseMenuUi != null && _pauseMenuUi.IsPaused)
@@ -92,6 +111,9 @@ namespace Battle
     private void OnBattleStarted()
     {
       _progressionInputEnabled = true;
+      if (_upgradeButton != null)
+        _upgradeButton.interactable = true;
+
       ApplyProgressionInputState();
     }
 
