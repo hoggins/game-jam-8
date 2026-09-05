@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Model;
 using UnityEngine;
 using UnityEngine.Scripting;
@@ -10,15 +11,21 @@ namespace Sfx
   /// gameplay beats that share the same clip. Registered in AppScope, so it survives scene
   /// loads together with the source it creates.
   [Preserve]
-  public class UiSfxService : IInitializable, IDisposable
+  public class UiSfxService : IInitializable, ITickable, IDisposable
   {
     private const string QuackClipsResourceFolder = "SFX";
 
-    /// A wave of ducks can die within the same frame - without this floor they stack into one
-    /// loud smear instead of reading as separate quacks.
-    private const float DuckKillQuackCooldown = 0.25f;
+    /// Ducks die in waves, often several within the same frame. Playing them all at once smears
+    /// into one loud noise, and dropping the extras loses the wave entirely - so each kill is
+    /// scheduled at a random offset up to this, and the queue drains no faster than the cooldown.
+    private const float MaxDuckKillQuackDelay = 0.5f;
+    private const float DuckKillQuackCooldown = 0.15f;
+
+    /// A big enough wave would otherwise trail quacks for seconds after the fight moved on.
+    private const int MaxPendingDuckKillQuacks = 8;
 
     private readonly CharacterService _characterService;
+    private readonly List<float> _pendingDuckKillQuacks = new();
 
     private AudioClip[] _quackClips;
     private AudioSource _source;
@@ -60,13 +67,53 @@ namespace Sfx
       _characterService.DuckKilled -= OnDuckKilled;
     }
 
-    /// Unscaled: the cooldown has to keep running while a slow-motion or paused frame is up.
+    /// Unscaled throughout: the spread and the cooldown have to keep running while a
+    /// slow-motion or paused frame is up.
     private void OnDuckKilled()
     {
-      if (Time.unscaledTime - _lastDuckKillQuackTime < DuckKillQuackCooldown)
+      var now = Time.unscaledTime;
+
+      // The kill that opens a wave is the one the player is watching - delaying it reads as lag.
+      // Only once something is already queued or still inside the cooldown does the spread apply.
+      if (_pendingDuckKillQuacks.Count == 0 && now - _lastDuckKillQuackTime >= DuckKillQuackCooldown)
+      {
+        _lastDuckKillQuackTime = now;
+        PlayQuack();
+        return;
+      }
+
+      if (_pendingDuckKillQuacks.Count >= MaxPendingDuckKillQuacks)
         return;
 
-      _lastDuckKillQuackTime = Time.unscaledTime;
+      _pendingDuckKillQuacks.Add(now + UnityEngine.Random.Range(0f, MaxDuckKillQuackDelay));
+    }
+
+    /// Plays at most one queued quack per frame, and only once the cooldown since the last one
+    /// has elapsed - a quack held back by the cooldown stays queued rather than being dropped.
+    void ITickable.Tick()
+    {
+      if (_pendingDuckKillQuacks.Count == 0)
+        return;
+
+      var now = Time.unscaledTime;
+      if (now - _lastDuckKillQuackTime < DuckKillQuackCooldown)
+        return;
+
+      var dueIndex = -1;
+      for (var i = 0; i < _pendingDuckKillQuacks.Count; i++)
+      {
+        if (_pendingDuckKillQuacks[i] > now)
+          continue;
+
+        if (dueIndex < 0 || _pendingDuckKillQuacks[i] < _pendingDuckKillQuacks[dueIndex])
+          dueIndex = i;
+      }
+
+      if (dueIndex < 0)
+        return;
+
+      _pendingDuckKillQuacks.RemoveAt(dueIndex);
+      _lastDuckKillQuackTime = now;
       PlayQuack();
     }
 
