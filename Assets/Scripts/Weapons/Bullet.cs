@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using App;
 using Combat;
+using Destruction;
 using Movement;
 using Pooling;
 using UnityEngine;
@@ -30,11 +31,13 @@ namespace Weapons
     private Vector3 _direction;
     private float _remainingLifetime;
     private int _damage;
+    private int _collisionLayerMask;
     private bool _launched;
 
     private void Awake()
     {
       this.AsInjected();
+      _collisionLayerMask = LayerMask.GetMask("Actors", DestructibleLayers.Damagable);
       _pool?.Prewarm(_hitFxPrefab, _hitFxPrewarmCount);
     }
 
@@ -115,8 +118,7 @@ namespace Weapons
 
       SpawnHitFx(hitPosition, hitRotation);
 
-      // A bullet is consumed by the first non-owner collider, whether it was damageable or
-      // an environment obstacle.
+      // A bullet is consumed by the first non-owner collider on a damageable or actor layer.
       Release();
       return true;
     }
@@ -180,7 +182,7 @@ namespace Weapons
         _direction,
         _hits,
         distance,
-        Physics.DefaultRaycastLayers,
+        _collisionLayerMask,
         QueryTriggerInteraction.Ignore);
 
       var closestDistance = float.PositiveInfinity;
