@@ -27,6 +27,11 @@ namespace Weapons
     private float _nextAttackTime;
 
     protected CharacterService PlayerService => _playerService;
+    protected Pool Pool => _pool;
+
+    // Melee attacks are the attacks that drive the player's attack animation. Other weapons
+    // can fire independently without making the player play that animation.
+    protected virtual bool NotifyAttackPerformed => true;
 
     protected virtual void Awake()
     {
@@ -53,7 +58,8 @@ namespace Weapons
       _nextAttackTime = Time.time + _attackCooldown;
       SpawnAttackFx();
       Attack(_playerService.AttackPower);
-      AttackPerformed?.Invoke();
+      if (NotifyAttackPerformed)
+        AttackPerformed?.Invoke();
       return true;
     }
 
