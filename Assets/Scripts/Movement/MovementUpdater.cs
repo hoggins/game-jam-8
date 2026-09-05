@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Map;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using VContainer.Unity;
@@ -26,6 +27,8 @@ namespace Movement
     private readonly RaycastHit[] _wallHits = new RaycastHit[64];
     private readonly Collider[] _wallOverlaps = new Collider[64];
 
+    private Bounds _levelWorldBounds;
+    private bool _hasLevelWorldBounds;
     private int _noGoZoneRevision;
 
     public MovementUpdater(MovementSettings settings) =>
@@ -40,6 +43,20 @@ namespace Movement
 
     internal bool IsInsideFlowMap(Vector3 position) =>
       _flowMap.IsInside(position);
+
+    internal bool IsInsideLevelBounds(Vector3 position, float radius = 0f)
+    {
+      if (!_hasLevelWorldBounds)
+        return true;
+
+      var margin = Mathf.Max(0f, radius + _settings.WallSkin);
+      var min = _levelWorldBounds.min;
+      var max = _levelWorldBounds.max;
+      return position.x >= min.x + margin
+             && position.x <= max.x - margin
+             && position.z >= min.z + margin
+             && position.z <= max.z - margin;
+    }
 
     internal void Register(MovementAgent agent)
     {
@@ -86,6 +103,7 @@ namespace Movement
     {
       SceneManager.sceneLoaded += OnSceneLoaded;
       RefreshNoGoZones();
+      RefreshLevelBounds();
     }
 
     void ILateTickable.LateTick() =>
@@ -101,6 +119,14 @@ namespace Movement
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
       RefreshNoGoZones();
+      RefreshLevelBounds();
+    }
+
+    private void RefreshLevelBounds()
+    {
+      var levelData = Object.FindFirstObjectByType<LevelData>();
+      _hasLevelWorldBounds = levelData != null
+                             && levelData.TryGetWorldBounds(out _levelWorldBounds);
     }
 
     internal void RefreshNoGoZones()
@@ -295,7 +321,7 @@ namespace Movement
       {
         position += displacement;
         position.y = agent.Position.y;
-        return position;
+        return ClampToLevelBounds(position, radius);
       }
 
       var remaining = displacement;
@@ -330,7 +356,28 @@ namespace Movement
 
       position = ResolveWallOverlaps(agent, position, radius);
       position.y = agent.Position.y;
+      return ClampToLevelBounds(position, radius);
+    }
+
+    private Vector3 ClampToLevelBounds(Vector3 position, float radius)
+    {
+      if (!_hasLevelWorldBounds)
+        return position;
+
+      var margin = Mathf.Max(0f, radius + _settings.WallSkin);
+      var min = _levelWorldBounds.min;
+      var max = _levelWorldBounds.max;
+      position.x = ClampAxis(position.x, min.x + margin, max.x - margin, _levelWorldBounds.center.x);
+      position.z = ClampAxis(position.z, min.z + margin, max.z - margin, _levelWorldBounds.center.z);
       return position;
+    }
+
+    private static float ClampAxis(float value, float min, float max, float fallback)
+    {
+      if (min > max)
+        return fallback;
+
+      return Mathf.Clamp(value, min, max);
     }
 
     private Vector3 ResolveWallOverlaps(

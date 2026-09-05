@@ -173,7 +173,8 @@ namespace Combat
         if (offset.sqrMagnitude <= repositionDistanceSquared)
           continue;
 
-        if (!TryGetSpawnPosition(out var position))
+        var radius = agent.Controller?.Radius ?? 0f;
+        if (!TryGetSpawnPosition(radius, out var position))
           continue;
 
         agent.Teleport(position);
@@ -183,25 +184,37 @@ namespace Combat
 
     private bool TrySpawn(GameObject mobPrefab)
     {
-      if (!TryGetSpawnPosition(out var position))
+      var mobMovement = mobPrefab.GetComponent<MobMovement>();
+      var radius = mobMovement != null ? mobMovement.Radius : 0f;
+      if (!TryGetSpawnPosition(radius, out var position))
         return false;
 
-      var spawned = _pool.Get(mobPrefab, position, Quaternion.identity) != null;
-      if (spawned)
-        _nextSpawnSide = (_nextSpawnSide + 1) % SideCount;
+      var spawned = _pool.Get(mobPrefab, position, Quaternion.identity);
+      if (spawned == null)
+        return false;
 
-      return spawned;
+      var agent = spawned.GetComponent<MovementAgent>();
+      var actualRadius = agent?.Controller?.Radius ?? radius;
+      if (!_movementUpdater.IsInsideLevelBounds(position, actualRadius))
+      {
+        _pool.Release(spawned);
+        return false;
+      }
+
+      _nextSpawnSide = (_nextSpawnSide + 1) % SideCount;
+
+      return true;
     }
 
-    private bool TryGetSpawnPosition(out Vector3 position)
+    private bool TryGetSpawnPosition(float radius, out Vector3 position)
     {
-      if (TryGetSpawnPosition(_nextSpawnSide, out position))
+      if (TryGetSpawnPosition(_nextSpawnSide, radius, out position))
         return true;
 
-      return TryGetSpawnPosition(-1, out position);
+      return TryGetSpawnPosition(-1, radius, out position);
     }
 
-    private bool TryGetSpawnPosition(int requiredSide, out Vector3 position)
+    private bool TryGetSpawnPosition(int requiredSide, float radius, out Vector3 position)
     {
       position = default;
       var camera = _camera != null ? _camera : Camera.main;
@@ -219,6 +232,7 @@ namespace Combat
           continue;
 
         if (!IsOutsideCameraView(candidate, side)
+            || !_movementUpdater.IsInsideLevelBounds(candidate, radius)
             || IsOnDamagableLayer(candidate)
             || (_movementUpdater.IsInsideFlowMap(candidate)
                 && !_movementUpdater.IsWalkable(candidate)))

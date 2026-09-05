@@ -28,6 +28,35 @@ namespace Map
     public RoadSet RoadSet => roadSet;
     public SidewalkSet SidewalkSet => sidewalkSet;
 
+    /// <summary>
+    /// The world-space footprint covered by the cells in this level. Map cells are authored in
+    /// world grid coordinates, so the bounds include the complete outer edge of the outermost
+    /// cell rather than just its center.
+    /// </summary>
+    public bool TryGetWorldBounds(out Bounds bounds)
+    {
+      bounds = default;
+      if (mapData == null || mapData.CellSize <= 0)
+        return false;
+
+      var hasCells = false;
+      var minCell = new Vector2Int(int.MaxValue, int.MaxValue);
+      var maxCell = new Vector2Int(int.MinValue, int.MinValue);
+
+      IncludeCells(mapData.FilledCells, ref hasCells, ref minCell, ref maxCell);
+      IncludeRoadCells(mapData.RoadCells, ref hasCells, ref minCell, ref maxCell);
+      IncludeCells(mapData.SidewalkCells, ref hasCells, ref minCell, ref maxCell);
+
+      if (!hasCells)
+        return false;
+
+      var cellSize = mapData.CellSize;
+      var min = new Vector3(minCell.x * cellSize, 0f, minCell.y * cellSize);
+      var max = new Vector3((maxCell.x + 1) * cellSize, 0f, (maxCell.y + 1) * cellSize);
+      bounds = new Bounds((min + max) * 0.5f, new Vector3(max.x - min.x, 0f, max.z - min.z));
+      return true;
+    }
+
     private void Awake() => this.AsInjected();
 
     private void Start() => _spawner.Spawn(mapData, houseSet, roadSet, sidewalkSet, seed, transform);
@@ -88,6 +117,36 @@ namespace Map
           0f,
           road.cell.y * cellSize + cellSize * 0.5f);
         Gizmos.DrawCube(center, new Vector3(cellSize, 0.1f, cellSize));
+      }
+    }
+
+    private static void IncludeCells(
+      IReadOnlyList<Vector2Int> cells,
+      ref bool hasCells,
+      ref Vector2Int minCell,
+      ref Vector2Int maxCell)
+    {
+      for (var i = 0; i < cells.Count; i++)
+      {
+        var cell = cells[i];
+        hasCells = true;
+        minCell = Vector2Int.Min(minCell, cell);
+        maxCell = Vector2Int.Max(maxCell, cell);
+      }
+    }
+
+    private static void IncludeRoadCells(
+      IReadOnlyList<RoadCellData> cells,
+      ref bool hasCells,
+      ref Vector2Int minCell,
+      ref Vector2Int maxCell)
+    {
+      for (var i = 0; i < cells.Count; i++)
+      {
+        var cell = cells[i].cell;
+        hasCells = true;
+        minCell = Vector2Int.Min(minCell, cell);
+        maxCell = Vector2Int.Max(maxCell, cell);
       }
     }
 
