@@ -122,58 +122,6 @@ CapsuleCollider:
   m_Height: 6.97
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
---- !u!1 &2451475325269963673
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 652812152619922830}
-  - component: {fileID: 2658548792467257908}
-  m_Layer: 6
-  m_Name: MeleeWeapon
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &652812152619922830
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2451475325269963673}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 7434860180236888473}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2658548792467257908
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2451475325269963673}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cf79991a47edd4a7a919920a9e8c23bf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Weapons.MeleeWeapon
-  _attackCooldown: 0.5
-  _attackFxPrefab: {fileID: 4957739243701182480, guid: c5387641d1cb547b09c87ced2c3af7a4, type: 3}
-  _attackFxPrewarmCount: 8
-  _attackFxPoint: {fileID: 652812152619922830}
-  _attachAttackFxToPlayer: 1
-  _attackRadius: 5
-  _hitFxPrefab: {fileID: 2847630276705505541, guid: 90495a52fe2ab4865b2f3cb56c99a68c, type: 3}
-  _hitFxPrewarmCount: 8
 --- !u!1001 &2272103097055718908
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -249,3 +197,76 @@ Animator:
   m_CorrespondingSourceObject: {fileID: 2717068406539487662, guid: d639598b7036c41d9943f1c3ecb7be16, type: 3}
   m_PrefabInstance: {fileID: 2272103097055718908}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &2905758741311464190
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 7434860180236888473}
+    m_Modifications:
+    - target: {fileID: 744844360633471335, guid: ea13d781633bd400fb796f584c5d08c3, type: 3}
+      propertyPath: m_Name
+      value: MeleeWeapon
+      objectReference: {fileID: 0}
+    - target: {fileID: 2403819526801905520, guid: ea13d781633bd400fb796f584c5d08c3, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2403819526801905520, guid: ea13d781633bd400fb796f584c5d08c3, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2403819526801905520, guid: ea13d781633bd400fb796f584c5d08c3, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2403819526801905520, guid: ea13d781633bd400fb796f584c5d08c3, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2403819526801905520, guid: ea13d781633bd400fb796f584c5d08c3, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2403819526801905520, guid: ea13d781633bd400fb796f584c5d08c3, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2403819526801905520, guid: ea13d781633bd400fb796f584c5d08c3, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2403819526801905520, guid: ea13d781633bd400fb796f584c5d08c3, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2403819526801905520, guid: ea13d781633bd400fb796f584c5d08c3, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2403819526801905520, guid: ea13d781633bd400fb796f584c5d08c3, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: ea13d781633bd400fb796f584c5d08c3, type: 3}
+--- !u!4 &652812152619922830 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2403819526801905520, guid: ea13d781633bd400fb796f584c5d08c3, type: 3}
+  m_PrefabInstance: {fileID: 2905758741311464190}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2658548792467257908 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 915994497837881546, guid: ea13d781633bd400fb796f584c5d08c3, type: 3}
+  m_PrefabInstance: {fileID: 2905758741311464190}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf79991a47edd4a7a919920a9e8c23bf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Weapons.MeleeWeapon

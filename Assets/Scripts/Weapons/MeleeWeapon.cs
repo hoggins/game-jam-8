@@ -11,6 +11,7 @@ namespace Weapons
   public sealed class MeleeWeapon : Weapon
   {
     [SerializeField, Min(0f)] private float _attackRadius = 2f;
+    [SerializeField, Range(0f, 360f)] private float _attackConeAngle = 90f;
     [SerializeField] private GameObject _hitFxPrefab;
     [SerializeField, Min(0)] private int _hitFxPrewarmCount = 8;
 
@@ -44,7 +45,9 @@ namespace Weapons
         for (var i = 0; i < _targets.Count; i++)
         {
           var target = _targets[i];
-          if (target == null || !target.isActiveAndEnabled)
+          if (target == null
+              || !target.isActiveAndEnabled
+              || !IsInsideAttackCone(target.transform.position))
             continue;
 
           DamageTarget(target, damage);
@@ -55,7 +58,10 @@ namespace Weapons
       for (var i = 0; i < attachedMobs.Count; i++)
       {
         var mob = attachedMobs[i];
-        if (mob == null || !mob.IsAttached || !mob.IsAlive || !_hitMobs.Add(mob))
+        if (mob == null
+            || !mob.IsAttached
+            || !mob.IsAlive
+            || !_hitMobs.Add(mob))
           continue;
 
         mob.TakeDamage(damage);
@@ -69,7 +75,11 @@ namespace Weapons
         _damagableLayerMask);
 
       for (var i = 0; i < hitCount; i++)
-        DamageDestructible(_destructibleHits[i].gameObject, damage);
+      {
+        var target = _destructibleHits[i].gameObject;
+        if (IsInsideAttackCone(target.transform.position))
+          DamageDestructible(target, damage);
+      }
     }
 
     private void DamageTarget(MovementAgent target, int damage)
@@ -118,7 +128,55 @@ namespace Weapons
     private void OnValidate()
     {
       _attackRadius = Mathf.Max(0f, _attackRadius);
+      _attackConeAngle = Mathf.Clamp(_attackConeAngle, 0f, 360f);
       _hitFxPrewarmCount = Mathf.Max(0, _hitFxPrewarmCount);
+    }
+
+    private bool IsInsideAttackCone(Vector3 targetPosition)
+    {
+      var offset = targetPosition - transform.position;
+      offset.y = 0f;
+      if (offset.sqrMagnitude <= Mathf.Epsilon)
+        return true;
+
+      var forward = GetAttackForward();
+      var minimumDot = Mathf.Cos(_attackConeAngle * 0.5f * Mathf.Deg2Rad);
+      return Vector3.Dot(forward, offset.normalized) >= minimumDot;
+    }
+
+    private Vector3 GetAttackForward()
+    {
+      var forward = transform.forward;
+      forward.y = 0f;
+      return forward.sqrMagnitude > Mathf.Epsilon ? forward.normalized : Vector3.forward;
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+      if (_attackRadius <= 0f)
+        return;
+
+      var origin = transform.position + Vector3.up * 0.05f;
+      var forward = GetAttackForward();
+      var halfAngle = _attackConeAngle * 0.5f;
+      var segmentCount = Mathf.Max(4, Mathf.CeilToInt(_attackConeAngle / 10f));
+      var previousPoint = origin
+        + (Quaternion.AngleAxis(-halfAngle, Vector3.up) * forward) * _attackRadius;
+
+      Gizmos.color = new Color(1f, 0.65f, 0.1f, 0.9f);
+      Gizmos.DrawLine(origin, previousPoint);
+
+      for (var i = 1; i <= segmentCount; i++)
+      {
+        var angle = Mathf.Lerp(-halfAngle, halfAngle, i / (float)segmentCount);
+        var point = origin
+          + (Quaternion.AngleAxis(angle, Vector3.up) * forward) * _attackRadius;
+        Gizmos.DrawLine(previousPoint, point);
+        previousPoint = point;
+      }
+
+      Gizmos.DrawLine(origin, previousPoint);
+      Gizmos.DrawLine(origin, origin + forward * _attackRadius);
     }
   }
 }
