@@ -11,9 +11,9 @@ namespace Timer
   /// <summary>
   /// Keeps the battle timer alive: once <see cref="BattleService.DestroyTimer"/> fires (every
   /// digit smashed), spawns a fresh <see cref="BattleTimerObject"/> near the player, clearing any
-  /// houses in its way, and resumes the countdown from the default duration. Every other
-  /// configured special respawns alongside it: between the new timer and the player when they're
-  /// far apart, or just randomly near the player when they're already close.
+  /// houses in its way, and resumes the countdown from the default duration. When the new timer is
+  /// far enough from the player, the other live specials form a fence between them with the health
+  /// bar in the centre; otherwise they use the near-player rule.
   /// </summary>
   [Preserve]
   public sealed class TimerRespawnService : IInitializable, IDisposable
@@ -61,6 +61,9 @@ namespace Timer
       _respawnCount++;
       _battleService.RespawnTimer();
 
+      if (_spawner.TryArrangeSpecialFence(timerInstance.transform.position, player.transform.position, player.transform))
+        return;
+
       RespawnOtherSpecials(player.transform, timerInstance.transform.position);
     }
 
@@ -89,10 +92,9 @@ namespace Timer
           continue;
         }
 
-        // The health bar is the player's own health made physical, so putting a fresh one in front of
-        // him would hand back what he spent smashing the last one. It is placed once by
-        // MapEnvironmentSpawner.SpawnInitialSpecials and stays where it was put until the next
-        // battle.
+        // The health bar is the player's own health made physical, so the fallback path never
+        // recreates or relocates it. The fence path moves the existing live bar without resetting
+        // its current pixels and makes it the central fence asset.
         if (special.type == SpecialHouses.Health)
           continue;
 

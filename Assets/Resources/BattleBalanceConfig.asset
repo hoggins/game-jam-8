@@ -15,6 +15,9 @@ MonoBehaviour:
   _battleDuration: 90
   _specialBetweenMaxDistance: 50
   _specialBetweenMinDistance: 40
+  _specialFenceStartDistance: 35
+  _specialFenceTimerOffset: 14
+  _specialFencePlayerOffset: 8
   _duckMaxHealth: 6
   _duckAttackDamage: 1
   _duckAttackDistance: 3

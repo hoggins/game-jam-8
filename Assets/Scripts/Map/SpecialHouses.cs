@@ -12,8 +12,8 @@ namespace Map
     /// stays gone until the next battle.
     Arrow = 2,
 
-    /// The player's health bar. Placed once at the start of a battle and never respawned or moved:
-    /// smashing it is self-harm, so it must not come back offering a second chance to do it.
+    /// The player's health bar. It is never recreated after being smashed, but a live bar may move
+    /// into the centre of the special fence when the timer respawns.
     Health = 3,
 
     /// The compass arrow for the final goal. It is placed and moved with the other specials, but it

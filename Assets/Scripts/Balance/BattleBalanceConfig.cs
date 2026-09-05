@@ -26,6 +26,14 @@ namespace Balance
     [Tooltip("Lower bound of the near-player band; see " + nameof(_specialBetweenMaxDistance) + ".")]
     [SerializeField, Min(0f)] private float _specialBetweenMinDistance = 40f;
 
+    [Header("Special Object Fence")]
+    [Tooltip("When the timer is at least this far from the player after a respawn, the other live specials form a line between them with the health bar in the centre.")]
+    [SerializeField, Min(0f)] private float _specialFenceStartDistance = 35f;
+    [Tooltip("Distance to leave between the respawned timer and the nearest special in the fence.")]
+    [SerializeField, Min(0f)] private float _specialFenceTimerOffset = 14f;
+    [Tooltip("Distance to leave between the player and the nearest special in the fence.")]
+    [SerializeField, Min(0f)] private float _specialFencePlayerOffset = 8f;
+
     [Header("Duck (Mob)")]
     [SerializeField, Min(0)] private int _duckMaxHealth = 2;
     [SerializeField, Min(0)] private int _duckAttackDamage = 1;
@@ -59,6 +67,9 @@ namespace Balance
     public float BattleDuration => _battleDuration;
     public float SpecialBetweenMaxDistance => _specialBetweenMaxDistance;
     public float SpecialBetweenMinDistance => _specialBetweenMinDistance;
+    public float SpecialFenceStartDistance => _specialFenceStartDistance;
+    public float SpecialFenceTimerOffset => _specialFenceTimerOffset;
+    public float SpecialFencePlayerOffset => _specialFencePlayerOffset;
     public int DuckMaxHealth => _duckMaxHealth;
     public int DuckAttackDamage => _duckAttackDamage;
     public float DuckAttackDistance => _duckAttackDistance;
@@ -102,6 +113,9 @@ namespace Balance
       _battleDuration = Mathf.Max(0f, _battleDuration);
       _specialBetweenMaxDistance = Mathf.Max(0f, _specialBetweenMaxDistance);
       _specialBetweenMinDistance = Mathf.Max(0f, _specialBetweenMinDistance);
+      _specialFenceStartDistance = Mathf.Max(0f, _specialFenceStartDistance);
+      _specialFenceTimerOffset = Mathf.Max(0f, _specialFenceTimerOffset);
+      _specialFencePlayerOffset = Mathf.Max(0f, _specialFencePlayerOffset);
       _duckMaxHealth = Mathf.Max(0, _duckMaxHealth);
       _duckAttackDamage = Mathf.Max(0, _duckAttackDamage);
       _duckAttackDistance = Mathf.Max(0f, _duckAttackDistance);

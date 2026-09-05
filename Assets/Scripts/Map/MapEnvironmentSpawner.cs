@@ -8,6 +8,22 @@ namespace Map
 {
   public class MapEnvironmentSpawner : System.IDisposable
   {
+    private readonly struct PlannedSpecialPlacement
+    {
+      public readonly SpecialHouses Type;
+      public readonly Vector3 Position;
+      public readonly Quaternion Rotation;
+      public readonly Vector2 HalfExtents;
+
+      public PlannedSpecialPlacement(SpecialHouses type, Vector3 position, Quaternion rotation, Vector2 halfExtents)
+      {
+        Type = type;
+        Position = position;
+        Rotation = rotation;
+        HalfExtents = halfExtents;
+      }
+    }
+
     private const string ContainerName = "SpawnedEnvironment";
     // Extra margin added on top of a special's real bounding box when clearing houses out of its
     // way, so the cleared area isn't drawn exactly flush with the mesh.
@@ -15,6 +31,9 @@ namespace Map
     // How many random placements to try before giving up on a special that keeps landing on top of
     // another live special.
     private const int MaxPlacementAttempts = 20;
+    // Gap between neighbouring objects in the perpendicular fence. Their real footprints determine
+    // the overall width, so the fence stays wide without relying on a prefab-specific spacing.
+    private const float SpecialFenceGap = 2f;
     // The camera only shows a small part of the map at once. Keeping every child renderer of every
     // spawned map element registered with the renderer culler makes the CPU pay for tens of
     // thousands of renderers every frame, even when they are hundreds of metres away. Buildings
@@ -281,6 +300,194 @@ namespace Map
     }
 
     /// <summary>
+    /// Places the available non-Timer specials on a wide line perpendicular to the timer/player
+    /// direction when the configured distance threshold is reached. The health bar is always the
+    /// centre point; remaining specials are spread to its left and right. Existing objects are moved
+    /// and missing respawnable objects are created, so the health bar keeps its current state instead
+    /// of being reset by a prefab replacement.
+    /// </summary>
+    public bool TryArrangeSpecialFence(Vector3 timerPosition, Vector3 playerPosition, Transform lookTarget)
+    {
+      if (_battleBalance == null)
+        return false;
+
+      var timerToPlayer = playerPosition - timerPosition;
+      timerToPlayer.y = 0f;
+      var distance = timerToPlayer.magnitude;
+      if (distance < _battleBalance.SpecialFenceStartDistance || distance < 0.0001f)
+        return false;
+
+      var fenceTypes = CollectFenceSpecialTypes();
+      if (!fenceTypes.Contains(SpecialHouses.Health))
+        return false;
+
+      var usableDistance = distance
+        - _battleBalance.SpecialFenceTimerOffset
+        - _battleBalance.SpecialFencePlayerOffset;
+      if (usableDistance <= 0f)
+        return false;
+
+      var direction = timerToPlayer / distance;
+      var fenceStart = timerPosition + direction * _battleBalance.SpecialFenceTimerOffset;
+      var fenceEnd = playerPosition - direction * _battleBalance.SpecialFencePlayerOffset;
+      var fenceCenter = Vector3.Lerp(fenceStart, fenceEnd, 0.5f);
+      fenceCenter.y = fenceStart.y;
+      var fenceSide = new Vector3(-direction.z, 0f, direction.x);
+      var nonHealthTypes = new List<SpecialHouses>(fenceTypes.Count - 1);
+      foreach (var type in fenceTypes)
+        if (type != SpecialHouses.Health)
+          nonHealthTypes.Add(type);
+
+      var planned = new List<PlannedSpecialPlacement>(fenceTypes.Count);
+      if (!AddFencePlacement(SpecialHouses.Health, fenceCenter, 0f, fenceSide, lookTarget, planned))
+        return false;
+
+      var healthHalfWidth = ProjectedHalfExtent(planned[0].HalfExtents, planned[0].Rotation, fenceSide);
+      var leftCount = (nonHealthTypes.Count + 1) / 2;
+      var leftBoundary = -healthHalfWidth - SpecialFenceGap;
+      for (var i = 0; i < leftCount; i++)
+      {
+        if (!AddFenceSidePlacement(
+          nonHealthTypes[i], -1f, ref leftBoundary, fenceCenter, fenceSide, lookTarget, planned))
+          return false;
+      }
+
+      var rightBoundary = healthHalfWidth + SpecialFenceGap;
+      for (var i = leftCount; i < nonHealthTypes.Count; i++)
+      {
+        if (!AddFenceSidePlacement(
+          nonHealthTypes[i], 1f, ref rightBoundary, fenceCenter, fenceSide, lookTarget, planned))
+          return false;
+      }
+
+      // Ignore all participants' old positions while validating the new layout, then check the
+      // planned positions against each other. This makes the operation atomic from the placement
+      // point of view: a special never fails just because another fence member has not moved yet.
+      var ignoredSpecialIds = CurrentSpecialIds(fenceTypes);
+      for (var i = 0; i < planned.Count; i++)
+      {
+        var placement = planned[i];
+        if (HasSpecialOverlap(placement.Position, placement.Rotation, placement.HalfExtents, null, ignoredSpecialIds))
+          return false;
+
+        for (var j = i + 1; j < planned.Count; j++)
+        {
+          var other = planned[j];
+          if (RectanglesOverlap(
+            placement.Position, placement.Rotation.eulerAngles.y, placement.HalfExtents,
+            other.Position, other.Rotation.eulerAngles.y, other.HalfExtents))
+            return false;
+        }
+      }
+
+      foreach (var placement in planned)
+      {
+        if (TryGetCurrentSpecial(placement.Type, out var existing))
+        {
+          if (!TryMoveSpecialAt(
+            placement.Type, existing, placement.Position, placement.Rotation, placement.HalfExtents, ignoredSpecialIds))
+            return false;
+        }
+        else if (!TrySpawnSpecialAt(
+          placement.Type, placement.Position, placement.Rotation, placement.HalfExtents, ignoredSpecialIds, out _))
+        {
+          return false;
+        }
+
+        // A type which was missing at validation time has a new id now. Add it so the next exact
+        // placement in this transaction still ignores the already-arranged fence members.
+        if (_currentSpecial.TryGetValue(placement.Type, out var current))
+          ignoredSpecialIds.Add(current.id);
+      }
+
+      _movementUpdater.RefreshNoGoZones();
+      return true;
+    }
+
+    private List<SpecialHouses> CollectFenceSpecialTypes()
+    {
+      var types = new List<SpecialHouses>();
+      if (_houseSet == null)
+        return types;
+
+      foreach (var special in _houseSet.Specials)
+      {
+        if (special.type == SpecialHouses.Timer || !special.enabled || special.prefab == null || types.Contains(special.type))
+          continue;
+
+        // Health and Arrow are intentionally not recreated after they have been destroyed. If they
+        // are still live, they participate in the fence; a missing one is simply left out.
+        if ((special.type == SpecialHouses.Health || special.type == SpecialHouses.Arrow)
+            && !TryGetCurrentSpecial(special.type, out _))
+          continue;
+
+        types.Add(special.type);
+      }
+
+      return types;
+    }
+
+    private bool AddFencePlacement(
+      SpecialHouses type, Vector3 fenceCenter, float lateralOffset, Vector3 fenceSide, Transform lookTarget,
+      List<PlannedSpecialPlacement> planned)
+    {
+      if (!TryResolveSpecial(type, "TryArrangeSpecialFence", out var special))
+        return false;
+
+      var position = fenceCenter + fenceSide * lateralOffset;
+      var rotation = FaceTarget(position, lookTarget);
+      planned.Add(new PlannedSpecialPlacement(type, position, rotation, SpecialHalfExtents(special)));
+      return true;
+    }
+
+    private bool AddFenceSidePlacement(
+      SpecialHouses type, float side, ref float boundary, Vector3 fenceCenter, Vector3 fenceSide,
+      Transform lookTarget, List<PlannedSpecialPlacement> planned)
+    {
+      if (!TryResolveSpecial(type, "TryArrangeSpecialFence", out var special))
+        return false;
+
+      var halfExtents = SpecialHalfExtents(special);
+      var halfWidth = Mathf.Max(halfExtents.x, halfExtents.y);
+      var lateralOffset = boundary + side * halfWidth;
+
+      // Facing changes slightly for objects moved off the centre line. Recalculate their projected
+      // width a few times so neighbouring footprints stay separated even when their yaw changes.
+      for (var attempt = 0; attempt < 3; attempt++)
+      {
+        var position = fenceCenter + fenceSide * lateralOffset;
+        var rotation = FaceTarget(position, lookTarget);
+        halfWidth = ProjectedHalfExtent(halfExtents, rotation, fenceSide);
+        lateralOffset = boundary + side * halfWidth;
+      }
+
+      var finalPosition = fenceCenter + fenceSide * lateralOffset;
+      var finalRotation = FaceTarget(finalPosition, lookTarget);
+      planned.Add(new PlannedSpecialPlacement(type, finalPosition, finalRotation, halfExtents));
+      halfWidth = ProjectedHalfExtent(halfExtents, finalRotation, fenceSide);
+      boundary = lateralOffset + side * (halfWidth + SpecialFenceGap);
+      return true;
+    }
+
+    private static float ProjectedHalfExtent(Vector2 halfExtents, Quaternion rotation, Vector3 axis)
+    {
+      var localX = rotation * Vector3.right;
+      var localZ = rotation * Vector3.forward;
+      return Mathf.Abs(Vector3.Dot(localX, axis)) * halfExtents.x
+        + Mathf.Abs(Vector3.Dot(localZ, axis)) * halfExtents.y;
+    }
+
+    private HashSet<int> CurrentSpecialIds(IEnumerable<SpecialHouses> types)
+    {
+      var ids = new HashSet<int>();
+      foreach (var type in types)
+        if (_currentSpecial.TryGetValue(type, out var current))
+          ids.Add(current.id);
+
+      return ids;
+    }
+
+    /// <summary>
     /// Spawns a configured special object (e.g. the battle timer) at runtime, at a random point in
     /// the annulus [<paramref name="minDistance"/>, <paramref name="maxDistance"/>] around
     /// <paramref name="anchor"/>, facing <paramref name="lookTarget"/>. Unlike <see cref="Spawn"/>,
@@ -312,7 +519,31 @@ namespace Map
 
       DespawnCurrentSpecial(type);
 
-      instance = Object.Instantiate(special.prefab, position, rotation, _container);
+      instance = SpawnSpecialInstance(special, type, position, rotation, worldHalfExtents);
+      _movementUpdater.RefreshNoGoZones();
+      return true;
+    }
+
+    private bool TrySpawnSpecialAt(
+      SpecialHouses type, Vector3 position, Quaternion rotation, Vector2 worldHalfExtents,
+      ISet<int> ignoredSpecialIds, out GameObject instance)
+    {
+      instance = null;
+      if (!TryResolveSpecial(type, "TryArrangeSpecialFence", out var special)
+          || HasSpecialOverlap(position, rotation, worldHalfExtents, null, ignoredSpecialIds))
+        return false;
+
+      ClearOverlapping(position, rotation, worldHalfExtents + ClearMargin, null);
+      DespawnCurrentSpecial(type);
+      instance = SpawnSpecialInstance(special, type, position, rotation, worldHalfExtents);
+      _movementUpdater.RefreshNoGoZones();
+      return true;
+    }
+
+    private GameObject SpawnSpecialInstance(
+      SpecialHouseObject special, SpecialHouses type, Vector3 position, Quaternion rotation, Vector2 worldHalfExtents)
+    {
+      var instance = Object.Instantiate(special.prefab, position, rotation, _container);
       instance.name = special.type.ToString();
       RegisterDamageMaskRenderers(instance.GetComponentsInChildren<Renderer>(true));
 
@@ -330,8 +561,7 @@ namespace Map
       if (destructible != null)
         destructible.Destroyed += _ => Release(id);
 
-      _movementUpdater.RefreshNoGoZones();
-      return true;
+      return instance;
     }
 
     /// <summary>
@@ -377,6 +607,20 @@ namespace Map
         Debug.LogWarning($"MapEnvironmentSpawner.TryMoveSpecial: '{type}' found no placement clear of other specials after {MaxPlacementAttempts} attempts; move skipped.");
         return false;
       }
+
+      return TryMoveSpecialAt(type, instance, position, rotation, worldHalfExtents, null);
+    }
+
+    private bool TryMoveSpecialAt(
+      SpecialHouses type, GameObject instance, Vector3 position, Quaternion rotation, Vector2 worldHalfExtents,
+      ISet<int> ignoredSpecialIds)
+    {
+      if (instance == null
+          || !_currentSpecial.TryGetValue(type, out var current)
+          || current.instance != instance
+          || !_objects.ContainsKey(current.id)
+          || HasSpecialOverlap(position, rotation, worldHalfExtents, instance.transform, ignoredSpecialIds))
+        return false;
 
       // Excluded from the sweep, or an object whose new footprint overlaps its old one would break
       // itself on arrival.
@@ -431,10 +675,16 @@ namespace Map
       var angle = Random.Range(0f, Mathf.PI * 2f);
       var radius = Random.Range(minDistance, maxDistance);
       position = anchor + new Vector3(Mathf.Cos(angle) * radius, 0f, Mathf.Sin(angle) * radius);
+      rotation = FaceTarget(position, lookTarget);
+    }
 
+    private static Quaternion FaceTarget(Vector3 position, Transform lookTarget)
+    {
       var facing = lookTarget != null ? lookTarget.position - position : Vector3.zero;
       facing.y = 0f;
-      rotation = facing.sqrMagnitude > 0.0001f ? Quaternion.LookRotation(facing.normalized, Vector3.up) : Quaternion.identity;
+      return facing.sqrMagnitude > 0.0001f
+        ? Quaternion.LookRotation(facing.normalized, Vector3.up)
+        : Quaternion.identity;
     }
 
     /// <summary>
@@ -476,7 +726,7 @@ namespace Map
       for (var attempt = 0; attempt < MaxPlacementAttempts; attempt++)
       {
         PickPlacement(anchor, lookTarget, minDistance, maxDistance, out position, out rotation);
-        if (!HasSpecialOverlap(position, rotation, worldHalfExtents, exclude))
+        if (!HasSpecialOverlap(position, rotation, worldHalfExtents, exclude, null))
           return true;
       }
 
@@ -490,7 +740,8 @@ namespace Map
     /// checked against the <see cref="_specialIds"/> index rather than houses. <paramref name="exclude"/>
     /// keeps a special being relocated from colliding with itself.
     /// </summary>
-    private bool HasSpecialOverlap(Vector3 position, Quaternion rotation, Vector2 worldHalfExtents, Transform exclude)
+    private bool HasSpecialOverlap(
+      Vector3 position, Quaternion rotation, Vector2 worldHalfExtents, Transform exclude, ISet<int> ignoredSpecialIds)
     {
       if (TryGetSceneGoalFootprint(out var goalCenter, out var goalHalfExtents)
           && RectanglesOverlap(position, rotation.eulerAngles.y, worldHalfExtents, goalCenter, 0f, goalHalfExtents))
@@ -499,6 +750,9 @@ namespace Map
       foreach (var id in _specialIds)
       {
         if (!_objects.TryGetValue(id, out var standing))
+          continue;
+
+        if (ignoredSpecialIds != null && ignoredSpecialIds.Contains(id))
           continue;
 
         if (exclude != null && standing.Destructible != null && standing.Destructible.transform.IsChildOf(exclude))
@@ -583,10 +837,12 @@ namespace Map
     {
       var angleA = rotationADegrees * Mathf.Deg2Rad;
       var angleB = rotationBDegrees * Mathf.Deg2Rad;
-      var axisA0 = new Vector2(Mathf.Cos(angleA), Mathf.Sin(angleA));
-      var axisA1 = new Vector2(-axisA0.y, axisA0.x);
-      var axisB0 = new Vector2(Mathf.Cos(angleB), Mathf.Sin(angleB));
-      var axisB1 = new Vector2(-axisB0.y, axisB0.x);
+      // Unity's yaw rotates +Z, while the flattened Vector2 uses (X, Z). Keep axis 0 on the
+      // object's local +X and axis 1 on local +Z so the half-extents remain (x, z).
+      var axisA0 = new Vector2(Mathf.Cos(angleA), -Mathf.Sin(angleA));
+      var axisA1 = new Vector2(Mathf.Sin(angleA), Mathf.Cos(angleA));
+      var axisB0 = new Vector2(Mathf.Cos(angleB), -Mathf.Sin(angleB));
+      var axisB1 = new Vector2(Mathf.Sin(angleB), Mathf.Cos(angleB));
 
       System.Span<Vector2> axes = stackalloc Vector2[] { axisA0, axisA1, axisB0, axisB1 };
       var delta = new Vector2(centerB.x - centerA.x, centerB.z - centerA.z);
