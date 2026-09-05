@@ -27,6 +27,9 @@ namespace Timer
     private static readonly ProfilerMarker ArrangeFenceMarker = new("TimerRespawnService.ArrangeFence");
     private static readonly ProfilerMarker OtherSpecialsMarker = new("TimerRespawnService.OtherSpecials");
 
+    private static readonly Vector3 EarlySpecialClusterAnchor = new(-700f, 0f, -700f);
+    private const int EarlySpecialClusterRespawns = 3;
+    private const float EarlySpecialClusterRadius = 20f;
     private const float ZigZagPlacementJitter = 4f;
 
     private readonly BattleService _battleService;
@@ -117,6 +120,13 @@ namespace Timer
         _respawnCount++;
         _telemetry?.BeginTimerHop(_respawnCount, straightLineDistance, secondsGranted, playerSpeedAtStart);
 
+        if (_respawnCount <= EarlySpecialClusterRespawns)
+        {
+          MoveSpecialsOutOfMap(player.transform);
+          _spawner.RefreshNoGoZones();
+          return;
+        }
+
         var arrangedFence = false;
         ArrangeFenceMarker.Begin();
         try
@@ -143,7 +153,11 @@ namespace Timer
     }
 
     private bool TrySpawnTimer(
-      Transform player, float minDistance, float maxDistance, out GameObject timerInstance, out Vector3 hopOrigin)
+      Transform player,
+      float minDistance,
+      float maxDistance,
+      out GameObject timerInstance,
+      out Vector3 hopOrigin)
     {
       timerInstance = null;
       hopOrigin = _hasLastTimerPosition ? _lastTimerPosition : player.position;
@@ -182,6 +196,40 @@ namespace Timer
       // original player-centered behavior as the safe fallback.
       return _spawner.TrySpawnSpecial(
         SpecialHouses.Timer, player.position, player, minDistance, maxDistance, out timerInstance);
+    }
+
+    private void MoveSpecialsOutOfMap(Transform player)
+    {
+      var houseSet = _spawner.CurrentHouseSet;
+      if (houseSet == null)
+        return;
+
+      foreach (var special in houseSet.Specials)
+      {
+        if (special.type == SpecialHouses.Timer || !special.enabled || special.prefab == null)
+          continue;
+
+        if ((special.type == SpecialHouses.Health || special.type == SpecialHouses.Arrow)
+            && !_spawner.TryGetCurrentSpecial(special.type, out _))
+          continue;
+
+        if (_spawner.TryGetCurrentSpecial(special.type, out var existing))
+          _spawner.TryMoveSpecial(
+            special.type,
+            existing,
+            EarlySpecialClusterAnchor,
+            player,
+            0f,
+            EarlySpecialClusterRadius);
+        else
+          _spawner.TrySpawnSpecial(
+            special.type,
+            EarlySpecialClusterAnchor,
+            player,
+            0f,
+            EarlySpecialClusterRadius,
+            out _);
+      }
     }
 
     private static bool TryGetCurrentTimerPosition(Vector3 playerPosition, out Vector3 timerPosition)
