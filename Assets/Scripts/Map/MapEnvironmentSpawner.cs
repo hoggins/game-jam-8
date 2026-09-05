@@ -37,9 +37,9 @@ namespace Map
 
     public IReadOnlyCollection<RuntimeEnvironmentObject> SpawnedObjects => _objects.Values;
 
-    public void Spawn(MapData mapData, HouseSet houseSet, int seed, Transform parent)
+    public void Spawn(MapData mapData, HouseSet houseSet, RoadSet roadSet, SidewalkSet sidewalkSet, int seed, Transform parent)
     {
-      if (mapData == null || houseSet == null)
+      if (mapData == null)
         return;
 
       // This service outlives the scene, so the bookkeeping from the previous level is still here.
@@ -80,6 +80,31 @@ namespace Map
         if (destructible != null)
           destructible.Destroyed += _ => Release(id);
       }
+
+      if (roadSet != null)
+        foreach (var placement in RoadFiller.Fill(mapData, roadSet))
+        {
+          var position = new Vector3(
+            placement.Cell.x * cellSize + cellSize * 0.5f,
+            0f,
+            placement.Cell.y * cellSize + cellSize * 0.5f);
+          var rotation = Quaternion.Euler(0f, placement.RotationDegrees, 0f);
+
+          var instance = Object.Instantiate(placement.Piece.prefab, position, rotation, _container);
+          instance.name = placement.Piece.name;
+        }
+
+      if (sidewalkSet != null)
+        foreach (var placement in SidewalkFiller.Fill(mapData, sidewalkSet, seed))
+        {
+          var position = new Vector3(
+            placement.Cell.x * cellSize + cellSize * 0.5f,
+            0f,
+            placement.Cell.y * cellSize + cellSize * 0.5f);
+
+          var instance = Object.Instantiate(placement.Piece.prefab, position, Quaternion.identity, _container);
+          instance.name = placement.Piece.name;
+        }
 
       if (_cullingGroup != null)
       {

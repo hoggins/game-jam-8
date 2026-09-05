@@ -1,0 +1,78 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 901e0324b895646b3983f15bc45b8315, type: 3}
+  m_Name: RoadSet
+  m_EditorClassIdentifier: Assembly-CSharp::Map.RoadSet
+  pieces:
+  - name: Isolated
+    prefab: {fileID: 3607606792022405278, guid: 5472b24594f764b3799a2b57f27109d9, type: 3}
+    shape: 0
+    connections: []
+    enabled: 1
+  - name: Dead End
+    prefab: {fileID: 1288141981208260646, guid: 5b4c717027fd84b6392fe6c2c4227c23, type: 3}
+    shape: 1
+    connections:
+    - direction: 1
+      width: 1
+    enabled: 1
+  - name: Straight
+    prefab: {fileID: 1288141981208260646, guid: 5b4c717027fd84b6392fe6c2c4227c23, type: 3}
+    shape: 2
+    connections:
+    - direction: 1
+      width: 1
+    - direction: 4
+      width: 1
+    enabled: 1
+  - name: Corner
+    prefab: {fileID: 1288141981208260646, guid: 5b4c717027fd84b6392fe6c2c4227c23, type: 3}
+    shape: 3
+    connections:
+    - direction: 1
+      width: 1
+    - direction: 2
+      width: 1
+    enabled: 1
+  - name: T Junction
+    prefab: {fileID: 3607606792022405278, guid: 5472b24594f764b3799a2b57f27109d9, type: 3}
+    shape: 4
+    connections:
+    - direction: 1
+      width: 1
+    - direction: 2
+      width: 1
+    - direction: 4
+      width: 1
+    enabled: 1
+  - name: Cross
+    prefab: {fileID: 3607606792022405278, guid: 5472b24594f764b3799a2b57f27109d9, type: 3}
+    shape: 5
+    connections:
+    - direction: 1
+      width: 1
+    - direction: 2
+      width: 1
+    - direction: 4
+      width: 1
+    - direction: 8
+      width: 1
+    enabled: 1
+  - name: Corner (One-Way)
+    prefab: {fileID: 3811683999856341327, guid: adcab9ad5550f4e0db3da77a22879fe6, type: 3}
+    shape: 3
+    connections:
+    - direction: 1
+      width: 0
+    - direction: 2
+      width: 0
+    enabled: 1

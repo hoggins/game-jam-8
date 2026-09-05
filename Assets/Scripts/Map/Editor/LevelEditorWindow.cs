@@ -1,3 +1,4 @@
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -7,11 +8,19 @@ namespace Map.Editor
   {
     private static readonly Plane GroundPlane = new(Vector3.up, Vector3.zero);
 
+    private enum PaintZone
+    {
+      House,
+      Road,
+      Sidewalk
+    }
+
     private LevelData _levelData;
     private bool _erasing;
+    private PaintZone _paintZone;
+    private RoadWidth _roadWidth = RoadWidth.TwoWay;
 
     private GameObject _materialSourceObject;
-    private int _materialSlotIndex;
     private bool _replaceExistingCells;
 
     [MenuItem("Tools/Map/Level Editor")]
@@ -49,6 +58,8 @@ namespace Map.Editor
 
       DrawObjectField(so.FindProperty("mapData"), "Map Data", typeof(MapData));
       DrawObjectField(so.FindProperty("houseSet"), "House Set", typeof(HouseSet));
+      DrawObjectField(so.FindProperty("roadSet"), "Road Set", typeof(RoadSet));
+      DrawObjectField(so.FindProperty("sidewalkSet"), "Sidewalk Set", typeof(SidewalkSet));
       EditorGUILayout.PropertyField(so.FindProperty("seed"));
       EditorGUILayout.PropertyField(so.FindProperty("gridExtent"));
       EditorGUILayout.PropertyField(so.FindProperty("showGrid"));
@@ -65,6 +76,11 @@ namespace Map.Editor
         return;
       }
 
+      _paintZone = (PaintZone)EditorGUILayout.EnumPopup("Paint Zone", _paintZone);
+
+      if (_paintZone == PaintZone.Road)
+        _roadWidth = (RoadWidth)EditorGUILayout.EnumPopup("Road Width", _roadWidth);
+
       var label = _levelData.isEditing ? "Stop Drawing" : "Start Drawing";
       if (GUILayout.Button(label))
       {
@@ -73,7 +89,8 @@ namespace Map.Editor
       }
 
       if (_levelData.isEditing)
-        EditorGUILayout.HelpBox("Click + drag in the Scene view to fill cells. Hold Shift to erase.", MessageType.None);
+        EditorGUILayout.HelpBox(
+          $"Click + drag in the Scene view to fill {_paintZone} cells. Hold Shift to erase.", MessageType.None);
 
       EditorGUILayout.Space();
 
@@ -92,10 +109,12 @@ namespace Map.Editor
 
     private void DrawFillFromMaterialSection()
     {
-      EditorGUILayout.LabelField("Fill Cells From Mesh Material", EditorStyles.boldLabel);
+      EditorGUILayout.LabelField("Fill Zones From Mesh Materials", EditorStyles.boldLabel);
       EditorGUILayout.HelpBox(
-        "Reads a mesh's submesh for the chosen material slot and marks every cell its " +
-        "triangles fall in as filled. The object can be positioned anywhere in the scene.",
+        "Reads every material slot on the source mesh at once and marks the cells its triangles " +
+        "fall in as House/Road/Sidewalk. The zone comes from the material's name: a descriptive " +
+        "name containing \"house\"/\"road\"/\"sidewalk\", or - for generic DCC exports - its " +
+        "trailing number (Material.001 = house, .002 = road, .004 = sidewalk).",
         MessageType.None);
 
       _materialSourceObject = (GameObject)EditorGUILayout.ObjectField(
@@ -105,52 +124,50 @@ namespace Map.Editor
       var meshFilter = _materialSourceObject != null ? _materialSourceObject.GetComponent<MeshFilter>() : null;
 
       if (_materialSourceObject != null && (renderer == null || meshFilter == null || meshFilter.sharedMesh == null))
-      {
         EditorGUILayout.HelpBox("Source Object needs a MeshFilter with a mesh and a MeshRenderer.", MessageType.Warning);
-      }
-      else if (renderer != null && meshFilter != null)
-      {
-        var materials = renderer.sharedMaterials;
-        var options = new string[materials.Length];
-        for (var i = 0; i < materials.Length; i++)
-          options[i] = $"Element {i}: {(materials[i] != null ? materials[i].name : "None")}";
-
-        _materialSlotIndex = Mathf.Clamp(_materialSlotIndex, 0, options.Length - 1);
-        _materialSlotIndex = EditorGUILayout.Popup("Material Slot", _materialSlotIndex, options);
-      }
 
       _replaceExistingCells = EditorGUILayout.ToggleLeft(
-        "Replace existing filled cells (instead of merging)", _replaceExistingCells);
+        "Replace existing cells per zone (instead of merging)", _replaceExistingCells);
 
       using (new EditorGUI.DisabledScope(renderer == null || meshFilter == null || meshFilter.sharedMesh == null))
       {
-        if (GUILayout.Button("Compute && Fill Cells"))
-          FillCellsFromMaterial();
+        if (GUILayout.Button("Compute && Fill All Layers"))
+          FillAllLayersFromMaterial();
       }
     }
 
-    private void FillCellsFromMaterial()
+    private void FillAllLayersFromMaterial()
     {
       var cellSize = _levelData.MapData.CellSize;
-      var cells = LevelEditorUtility.ComputeCellsForMaterialSlot(_materialSourceObject, _materialSlotIndex, cellSize);
+      var cellsByZone = LevelEditorUtility.ComputeCellsForAllMaterialSlots(
+        _materialSourceObject, cellSize, out var unmatchedSlots);
 
-      if (cells.Count == 0)
+      if (cellsByZone.Count == 0)
       {
-        Debug.LogWarning("No triangles found for the selected material slot.");
+        Debug.LogWarning(
+          "No material slot matched a known zone (name must contain \"house\", \"road\" or \"sidewalk\").");
         return;
       }
 
       if (_replaceExistingCells &&
           !EditorUtility.DisplayDialog(
             "Replace Map Cells",
-            $"This will clear the {_levelData.MapData.FilledCells.Count} currently filled cells and " +
-            $"replace them with {cells.Count} cells computed from '{_materialSourceObject.name}'. Continue?",
+            $"This will clear existing cells for {cellsByZone.Count} matched zone(s) and replace them " +
+            $"with cells computed from '{_materialSourceObject.name}'. Continue?",
             "Replace", "Cancel"))
         return;
 
-      LevelEditorUtility.ApplyCellsToMapData(_levelData.MapData, cells, _replaceExistingCells);
+      foreach (var pair in cellsByZone)
+        LevelEditorUtility.ApplyCellsToZone(_levelData.MapData, pair.Key, pair.Value, _replaceExistingCells);
+
       SceneView.RepaintAll();
-      Debug.Log($"Filled {cells.Count} cells from '{_materialSourceObject.name}' material slot {_materialSlotIndex}.");
+
+      var summary = string.Join(", ", cellsByZone.Select(pair => $"{pair.Key}: {pair.Value.Count}"));
+      Debug.Log($"Filled cells from '{_materialSourceObject.name}' - {summary}.");
+
+      if (unmatchedSlots.Count > 0)
+        Debug.LogWarning(
+          $"Unmatched material slots (no house/road/sidewalk in name): {string.Join(", ", unmatchedSlots)}");
     }
 
     private static void DrawObjectField(SerializedProperty property, string label, System.Type type)
@@ -244,12 +261,35 @@ namespace Map.Editor
         Mathf.FloorToInt(hit.x / cellSize),
         Mathf.FloorToInt(hit.z / cellSize));
 
-      if (_levelData.MapData.IsFilled(cell) == !_erasing)
+      var mapData = _levelData.MapData;
+      var skip = _paintZone switch
+      {
+        PaintZone.Road => _erasing
+          ? !mapData.IsRoad(cell)
+          : mapData.IsRoad(cell) && mapData.GetRoadWidth(cell) == _roadWidth,
+        PaintZone.Sidewalk => mapData.IsSidewalk(cell) == !_erasing,
+        _ => mapData.IsFilled(cell) == !_erasing
+      };
+
+      if (skip)
         return;
 
-      Undo.RecordObject(_levelData.MapData, _erasing ? "Erase Map Cell" : "Fill Map Cell");
-      _levelData.MapData.SetFilled(cell, !_erasing);
-      EditorUtility.SetDirty(_levelData.MapData);
+      Undo.RecordObject(mapData, _erasing ? $"Erase {_paintZone} Cell" : $"Fill {_paintZone} Cell");
+
+      switch (_paintZone)
+      {
+        case PaintZone.Road:
+          mapData.SetRoad(cell, !_erasing, _roadWidth);
+          break;
+        case PaintZone.Sidewalk:
+          mapData.SetSidewalk(cell, !_erasing);
+          break;
+        default:
+          mapData.SetFilled(cell, !_erasing);
+          break;
+      }
+
+      EditorUtility.SetDirty(mapData);
       SceneView.RepaintAll();
     }
   }

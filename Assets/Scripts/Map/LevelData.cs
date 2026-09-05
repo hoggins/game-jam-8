@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using App;
 using UnityEngine;
 #if UNITY_EDITOR
@@ -13,6 +14,8 @@ namespace Map
 
     [SerializeField] private MapData mapData;
     [SerializeField] private HouseSet houseSet;
+    [SerializeField] private RoadSet roadSet;
+    [SerializeField] private SidewalkSet sidewalkSet;
     [SerializeField] private int seed;
     [SerializeField] private int gridExtent = 10;
     [SerializeField] private bool showGrid = true;
@@ -22,10 +25,12 @@ namespace Map
 
     public MapData MapData => mapData;
     public HouseSet HouseSet => houseSet;
+    public RoadSet RoadSet => roadSet;
+    public SidewalkSet SidewalkSet => sidewalkSet;
 
     private void Awake() => this.AsInjected();
 
-    private void Start() => _spawner.Spawn(mapData, houseSet, seed, transform);
+    private void Start() => _spawner.Spawn(mapData, houseSet, roadSet, sidewalkSet, seed, transform);
 
     private void OnDrawGizmos()
     {
@@ -44,6 +49,9 @@ namespace Map
         Gizmos.DrawCube(center, new Vector3(cellSize, 0.1f, cellSize));
       }
 
+      DrawRoadGizmos(mapData.RoadCells, cellSize);
+      DrawZoneGizmos(mapData.SidewalkCells, cellSize, new Color(0.9f, 0.5f, 0.1f, 0.5f));
+
       var extent = gridExtent * cellSize;
       Gizmos.color = new Color(1f, 1f, 1f, 0.3f);
       for (var i = -gridExtent; i <= gridExtent; i++)
@@ -54,32 +62,91 @@ namespace Map
       }
     }
 
+    private static void DrawZoneGizmos(IReadOnlyList<Vector2Int> cells, int cellSize, Color color)
+    {
+      Gizmos.color = color;
+      foreach (var cell in cells)
+      {
+        var center = new Vector3(
+          cell.x * cellSize + cellSize * 0.5f,
+          0f,
+          cell.y * cellSize + cellSize * 0.5f);
+        Gizmos.DrawCube(center, new Vector3(cellSize, 0.1f, cellSize));
+      }
+    }
+
+    private static void DrawRoadGizmos(IReadOnlyList<RoadCellData> cells, int cellSize)
+    {
+      foreach (var road in cells)
+      {
+        Gizmos.color = road.width == RoadWidth.OneWay
+          ? new Color(0.9f, 0.9f, 0.2f, 0.5f)
+          : new Color(0.6f, 0.6f, 0.1f, 0.5f);
+
+        var center = new Vector3(
+          road.cell.x * cellSize + cellSize * 0.5f,
+          0f,
+          road.cell.y * cellSize + cellSize * 0.5f);
+        Gizmos.DrawCube(center, new Vector3(cellSize, 0.1f, cellSize));
+      }
+    }
+
     public void Fill()
     {
       Clear();
 
-      if (mapData == null || houseSet == null)
+      if (mapData == null)
         return;
 
       var container = CreateContainer();
       var cellSize = mapData.CellSize;
       var originCell = new Vector2(transform.position.x / cellSize, transform.position.z / cellSize);
 
-      foreach (var placement in MapFiller.Fill(mapData, houseSet, originCell, seed))
-      {
-        var position = new Vector3(
-          placement.Cell.x * cellSize + placement.House.size.x * cellSize * 0.5f,
-          0f,
-          placement.Cell.y * cellSize + placement.House.size.y * cellSize * 0.5f);
+      if (houseSet != null)
+        foreach (var placement in MapFiller.Fill(mapData, houseSet, originCell, seed))
+        {
+          var position = new Vector3(
+            placement.Cell.x * cellSize + placement.House.size.x * cellSize * 0.5f,
+            0f,
+            placement.Cell.y * cellSize + placement.House.size.y * cellSize * 0.5f);
 
-        var instance = Instantiate(placement.House.prefab, position, Quaternion.identity, container);
-        instance.name = placement.House.name;
+          SpawnInstance(placement.House.prefab, placement.House.name, position, Quaternion.identity, container);
+        }
+
+      if (roadSet != null)
+        foreach (var placement in RoadFiller.Fill(mapData, roadSet))
+        {
+          var position = new Vector3(
+            placement.Cell.x * cellSize + cellSize * 0.5f,
+            0f,
+            placement.Cell.y * cellSize + cellSize * 0.5f);
+          var rotation = Quaternion.Euler(0f, placement.RotationDegrees, 0f);
+
+          SpawnInstance(placement.Piece.prefab, placement.Piece.name, position, rotation, container);
+        }
+
+      if (sidewalkSet != null)
+        foreach (var placement in SidewalkFiller.Fill(mapData, sidewalkSet, seed))
+        {
+          var position = new Vector3(
+            placement.Cell.x * cellSize + cellSize * 0.5f,
+            0f,
+            placement.Cell.y * cellSize + cellSize * 0.5f);
+
+          SpawnInstance(placement.Piece.prefab, placement.Piece.name, position, Quaternion.identity, container);
+        }
+    }
+
+    private static void SpawnInstance(
+      GameObject prefab, string name, Vector3 position, Quaternion rotation, Transform container)
+    {
+      var instance = Instantiate(prefab, position, rotation, container);
+      instance.name = name;
 
 #if UNITY_EDITOR
-        if (!Application.isPlaying)
-          Undo.RegisterCreatedObjectUndo(instance, "Simulate Placement");
+      if (!Application.isPlaying)
+        Undo.RegisterCreatedObjectUndo(instance, "Simulate Placement");
 #endif
-      }
     }
 
     public void Clear()

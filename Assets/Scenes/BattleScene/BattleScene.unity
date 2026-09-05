@@ -263,6 +263,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Map.LevelData
   mapData: {fileID: 11400000, guid: ac69748358f864e8c94db65e0aae9209, type: 2}
   houseSet: {fileID: 11400000, guid: 2be63b4228ce6471a8facbc07e6e860b, type: 2}
+  roadSet: {fileID: 11400000, guid: 0268a1f9ef0df44a7ac5ca682afdcf09, type: 2}
+  sidewalkSet: {fileID: 11400000, guid: ea7bf419859bc4b7199a803c02683b26, type: 2}
   seed: 0
   gridExtent: 10
   showGrid: 1
@@ -294,7 +296,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 90198e1b647504b61870c486f0b284a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::App.DebugCheatManager
-  _teleportPosition: {x: -200, y: 0, z: -360}
+  _teleportPosition: {x: 0, y: 0, z: 0}
 --- !u!1 &211954662
 GameObject:
   m_ObjectHideFlags: 0
@@ -1063,9 +1065,13 @@ PrefabInstance:
       propertyPath: m_Name
       value: Ground01
       objectReference: {fileID: 0}
+    - target: {fileID: 6669490373081238591, guid: 57291ee2d4b612f419a552ccd9b9850a, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6988501443091066571, guid: 57291ee2d4b612f419a552ccd9b9850a, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -3.04
+      value: -3.11
       objectReference: {fileID: 0}
     - target: {fileID: 6988501443091066571, guid: 57291ee2d4b612f419a552ccd9b9850a, type: 3}
       propertyPath: m_LocalPosition.y
@@ -1073,7 +1079,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6988501443091066571, guid: 57291ee2d4b612f419a552ccd9b9850a, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.71
+      value: 0.81
       objectReference: {fileID: 0}
     - target: {fileID: 6988501443091066571, guid: 57291ee2d4b612f419a552ccd9b9850a, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1102,10 +1108,6 @@ PrefabInstance:
     - target: {fileID: 6988501443091066571, guid: 57291ee2d4b612f419a552ccd9b9850a, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8384280883836899191, guid: 57291ee2d4b612f419a552ccd9b9850a, type: 3}
-      propertyPath: m_IsActive
-      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1267,6 +1269,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
+    - target: {fileID: 5472302730410959488, guid: 2a61427168126454490fc82a1da79814, type: 3}
+      propertyPath: _speed
+      value: 25
+      objectReference: {fileID: 0}
     - target: {fileID: 7434860180236888473, guid: 2a61427168126454490fc82a1da79814, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -1364,6 +1370,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7448638087530344469, guid: 03f01e38c783740d899943aaa662a1ba, type: 3}
+      propertyPath: m_fontAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+    - target: {fileID: 7448638087530344469, guid: 03f01e38c783740d899943aaa662a1ba, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

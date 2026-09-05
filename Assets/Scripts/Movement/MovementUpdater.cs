@@ -8,6 +8,14 @@ namespace Movement
   public sealed class MovementUpdater : IInitializable, ILateTickable, System.IDisposable
   {
     private const string PlayerTag = "Player";
+
+    // Ground (roads, sidewalks, terrain) only exists to give falling debris something solid to
+    // land on - it never blocks movement, and its non-convex mesh colliders don't support the
+    // ClosestPoint call ResolveWallOverlaps relies on. Excluding it here keeps wall queries to
+    // colliders that are actually walls.
+    private static readonly int WallLayerMask =
+      Physics.DefaultRaycastLayers & ~(1 << LayerMask.NameToLayer("Ground"));
+
     private readonly MovementSettings _settings;
 
     private readonly FlowMap _flowMap = new();
@@ -334,7 +342,7 @@ namespace Movement
           position,
           radius + _settings.WallSkin,
           _wallOverlaps,
-          Physics.DefaultRaycastLayers,
+          WallLayerMask,
           QueryTriggerInteraction.Ignore);
         var pushed = false;
 
@@ -389,7 +397,7 @@ namespace Movement
         direction,
         _wallHits,
         distance + _settings.WallSkin,
-        Physics.DefaultRaycastLayers,
+        WallLayerMask,
         QueryTriggerInteraction.Ignore);
       var closestDistance = float.PositiveInfinity;
       closestHit = default;
