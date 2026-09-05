@@ -31,48 +31,47 @@ MonoBehaviour:
     enabled: 1
     unique: 0
     difficultyLevel: 1
-  - name: BattleTimer
+  - name: House01_D2
+    prefab: {fileID: 6954928472654060805, guid: b9d6ccace99af4e9a9cbf5c994ddbbf7, type: 3}
+    size: {x: 1, y: 1}
+    enabled: 1
+    unique: 0
+    difficultyLevel: 2
+  - name: House01_D2
+    prefab: {fileID: 6954928472654060805, guid: b9d6ccace99af4e9a9cbf5c994ddbbf7, type: 3}
+    size: {x: 1, y: 2}
+    enabled: 1
+    unique: 0
+    difficultyLevel: 2
+  - name: House01_D2
+    prefab: {fileID: 6954928472654060805, guid: b9d6ccace99af4e9a9cbf5c994ddbbf7, type: 3}
+    size: {x: 2, y: 1}
+    enabled: 1
+    unique: 0
+    difficultyLevel: 2
+  - name: House01_D3
+    prefab: {fileID: 6954928472654060805, guid: 7d06efa1ed66446e58de82db42425deb, type: 3}
+    size: {x: 1, y: 1}
+    enabled: 1
+    unique: 0
+    difficultyLevel: 3
+  - name: House01_D3
+    prefab: {fileID: 6954928472654060805, guid: 7d06efa1ed66446e58de82db42425deb, type: 3}
+    size: {x: 1, y: 2}
+    enabled: 1
+    unique: 0
+    difficultyLevel: 3
+  - name: House01_D3
+    prefab: {fileID: 6954928472654060805, guid: 7d06efa1ed66446e58de82db42425deb, type: 3}
+    size: {x: 2, y: 1}
+    enabled: 1
+    unique: 0
+    difficultyLevel: 3
+  specials:
+  - type: 0
     prefab: {fileID: 6775418544681209697, guid: f1baf58a7ee9643a987187050600e04a, type: 3}
     size: {x: 2, y: 1}
     enabled: 1
-    unique: 1
-    difficultyLevel: 1
-  - name: House01_D2
-    prefab: {fileID: 6954928472654060805, guid: b9d6ccace99af4e9a9cbf5c994ddbbf7, type: 3}
-    size: {x: 1, y: 1}
-    enabled: 1
-    unique: 0
-    difficultyLevel: 2
-  - name: House01_D2
-    prefab: {fileID: 6954928472654060805, guid: b9d6ccace99af4e9a9cbf5c994ddbbf7, type: 3}
-    size: {x: 1, y: 2}
-    enabled: 1
-    unique: 0
-    difficultyLevel: 2
-  - name: House01_D2
-    prefab: {fileID: 6954928472654060805, guid: b9d6ccace99af4e9a9cbf5c994ddbbf7, type: 3}
-    size: {x: 2, y: 1}
-    enabled: 1
-    unique: 0
-    difficultyLevel: 2
-  - name: House01_D3
-    prefab: {fileID: 6954928472654060805, guid: 7d06efa1ed66446e58de82db42425deb, type: 3}
-    size: {x: 1, y: 1}
-    enabled: 1
-    unique: 0
-    difficultyLevel: 3
-  - name: House01_D3
-    prefab: {fileID: 6954928472654060805, guid: 7d06efa1ed66446e58de82db42425deb, type: 3}
-    size: {x: 1, y: 2}
-    enabled: 1
-    unique: 0
-    difficultyLevel: 3
-  - name: House01_D3
-    prefab: {fileID: 6954928472654060805, guid: 7d06efa1ed66446e58de82db42425deb, type: 3}
-    size: {x: 2, y: 1}
-    enabled: 1
-    unique: 0
-    difficultyLevel: 3
   difficultyRanges:
   - minDistance: 0
     maxDistance: 5

@@ -25,9 +25,11 @@ namespace Map
     public const int DifficultyLevelCount = 5;
 
     [SerializeField] private List<HouseObject> houses = new();
+    [SerializeField] private List<SpecialHouseObject> specials = new();
     [SerializeField] private List<HouseDifficultyRange> difficultyRanges = new();
 
     public IReadOnlyList<HouseObject> Houses => houses;
+    public IReadOnlyList<SpecialHouseObject> Specials => specials;
     public IReadOnlyList<HouseDifficultyRange> DifficultyRanges => difficultyRanges;
 
     public int PickDifficultyLevel(float distance, System.Random random)
