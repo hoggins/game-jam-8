@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using VContainer;
 using Model;
+using Timer;
 
 namespace App
 {
@@ -44,6 +45,9 @@ namespace App
 
       if (keyboard.f11Key.wasPressedThisFrame)
         EnableInfiniteTimer();
+
+      if (keyboard.f4Key.wasPressedThisFrame)
+        DestroyTimer();
     }
 
 #if UNITY_EDITOR
@@ -90,6 +94,23 @@ namespace App
 
       _battleService.EnableInfiniteTimer();
       Debug.Log("Infinite battle timer enabled.", this);
+      return true;
+    }
+
+    /// <summary>
+    /// Destroys the current battle timer as if the player had smashed every digit. Press F4 during
+    /// a battle. Goes through <see cref="BattleTimerObject.CheatDestroyAll"/> rather than calling
+    /// <see cref="BattleService.DestroyTimer"/> directly, so the standard respawn (and everything
+    /// else driven off a real digit's <c>Destroyed</c> event) fires exactly as it would from play.
+    /// </summary>
+    public bool DestroyTimer()
+    {
+      var timer = FindFirstObjectByType<BattleTimerObject>();
+      if (timer == null || timer.IsDead)
+        return false;
+
+      timer.CheatDestroyAll();
+      Debug.Log("Battle timer destroyed (cheat).", this);
       return true;
     }
 

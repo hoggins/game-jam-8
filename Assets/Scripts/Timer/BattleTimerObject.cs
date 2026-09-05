@@ -183,6 +183,20 @@ namespace Timer
         _hudCamera.SetActive(false);
     }
 
+    /// <summary>
+    /// Smashes every surviving digit, exactly as if the player finished the clock digit by digit.
+    /// Used by the F4 debug cheat so the timer dies through the same path a real hit would —
+    /// <see cref="OnDigitDestroyed"/> still recomputes the remaining time after each break and
+    /// fires <see cref="BattleService.DestroyTimer"/> once the last one falls, which is what drives
+    /// the standard respawn in <see cref="TimerRespawnService"/>.
+    /// </summary>
+    public void CheatDestroyAll()
+    {
+      for (var i = 0; i < _digits.Length; i++)
+        if (_digits[i] != null && !_digits[i].IsDestroyed && _destructibles[i] != null)
+          _destructibles[i].Break(_destructibles[i].transform.position);
+    }
+
     private void BreakRemainingParts()
     {
       for (var i = 0; i < transform.childCount; i++)
