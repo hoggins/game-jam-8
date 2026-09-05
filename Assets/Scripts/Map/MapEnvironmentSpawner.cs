@@ -21,6 +21,7 @@ namespace Map
     private readonly MovementUpdater _movementUpdater;
     private readonly EnvironmentVisibilitySettings _visibilitySettings;
     private readonly SpecialSpawnSettings _specialSpawnSettings;
+    private readonly BattleBalanceConfig _battleBalance;
 
     private Transform _container;
     private HouseSet _houseSet;
@@ -34,11 +35,13 @@ namespace Map
     private bool _hasVisibilityHysteresis;
 
     public MapEnvironmentSpawner(
-      MovementUpdater movementUpdater, EnvironmentVisibilitySettings visibilitySettings, SpecialSpawnSettings specialSpawnSettings)
+      MovementUpdater movementUpdater, EnvironmentVisibilitySettings visibilitySettings, SpecialSpawnSettings specialSpawnSettings,
+      BattleBalanceConfig battleBalance)
     {
       _movementUpdater = movementUpdater;
       _visibilitySettings = visibilitySettings;
       _specialSpawnSettings = specialSpawnSettings;
+      _battleBalance = battleBalance;
     }
 
     public IReadOnlyCollection<RuntimeEnvironmentObject> SpawnedObjects => _objects.Values;
@@ -193,11 +196,11 @@ namespace Map
     /// somewhere between the two when they're far apart, otherwise a band close to (but not on top
     /// of) the player. Shared between the initial placement and every runtime respawn.
     /// </summary>
-    public static void GetOtherSpecialPlacement(
+    public void GetOtherSpecialPlacement(
       Vector3 timerPosition, Vector3 playerPosition, out Vector3 anchor, out float minDistance, out float maxDistance)
     {
       var distanceToPlayer = Vector3.Distance(timerPosition, playerPosition);
-      if (distanceToPlayer > BattleBalance.SpecialBetweenMaxDistance)
+      if (distanceToPlayer > _battleBalance.SpecialBetweenMaxDistance)
       {
         // Far apart: land roughly on the segment between them, with a little spread so it's not
         // pinned to the exact midpoint every time.
@@ -208,8 +211,8 @@ namespace Map
       else
       {
         anchor = playerPosition;
-        minDistance = BattleBalance.SpecialBetweenMinDistance;
-        maxDistance = BattleBalance.SpecialBetweenMaxDistance;
+        minDistance = _battleBalance.SpecialBetweenMinDistance;
+        maxDistance = _battleBalance.SpecialBetweenMaxDistance;
       }
     }
 

@@ -28,6 +28,13 @@ namespace Model
     private int _timer;
     private bool _isInitialized;
 
+    private readonly ProgressionBalanceConfig _progressionBalance;
+
+    public Storage(ProgressionBalanceConfig progressionBalance)
+    {
+      _progressionBalance = progressionBalance;
+    }
+
     public event Action StatisticsChanged;
 
     public int AttackPower
@@ -88,14 +95,14 @@ namespace Model
 
     void IInitializable.Initialize()
     {
-      _attackPower = PlayerPrefs.GetInt(AttackPowerKey, ProgressionBalance.StartingAttackPower);
-      _maxHealth = PlayerPrefs.GetInt(MaxHealthKey, ProgressionBalance.StartingMaxHealth);
+      _attackPower = PlayerPrefs.GetInt(AttackPowerKey, _progressionBalance.StartingAttackPower);
+      _maxHealth = PlayerPrefs.GetInt(MaxHealthKey, _progressionBalance.StartingMaxHealth);
       _ducksKilled = PlayerPrefs.GetInt(DucksKilledKey, 0);
       _buildingsDestroyed = PlayerPrefs.GetInt(BuildingsDestroyedKey, 0);
       _currentCoins = PlayerPrefs.GetInt(CurrentCoinsKey, 0);
-      _speed = PlayerPrefs.GetInt(SpeedKey, ProgressionBalance.StartingSpeed);
-      _gunPower = PlayerPrefs.GetInt(GunPowerKey, ProgressionBalance.StartingGunPower);
-      _timer = PlayerPrefs.GetInt(TimerKey, ProgressionBalance.StartingTimer);
+      _speed = PlayerPrefs.GetInt(SpeedKey, _progressionBalance.StartingSpeed);
+      _gunPower = PlayerPrefs.GetInt(GunPowerKey, _progressionBalance.StartingGunPower);
+      _timer = PlayerPrefs.GetInt(TimerKey, _progressionBalance.StartingTimer);
       _isInitialized = true;
     }
 

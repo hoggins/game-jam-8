@@ -69,7 +69,7 @@ namespace Timer
       if (houseSet == null)
         return;
 
-      MapEnvironmentSpawner.GetOtherSpecialPlacement(timerPosition, player.position, out var anchor, out var minDistance, out var maxDistance);
+      _spawner.GetOtherSpecialPlacement(timerPosition, player.position, out var anchor, out var minDistance, out var maxDistance);
 
       foreach (var special in houseSet.Specials)
       {

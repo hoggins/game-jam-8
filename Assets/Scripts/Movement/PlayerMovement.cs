@@ -32,6 +32,7 @@ namespace Movement
     [SerializeField] private Color _damageTrailColor = Color.white;
 
     [Inject] private CharacterService _characterService;
+    [Inject] private ProgressionBalanceConfig _progressionBalance;
 
     private bool _enabledMoveAction;
     private Vector3 _previousPosition;
@@ -39,7 +40,7 @@ namespace Movement
 
     /// Movement speed is a character stat; the service is missing only before the
     /// container exists, so fall back to the starting value then.
-    private float Speed => _characterService?.Speed ?? ProgressionBalance.StartingSpeed;
+    private float Speed => _characterService?.Speed ?? _progressionBalance.StartingSpeed;
 
     private void Awake()
     {

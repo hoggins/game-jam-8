@@ -40,6 +40,7 @@ namespace Combat
     [Inject] private Pool _pool;
     [Inject] private CharacterService _characterService;
     [Inject] private BattleService _battleService;
+    [Inject] private BattleBalanceConfig _battleBalance;
 
     private const string CoinPickupPrefabPath = "Prefabs/Interface/Coin01";
 
@@ -71,7 +72,7 @@ namespace Combat
       _death = GetComponent<MobDeath>();
       _hitAnimation = GetComponent<ActorHitAnimation>();
       _renderers = GetComponentsInChildren<Renderer>(true);
-      CurrentHealth = BattleBalance.DuckMaxHealth;
+      CurrentHealth = _battleBalance.DuckMaxHealth;
     }
 
     private void Start() =>
@@ -79,7 +80,7 @@ namespace Combat
 
     private void OnEnable()
     {
-      CurrentHealth = BattleBalance.DuckMaxHealth;
+      CurrentHealth = _battleBalance.DuckMaxHealth;
       _isDying = false;
       _hasAttacked = false;
       _isAttached = false;
@@ -104,7 +105,7 @@ namespace Combat
         return;
 
       _hasAttacked = true;
-      _characterService?.TakeDamage(BattleBalance.DuckAttackDamage);
+      _characterService?.TakeDamage(_battleBalance.DuckAttackDamage);
       AttachToPlayer();
     }
 
@@ -242,7 +243,7 @@ namespace Combat
     {
       var offset = transform.position - _player.position;
       offset.y = 0f;
-      return offset.sqrMagnitude <= BattleBalance.DuckAttackDistance * BattleBalance.DuckAttackDistance;
+      return offset.sqrMagnitude <= _battleBalance.DuckAttackDistance * _battleBalance.DuckAttackDistance;
     }
 
     private void ResolvePlayer()

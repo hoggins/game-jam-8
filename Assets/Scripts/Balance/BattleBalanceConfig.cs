@@ -1,0 +1,99 @@
+using System;
+using System.Collections.Generic;
+using Destruction;
+using UnityEngine;
+
+namespace Balance
+{
+  [Serializable]
+  public struct DestructibleMaxHealthEntry
+  {
+    public DestructibleObjectType type;
+    [Min(0)] public int maxHealth;
+  }
+
+  [CreateAssetMenu(fileName = "BattleBalanceConfig", menuName = "Game/Battle Balance Config")]
+  public sealed class BattleBalanceConfig : ScriptableObject
+  {
+    [Header("Timing")]
+    [Tooltip("Beat held on 00:00, with damage switched off, before the timeout defeat lands.")]
+    [SerializeField, Min(0f)] private float _timerExpiredDefeatDelay = 2f;
+    [SerializeField, Min(0f)] private float _battleDuration = 90f;
+
+    [Header("Special Object Respawn")]
+    [Tooltip("Beyond this distance from the player, a non-Timer special respawns somewhere between "
+      + "the timer and the player; within it, the special spawns in a band between " + nameof(_specialBetweenMinDistance)
+      + " and this distance from the player instead, so it never lands right on top of them.")]
+    [SerializeField, Min(0f)] private float _specialBetweenMaxDistance = 50f;
+    [Tooltip("Lower bound of the near-player band; see " + nameof(_specialBetweenMaxDistance) + ".")]
+    [SerializeField, Min(0f)] private float _specialBetweenMinDistance = 40f;
+
+    [Header("Duck (Mob)")]
+    [SerializeField, Min(0)] private int _duckMaxHealth = 2;
+    [SerializeField, Min(0)] private int _duckAttackDamage = 1;
+    [SerializeField, Min(0f)] private float _duckAttackDistance = 3f;
+    [SerializeField, Min(0f)] private float _duckRepositionDistance = 40f;
+
+    [Tooltip("Chance of dropping N coins on a duck kill, indexed by coin count. Must sum to 1.")]
+    [SerializeField] private float[] _duckCoinDropChances = { 0.6f, 0.3f, 0.1f };
+
+    [Header("Destructible Objects")]
+    [SerializeField] private List<DestructibleMaxHealthEntry> _destructibleMaxHealth = new()
+    {
+      new DestructibleMaxHealthEntry { type = DestructibleObjectType.House, maxHealth = 7 },
+      new DestructibleMaxHealthEntry { type = DestructibleObjectType.TimerDigit, maxHealth = 15 },
+      new DestructibleMaxHealthEntry { type = DestructibleObjectType.TimerDivider, maxHealth = 10 },
+    };
+
+    public float TimerExpiredDefeatDelay => _timerExpiredDefeatDelay;
+    public float BattleDuration => _battleDuration;
+    public float SpecialBetweenMaxDistance => _specialBetweenMaxDistance;
+    public float SpecialBetweenMinDistance => _specialBetweenMinDistance;
+    public int DuckMaxHealth => _duckMaxHealth;
+    public int DuckAttackDamage => _duckAttackDamage;
+    public float DuckAttackDistance => _duckAttackDistance;
+    public float DuckRepositionDistance => _duckRepositionDistance;
+
+    public int GetDestructibleMaxHealth(DestructibleObjectType type)
+    {
+      foreach (var entry in _destructibleMaxHealth)
+        if (entry.type == type)
+          return entry.maxHealth;
+
+      throw new KeyNotFoundException($"No max health configured for destructible type '{type}'.");
+    }
+
+    public int RollDuckCoinDrop()
+    {
+      var roll = UnityEngine.Random.value;
+      var accumulated = 0f;
+      for (var coins = 0; coins < _duckCoinDropChances.Length; coins++)
+      {
+        accumulated += _duckCoinDropChances[coins];
+        if (roll < accumulated)
+          return coins;
+      }
+
+      return _duckCoinDropChances.Length - 1;
+    }
+
+    private void OnValidate()
+    {
+      _timerExpiredDefeatDelay = Mathf.Max(0f, _timerExpiredDefeatDelay);
+      _battleDuration = Mathf.Max(0f, _battleDuration);
+      _specialBetweenMaxDistance = Mathf.Max(0f, _specialBetweenMaxDistance);
+      _specialBetweenMinDistance = Mathf.Max(0f, _specialBetweenMinDistance);
+      _duckMaxHealth = Mathf.Max(0, _duckMaxHealth);
+      _duckAttackDamage = Mathf.Max(0, _duckAttackDamage);
+      _duckAttackDistance = Mathf.Max(0f, _duckAttackDistance);
+      _duckRepositionDistance = Mathf.Max(0f, _duckRepositionDistance);
+
+      for (var i = 0; i < _destructibleMaxHealth.Count; i++)
+      {
+        var entry = _destructibleMaxHealth[i];
+        entry.maxHealth = Mathf.Max(0, entry.maxHealth);
+        _destructibleMaxHealth[i] = entry;
+      }
+    }
+  }
+}

@@ -18,6 +18,7 @@ namespace Destruction
     [SerializeField] private DestructibleObjectType _objectType;
 
     [Inject] private CharacterService _characterService;
+    [Inject] private BattleBalanceConfig _battleBalance;
 
     private DestructibleObject _destructibleObject;
     private HitFx _hitFx;
@@ -34,7 +35,7 @@ namespace Destruction
       this.AsInjected();
       _destructibleObject = GetComponent<DestructibleObject>();
       _hitFx = GetComponent<HitFx>();
-      _maxHealth = BattleBalance.GetDestructibleMaxHealth(_objectType);
+      _maxHealth = _battleBalance.GetDestructibleMaxHealth(_objectType);
       CurrentHealth = _maxHealth;
       _nextPartFalloutDamage = RollPartFalloutDamage();
     }

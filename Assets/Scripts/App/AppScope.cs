@@ -1,3 +1,4 @@
+using Balance;
 using Destruction;
 using Map;
 using Model;
@@ -36,6 +37,18 @@ namespace App
     protected override void Configure(IContainerBuilder builder)
     {
       base.Configure(builder);
+
+      var battleBalance = Resources.Load<BattleBalanceConfig>("BattleBalanceConfig");
+      if (battleBalance == null)
+        throw new System.InvalidOperationException("BattleBalanceConfig asset was not found in Resources.");
+
+      builder.RegisterInstance(battleBalance);
+
+      var progressionBalance = Resources.Load<ProgressionBalanceConfig>("ProgressionBalanceConfig");
+      if (progressionBalance == null)
+        throw new System.InvalidOperationException("ProgressionBalanceConfig asset was not found in Resources.");
+
+      builder.RegisterInstance(progressionBalance);
 
       builder.Register<SceneService>(Lifetime.Singleton)
         .AsSelf()
