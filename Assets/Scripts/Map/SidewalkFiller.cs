@@ -66,9 +66,7 @@ namespace Map
           break;
         }
 
-        var rotationDegrees = chosen.facesRoad
-          ? GetRoadFacingRotation(mapData, cell)
-          : 0f;
+        var rotationDegrees = GetRoadFacingRotation(mapData, cell);
 
         placements.Add(new SidewalkPlacement(chosen, cell, rotationDegrees));
       }
