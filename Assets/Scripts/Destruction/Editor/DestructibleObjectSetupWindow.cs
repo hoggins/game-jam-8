@@ -118,7 +118,11 @@ namespace Destruction.Editor
 
       try
       {
-        var meshCount = ConfigureMeshParts(root, baseDecaySettings, decaySettings.MaxFallSpeedMultiplier);
+        var meshCount = ConfigureMeshParts(
+          root,
+          baseDecaySettings,
+          decaySettings.MaxFallSpeedMultiplier,
+          out var replacedMeshColliderCount);
         ConfigureRoot(root, objectType, tag, spawnDestructionFx);
 
         EditorUtility.SetDirty(root);
@@ -132,7 +136,8 @@ namespace Destruction.Editor
         AssetDatabase.SaveAssets();
 
         Debug.Log(
-          $"Configured {meshCount} destructible mesh part(s) on prefab '{prefabPath}'.",
+          $"Configured {meshCount} destructible mesh part(s) on prefab '{prefabPath}' "
+          + $"and replaced {replacedMeshColliderCount} MeshCollider(s) with BoxCollider(s).",
           root);
       }
       finally
@@ -141,8 +146,13 @@ namespace Destruction.Editor
       }
     }
 
-    private static int ConfigureMeshParts(GameObject root, PartDecaySettings baseSettings, float maxSpeedMultiplier)
+    private static int ConfigureMeshParts(
+      GameObject root,
+      PartDecaySettings baseSettings,
+      float maxSpeedMultiplier,
+      out int replacedMeshColliderCount)
     {
+      replacedMeshColliderCount = ReplaceMeshColliders(root);
       var meshFilters = root.GetComponentsInChildren<MeshFilter>(true);
       var configuredCount = 0;
 
@@ -159,15 +169,7 @@ namespace Destruction.Editor
         if (partLayer >= 0)
           part.layer = partLayer;
 
-        var meshCollider = part.GetComponent<MeshCollider>();
-        if (meshCollider == null && part.GetComponent<Collider>() == null)
-          meshCollider = part.AddComponent<MeshCollider>();
-
-        if (meshCollider != null)
-        {
-          meshCollider.sharedMesh = meshFilter.sharedMesh;
-          meshCollider.convex = true;
-        }
+        ConfigurePartCollider(part, meshFilter.sharedMesh.bounds);
 
         // Rigidbodies are added at runtime exactly when a part breaks off (DestructibleObject
         // .Impulse), not baked into the prefab: a Rigidbody on every intact part, times every
@@ -187,6 +189,71 @@ namespace Destruction.Editor
       }
 
       return configuredCount;
+    }
+
+    private static void ConfigurePartCollider(GameObject part, Bounds meshBounds)
+    {
+      var boxCollider = part.GetComponent<BoxCollider>();
+      if (boxCollider == null)
+        boxCollider = part.AddComponent<BoxCollider>();
+
+      boxCollider.isTrigger = false;
+      boxCollider.center = meshBounds.center;
+      boxCollider.size = meshBounds.size;
+    }
+
+    private static int ReplaceMeshColliders(GameObject root)
+    {
+      var meshColliders = root.GetComponentsInChildren<MeshCollider>(true);
+      var replacedCount = 0;
+
+      foreach (var meshCollider in meshColliders)
+      {
+        if (meshCollider == null)
+          continue;
+
+        var part = meshCollider.gameObject;
+        var bounds = meshCollider.sharedMesh != null
+          ? meshCollider.sharedMesh.bounds
+          : GetFallbackColliderBounds(meshCollider);
+
+        ConfigurePartCollider(part, bounds);
+        Object.DestroyImmediate(meshCollider, true);
+        replacedCount++;
+      }
+
+      return replacedCount;
+    }
+
+    private static Bounds GetFallbackColliderBounds(MeshCollider meshCollider)
+    {
+      var renderer = meshCollider.GetComponent<Renderer>();
+      if (renderer != null)
+        return ToLocalBounds(renderer.bounds, meshCollider.transform);
+
+      return ToLocalBounds(meshCollider.bounds, meshCollider.transform);
+    }
+
+    private static Bounds ToLocalBounds(Bounds worldBounds, Transform target)
+    {
+      var localBounds = default(Bounds);
+      var hasBounds = false;
+
+      foreach (var corner in GetCorners(worldBounds))
+      {
+        var localPoint = target.InverseTransformPoint(corner);
+        if (!hasBounds)
+        {
+          localBounds = new Bounds(localPoint, Vector3.zero);
+          hasBounds = true;
+        }
+        else
+        {
+          localBounds.Encapsulate(localPoint);
+        }
+      }
+
+      return localBounds;
     }
 
     private static float GetPartVolume(MeshFilter meshFilter)
