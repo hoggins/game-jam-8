@@ -51,6 +51,7 @@ namespace Balance.Editor
       new Section("Environment Decay", typeof(EnvironmentDecaySettings)),
       new Section("Environment Visibility", typeof(EnvironmentVisibilitySettings)),
       new Section("Hit FX", typeof(HitFxSettings)),
+      new Section("Sound", typeof(Sfx.SfxSettings)),
     };
 
     private Vector2 _scroll;

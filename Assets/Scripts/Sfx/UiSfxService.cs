@@ -14,6 +14,7 @@ namespace Sfx
   public class UiSfxService : IInitializable, ITickable, IDisposable
   {
     private const string QuackClipsResourceFolder = "SFX";
+    private const string SettingsResourcePath = "SfxSettings";
 
     /// Ducks die in waves, often several within the same frame. Playing them all at once smears
     /// into one loud noise, and dropping the extras loses the wave entirely - so each kill is
@@ -26,6 +27,8 @@ namespace Sfx
 
     private readonly CharacterService _characterService;
     private readonly List<float> _pendingDuckKillQuacks = new();
+
+    private SfxSettings _settings;
 
     private AudioClip[] _quackClips;
     private AudioSource _source;
@@ -45,6 +48,13 @@ namespace Sfx
       {
         Debug.LogError($"No quack clips were found in Resources/{QuackClipsResourceFolder}.");
         return;
+      }
+
+      _settings = Resources.Load<SfxSettings>(SettingsResourcePath);
+      if (_settings == null)
+      {
+        Debug.LogError($"Sfx settings were not found at Resources/{SettingsResourcePath}. Falling back to defaults.");
+        _settings = ScriptableObject.CreateInstance<SfxSettings>();
       }
 
       var host = new GameObject(nameof(UiSfxService));
@@ -122,7 +132,7 @@ namespace Sfx
       if (_source == null || _quackClips == null || _quackClips.Length == 0)
         return;
 
-      _source.PlayOneShot(_quackClips[NextQuackIndex()]);
+      _source.PlayOneShot(_quackClips[NextQuackIndex()], _settings.RollQuackVolume());
     }
 
     /// Random, but never the same variant twice in a row - a repeat reads as a stutter rather
