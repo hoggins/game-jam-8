@@ -25,6 +25,8 @@ namespace Movement
     MovementLayer IMovementController.Layer => MovementLayer.Mob;
     MovementLayer IMovementController.CollidesWith => _collidesWith;
 
+    internal float Radius => _radius;
+
     Vector3 IMovementController.GetDesiredVelocity(in MovementContext context) =>
       context.GetFlowDirection() * _speed;
 
