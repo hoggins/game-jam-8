@@ -52,6 +52,7 @@ namespace Combat
 
     private MovementAgent _movementAgent;
     private MobDeath _death;
+    private ActorHitAnimation _hitAnimation;
     private Renderer[] _renderers;
     private Transform _player;
     private Coroutine _attachCoroutine;
@@ -68,6 +69,7 @@ namespace Combat
       this.AsInjected();
       _movementAgent = GetComponent<MovementAgent>();
       _death = GetComponent<MobDeath>();
+      _hitAnimation = GetComponent<ActorHitAnimation>();
       _renderers = GetComponentsInChildren<Renderer>(true);
       CurrentHealth = BattleBalance.DuckMaxHealth;
     }
@@ -115,6 +117,9 @@ namespace Combat
         return;
 
       CurrentHealth = Mathf.Max(0, CurrentHealth - damage);
+      if (damage > 0)
+        _hitAnimation?.PlayHit();
+
       if (CurrentHealth == 0)
         BeginDeath();
     }

@@ -9,6 +9,7 @@ namespace Model
     private readonly Storage _storage;
 
     public event Action Died;
+    public event Action Damaged;
     public event Action<int> HealthChanged;
     public event Action HealthDestroyed;
     public event Action ProgressionChanged;
@@ -81,8 +82,11 @@ namespace Model
       if (IsInvincible || !IsAlive)
         return;
 
+      var previousHealth = CurrentHealth;
       CurrentHealth = Math.Max(0, CurrentHealth - damage);
       HealthChanged?.Invoke(CurrentHealth);
+      if (CurrentHealth < previousHealth)
+        Damaged?.Invoke();
       if (CurrentHealth > 0)
         return;
 
