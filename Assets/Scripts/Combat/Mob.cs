@@ -18,9 +18,11 @@ namespace Combat
     private sealed class MaterialWeight
     {
       [SerializeField] private Material _material;
+      [SerializeField] private Mesh _mesh;
       [SerializeField, Min(0f)] private float _weight = 1f;
 
       internal Material Material => _material;
+      internal Mesh Mesh => _mesh;
       internal float Weight => _weight;
 
       internal void Validate() =>
@@ -54,6 +56,7 @@ namespace Combat
     private MobDeath _death;
     private ActorHitAnimation _hitAnimation;
     private Renderer[] _renderers;
+    private MeshFilter[] _meshFilters;
     private Transform _player;
     private Coroutine _attachCoroutine;
     private bool _isDying;
@@ -71,6 +74,7 @@ namespace Combat
       _death = GetComponent<MobDeath>();
       _hitAnimation = GetComponent<ActorHitAnimation>();
       _renderers = GetComponentsInChildren<Renderer>(true);
+      _meshFilters = GetComponentsInChildren<MeshFilter>(true);
       CurrentHealth = _battleBalance.DuckMaxHealth;
     }
 
@@ -84,7 +88,7 @@ namespace Combat
       _hasAttacked = false;
       _isAttached = false;
       _player = null;
-      ApplyRandomMaterial();
+      ApplyRandomAppearance();
       _death?.ResetVisual();
 
       if (_movementAgent != null)
@@ -369,9 +373,31 @@ namespace Combat
     private static float Evaluate(AnimationCurve curve, float progress) =>
       curve == null ? progress : curve.Evaluate(progress);
 
-    private void ApplyRandomMaterial()
+    private void ApplyRandomAppearance()
     {
-      var material = PickRandomMaterial();
+      var appearance = PickRandomAppearance();
+      if (appearance == null)
+        return;
+
+      ApplyMesh(appearance.Mesh);
+      ApplyMaterial(appearance.Material);
+    }
+
+    private void ApplyMesh(Mesh mesh)
+    {
+      if (mesh == null || _meshFilters == null)
+        return;
+
+      for (var i = 0; i < _meshFilters.Length; i++)
+      {
+        var meshFilter = _meshFilters[i];
+        if (meshFilter != null)
+          meshFilter.sharedMesh = mesh;
+      }
+    }
+
+    private void ApplyMaterial(Material material)
+    {
       if (material == null || _renderers == null)
         return;
 
@@ -395,10 +421,10 @@ namespace Combat
       }
     }
 
-    private Material PickRandomMaterial()
+    private MaterialWeight PickRandomAppearance()
     {
       var totalWeight = 0f;
-      Material lastValidMaterial = null;
+      MaterialWeight lastValidAppearance = null;
 
       for (var i = 0; i < _materials.Count; i++)
       {
@@ -407,7 +433,7 @@ namespace Combat
           continue;
 
         totalWeight += entry.Weight;
-        lastValidMaterial = entry.Material;
+        lastValidAppearance = entry;
       }
 
       if (totalWeight <= 0f)
@@ -423,10 +449,10 @@ namespace Combat
 
         accumulatedWeight += entry.Weight;
         if (roll < accumulatedWeight)
-          return entry.Material;
+          return entry;
       }
 
-      return lastValidMaterial;
+      return lastValidAppearance;
     }
 
     private static AnimationCurve DefaultAttachCurve() =>
