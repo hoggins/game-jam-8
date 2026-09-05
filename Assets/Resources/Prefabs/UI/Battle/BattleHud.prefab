@@ -96,6 +96,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1410337025887571391}
   - component: {fileID: 3692067878617239292}
+  - component: {fileID: 3938703220196254161}
   m_Layer: 5
   m_Name: BattleHud
   m_TagString: Untagged
@@ -137,3 +138,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Battle.BattleHudUi
   _cancelAction: {fileID: 7727032971491509709, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   _pauseMenuUi: {fileID: 0}
+--- !u!114 &3938703220196254161
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8714479988043036316}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a8e9e5e4e5f744d89ad16f8ca8f6b3d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Battle.DebugInfoHud
+  _showInEditor: 1
+  _position: {x: 16, y: 16}
+  _size: {x: 320, y: 250}
+  _fontSize: 16
