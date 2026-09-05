@@ -16,7 +16,7 @@ MonoBehaviour:
   _winGraceDuration: 5
   _specialBetweenMaxDistance: 50
   _specialBetweenMinDistance: 40
-  _specialFenceStartDistance: 35
+  _specialFenceStartDistance: 50
   _specialFenceTimerOffset: 14
   _specialFencePlayerOffset: 8
   _timerTravelSpeedFactor: 0.8

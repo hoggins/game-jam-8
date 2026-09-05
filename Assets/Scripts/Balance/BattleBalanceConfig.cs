@@ -36,7 +36,7 @@ namespace Balance
 
     [Header("Special Object Fence")]
     [Tooltip("When the timer is at least this far from the player after a respawn, the other live specials form a line between them with the health bar in the centre.")]
-    [SerializeField, Min(0f)] private float _specialFenceStartDistance = 35f;
+    [SerializeField, Min(0f)] private float _specialFenceStartDistance = 50f;
     [Tooltip("Distance to leave between the respawned timer and the nearest special in the fence.")]
     [SerializeField, Min(0f)] private float _specialFenceTimerOffset = 14f;
     [Tooltip("Distance to leave between the player and the nearest special in the fence.")]
