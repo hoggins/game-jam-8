@@ -502,6 +502,7 @@ GameObject:
   - component: {fileID: 2007637934935903628}
   - component: {fileID: 1443254288181765414}
   - component: {fileID: 2342279530122842915}
+  - component: {fileID: 1253126824285432514}
   m_Layer: 0
   m_Name: Stage_Complet
   m_TagString: Untagged
@@ -612,3 +613,15 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &1253126824285432514
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7228568511699228871}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 975db8b2ebcbd486fa30736c935a260c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Sfx.UiClickSfx

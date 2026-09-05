@@ -73,6 +73,9 @@ namespace App
       builder.Register<SceneHud.SceneHudService>(Lifetime.Singleton)
         .AsSelf()
         .AsImplementedInterfaces();
+      builder.Register<Sfx.UiSfxService>(Lifetime.Singleton)
+        .AsSelf()
+        .AsImplementedInterfaces();
 
       var movementSettings = Resources.Load<Movement.MovementSettings>("MovementSettings");
       if (movementSettings == null)
