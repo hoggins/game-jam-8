@@ -104,8 +104,15 @@ namespace Combat
     {
       _isDying = true;
       SpawnCoinPickups(_characterService?.RegisterDuckKill() ?? 0);
-      // Movement and any in-flight attach animation keep running: a dying duck walks
-      // out its dissolve. The IsAlive guard in Update is what stops it dealing damage.
+
+      if (_attachCoroutine != null)
+      {
+        StopCoroutine(_attachCoroutine);
+        _attachCoroutine = null;
+      }
+
+      // Unattached mobs keep moving while they dissolve. Attached mobs are detached and
+      // thrown by MobDeath, so their local attachment animation must stop first.
       _death?.Play(_isAttached ? _player : null, _movementAgent, OnDeathPlayed);
     }
 

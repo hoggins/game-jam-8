@@ -67,16 +67,17 @@ namespace Combat
 
     private void ThrowAway(Vector3 throwOrigin, MovementAgent movementAgent)
     {
-      transform.SetParent(null, true);
-
-      if (movementAgent != null)
-        movementAgent.enabled = false;
-
       var direction = transform.position - throwOrigin;
       direction.y = 0f;
       if (direction.sqrMagnitude < 0.0001f)
         direction = UnityEngine.Random.insideUnitSphere;
       direction.Normalize();
+
+      transform.SetParent(null, true);
+      transform.position = throwOrigin;
+
+      if (movementAgent != null)
+        movementAgent.enabled = false;
 
       var capsule = gameObject.AddComponent<CapsuleCollider>();
       capsule.radius = _throwColliderRadius;
