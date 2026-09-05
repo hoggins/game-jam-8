@@ -70,9 +70,9 @@ MonoBehaviour:
   _avoidancePower: 4
   _collidesWith: 2
   _leaveDamageTrail: 1
-  _damageTrailRadius: 2
+  _damageTrailRadius: 3
   _damageTrailIntensityPerSecond: 1
-  _damageTrailSmoothness: 0.6
+  _damageTrailSmoothness: 0.088
   _damageTrailColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &6603987278544191975
 MonoBehaviour:
