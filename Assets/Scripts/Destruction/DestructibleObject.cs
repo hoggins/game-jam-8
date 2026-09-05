@@ -16,31 +16,33 @@ namespace Destruction
     [Inject] private EnvironmentDecayManager _decayManager;
 
     private FlowMapNoGoZone _noGoZone;
-     private BoxCollider _navigationCollider;
-    private Rigidbody[] _bodies;
+    private BoxCollider _navigationCollider;
+    private DecayPart[] _parts;
     private bool _destroyed;
 
     public event Action<DestructibleObject> Destroyed;
 
     private static LayerMask? _partLayer;
+    private static PhysicsMaterial _frictionMaterial;
 
     private void Awake()
     {
       this.AsInjected();
 
       _partLayer ??= LayerMask.NameToLayer(DestructibleLayers.Parts);
+      _frictionMaterial ??= Resources.Load<PhysicsMaterial>(FrictionMaterialPath);
 
       _noGoZone = GetComponent<FlowMapNoGoZone>();
       _navigationCollider = GetComponent<BoxCollider>();
-      _bodies = GetComponentsInChildren<Rigidbody>();
+      _parts = GetComponentsInChildren<DecayPart>();
 
-      var friction = Resources.Load<PhysicsMaterial>(FrictionMaterialPath);
-      foreach (var body in _bodies)
-      {
-        body.isKinematic = true;
-        foreach (var collider in body.GetComponents<Collider>())
-          collider.material = friction;
-      }
+      // A part only needs a live Rigidbody once it actually breaks off (added in Impulse below);
+      // with thousands of houses on a big map, a Rigidbody sitting on every intact part is pure
+      // PhysX bookkeeping cost for debris nobody is touching yet. The collider stays too, just
+      // disabled, since nothing needs it before the part is airborne.
+      foreach (var part in _parts)
+        foreach (var collider in part.GetComponents<Collider>())
+          collider.enabled = false;
     }
 
     public void Break(Vector3 origin) =>
@@ -60,33 +62,38 @@ namespace Destruction
 
       gameObject.layer = _partLayer!.Value;
 
-      foreach (var body in _bodies)
+      foreach (var part in _parts)
       {
+        var colliders = part.GetComponents<Collider>();
+        foreach (var collider in colliders)
+        {
+          collider.enabled = true;
+          collider.material = _frictionMaterial;
+        }
+
+        var body = part.GetComponent<Rigidbody>();
+        if (body == null)
+          body = part.gameObject.AddComponent<Rigidbody>();
         body.isKinematic = false;
 
-        var hitPoint = ClosestPoint(body, origin);
+        var hitPoint = ClosestPoint(colliders, origin);
         var direction = (hitPoint - origin).normalized;
         body.AddForceAtPosition(direction * magnitude, hitPoint, ForceMode.Impulse);
 
         if (Application.isPlaying)
-        {
-          var decayPart = body.GetComponent<DecayPart>();
-          var settings = decayPart != null ? decayPart.Settings : new PartDecaySettings();
-          _decayManager.RegisterPart(this, body, settings);
-        }
+          _decayManager.RegisterPart(this, body, part.Settings);
       }
 
       Destroyed?.Invoke(this);
 
-      if (_bodies.Length == 0 && Application.isPlaying)
+      if (_parts.Length == 0 && Application.isPlaying)
         Destroy(gameObject);
     }
 
-    private static Vector3 ClosestPoint(Rigidbody body, Vector3 origin)
+    private static Vector3 ClosestPoint(Collider[] colliders, Vector3 origin)
     {
-      var colliders = body.GetComponents<Collider>();
       if (colliders.Length == 0)
-        return body.position;
+        return origin;
 
       var closest = colliders[0].ClosestPoint(origin);
       var closestDistance = Vector3.SqrMagnitude(closest - origin);

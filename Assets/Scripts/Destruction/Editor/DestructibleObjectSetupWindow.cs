@@ -150,11 +150,13 @@ namespace Destruction.Editor
           meshCollider.convex = true;
         }
 
+        // Rigidbodies are added at runtime exactly when a part breaks off (DestructibleObject
+        // .Impulse), not baked into the prefab: a Rigidbody on every intact part, times every
+        // house on a big map, sits in the physics world doing nothing until it's needed. Strip
+        // any left over from before this change, so older prefabs get cleaned up by re-patching.
         var body = part.GetComponent<Rigidbody>();
-        if (body == null)
-          body = part.AddComponent<Rigidbody>();
-
-        body.isKinematic = true;
+        if (body != null)
+          Object.DestroyImmediate(body, true);
 
         var decayPart = part.GetComponent<DecayPart>();
         if (decayPart == null)

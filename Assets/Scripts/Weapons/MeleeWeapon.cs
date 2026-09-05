@@ -51,10 +51,8 @@ namespace Weapons
         }
       }
 
-      var attachedMobs = Object.FindObjectsByType<Mob>(
-        FindObjectsInactive.Exclude,
-        FindObjectsSortMode.None);
-      for (var i = 0; i < attachedMobs.Length; i++)
+      var attachedMobs = Mob.AttachedMobs;
+      for (var i = 0; i < attachedMobs.Count; i++)
       {
         var mob = attachedMobs[i];
         if (mob == null || !mob.IsAttached || !mob.IsAlive || !_hitMobs.Add(mob))

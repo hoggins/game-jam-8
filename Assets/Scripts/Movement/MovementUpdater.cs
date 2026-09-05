@@ -274,8 +274,21 @@ namespace Movement
     {
       displacement.y = 0f;
       var position = agent.Position;
-      var remaining = displacement;
       var radius = Mathf.Max(0.01f, agent.Controller.Radius);
+
+      // The only colliders these physics queries can ever hit are the no-go zone boxes that
+      // already mark flow-field cells blocked, so an agent nowhere near a blocked cell cannot be
+      // touching a wall. Skipping the queries there matters a lot on a map with many buildings,
+      // since most agents spend most of their time in open space between them.
+      var checkRadius = radius + _settings.WallSkin + displacement.magnitude;
+      if (!_flowMap.HasBlockedCellNear(position, checkRadius))
+      {
+        position += displacement;
+        position.y = agent.Position.y;
+        return position;
+      }
+
+      var remaining = displacement;
       position = ResolveWallOverlaps(agent, position, radius);
 
       for (var iteration = 0; iteration < _settings.WallSlideIterations; iteration++)

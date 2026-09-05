@@ -29,6 +29,11 @@ namespace Combat
 
     private static GameObject _coinPickupPrefab;
 
+    // Tiny registry of currently-attached mobs so MeleeWeapon doesn't need to scan every Mob in
+    // the scene (there can be thousands on a big map) just to find the handful stuck to the player.
+    private static readonly List<Mob> _attachedMobs = new();
+    internal static IReadOnlyList<Mob> AttachedMobs => _attachedMobs;
+
     private MovementAgent _movementAgent;
     private MobDeath _death;
     private Transform _player;
@@ -144,6 +149,7 @@ namespace Combat
         _movementAgent.enabled = false;
 
       _isAttached = true;
+      _attachedMobs.Add(this);
       transform.SetParent(_player, true);
 
       var startLocalPosition = transform.localPosition;
@@ -308,6 +314,7 @@ namespace Combat
         transform.SetParent(null, true);
 
       _isAttached = false;
+      _attachedMobs.Remove(this);
     }
 
     private void OnDisable()
@@ -319,6 +326,7 @@ namespace Combat
       }
 
       _isAttached = false;
+      _attachedMobs.Remove(this);
     }
 
     private void OnValidate()

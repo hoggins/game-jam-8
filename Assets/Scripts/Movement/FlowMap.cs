@@ -153,6 +153,27 @@ namespace Movement
     internal bool IsCellReachable(int x, int y) =>
       _costs[x + y * _width] < float.PositiveInfinity;
 
+    /// Cheap array lookup used to gate the expensive Physics.Overlap/SphereCast wall-collision
+    /// queries: those queries only ever hit the box colliders that mark cells blocked here, so an
+    /// agent whose whole move fits inside unblocked cells cannot touch a wall and can skip physics
+    /// entirely. Returns true (assume blocked, so the caller stays on the safe physics path) when
+    /// the field isn't built yet or the checked area falls outside the current field bounds.
+    internal bool HasBlockedCellNear(Vector3 position, float radius)
+    {
+      if (!_hasField)
+        return true;
+
+      var minCell = PositionToCell(position - new Vector3(radius, 0f, radius), _offset, _cellSize);
+      var maxCell = PositionToCell(position + new Vector3(radius, 0f, radius), _offset, _cellSize);
+
+      for (var y = minCell.y; y <= maxCell.y; y++)
+      for (var x = minCell.x; x <= maxCell.x; x++)
+        if (TryGetIndex(new Vector2Int(x, y), out var index) && _blocked[index])
+          return true;
+
+      return false;
+    }
+
     internal bool IsWalkable(Vector3 position)
     {
       if (!_hasField)
