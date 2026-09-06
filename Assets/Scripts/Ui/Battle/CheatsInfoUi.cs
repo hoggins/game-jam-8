@@ -10,11 +10,15 @@ namespace Battle
   {
     private const string CheatsInfo =
       "<b>CHEATS</b>\n"
-      + "F3  Reset progression\n"
-      + "F4  Destroy battle timer "
-      + "F5  Teleport to goal\n"
-      + "F10  Player invincibility "
-      + "F11  Infinite timer";
+      // + "<b>F2</b>  Toggle cheats info\n"
+      + "<b>F3</b>  Reset all player progression\n"
+      + "<b>F4</b>  Destroy battle timer "
+      + "<b>F5</b>  Teleport to goal "
+      + "<b>F6</b>  Add coins\n"
+      // + "<b>F8</b>  Teleport to configured position\n"
+      // + "<b>F9</b>  Teleport to origin\n"
+      + "<b>F10</b>  Player invincibility "
+      + "<b>F11</b>  Infinite timer";
 
     [SerializeField] private TMP_Text _infoText;
 

@@ -19,8 +19,6 @@ namespace App
 
     [Header("Player Money")]
     [SerializeField, Min(1)] private int _coinsToAdd = 100;
-    [SerializeField] private Vector2 _moneyButtonPosition = new(16f, 276f);
-    [SerializeField] private Vector2 _moneyButtonSize = new(320f, 32f);
 
     [Inject] private CharacterService _characterService;
     [Inject] private BattleService _battleService;
@@ -58,6 +56,9 @@ namespace App
       if (keyboard.f5Key.wasPressedThisFrame)
         TeleportPlayerToGoal();
 
+      if (keyboard.f6Key.wasPressedThisFrame)
+        AddPlayerMoney();
+
       if (keyboard.f11Key.wasPressedThisFrame)
         EnableInfiniteTimer();
 
@@ -65,21 +66,7 @@ namespace App
         DestroyTimer();
     }
 
-#if UNITY_EDITOR
-    private void OnGUI()
-    {
-      var buttonRect = new Rect(
-        _moneyButtonPosition.x,
-        _moneyButtonPosition.y,
-        Mathf.Max(1f, _moneyButtonSize.x),
-        Mathf.Max(1f, _moneyButtonSize.y));
-
-      if (GUI.Button(buttonRect, $"Add {_coinsToAdd} Coins"))
-        AddPlayerMoney();
-    }
-#endif
-
-    /// <summary>Adds the configured amount of coins to the player's saved balance.</summary>
+    /// <summary>Adds the configured amount of coins to the player's saved balance. Press F6 during a battle.</summary>
     public bool AddPlayerMoney()
     {
       if (_characterService == null || _coinsToAdd <= 0)
