@@ -226,6 +226,7 @@ namespace Movement
           continue;
 
         var context = new MovementContext(agent, _flowMap, playerPosition, hasPlayer);
+        agent.DesiredFacingDirection = Vector3.zero;
         agent.DesiredVelocity = agent.Controller.GetDesiredVelocity(context);
       }
 
@@ -308,7 +309,11 @@ namespace Movement
         agent.SmoothedVelocity = velocity;
       }
 
-      var planarVelocity = agent.SmoothedVelocity;
+      var planarVelocity = agent.Controller.Layer == MovementLayer.Player
+        ? agent.DesiredFacingDirection
+        : agent.SmoothedVelocity;
+      if (planarVelocity.sqrMagnitude <= 0.0001f)
+        planarVelocity = agent.SmoothedVelocity;
       planarVelocity.y = 0f;
       if (planarVelocity.sqrMagnitude <= 0.0001f)
         return;

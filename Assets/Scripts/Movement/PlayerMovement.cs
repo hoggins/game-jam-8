@@ -114,6 +114,8 @@ namespace Movement
 
     Vector3 IMovementController.GetDesiredVelocity(in MovementContext context)
     {
+      context.Agent.DesiredFacingDirection = Vector3.zero;
+
       var action = _moveAction != null ? _moveAction.action : null;
       if (action == null)
         return Vector3.zero;
@@ -121,7 +123,11 @@ namespace Movement
       var input = Vector2.ClampMagnitude(action.ReadValue<Vector2>(), 1f);
       var camera = Camera.main;
       if (camera == null)
-        return new Vector3(input.x, 0f, input.y) * Speed;
+      {
+        var fallbackMovement = new Vector3(input.x, 0f, input.y);
+        context.Agent.DesiredFacingDirection = fallbackMovement;
+        return fallbackMovement * Speed;
+      }
 
       var cameraForward = Vector3.ProjectOnPlane(camera.transform.forward, Vector3.up);
       if (cameraForward.sqrMagnitude < 0.000001f)
@@ -130,6 +136,7 @@ namespace Movement
       cameraForward.Normalize();
       var cameraRight = Vector3.ProjectOnPlane(camera.transform.right, Vector3.up).normalized;
       var movement = cameraRight * input.x + cameraForward * input.y;
+      context.Agent.DesiredFacingDirection = movement;
       return movement * Speed;
     }
 

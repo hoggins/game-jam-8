@@ -14,6 +14,7 @@ namespace Movement
     internal Vector3 Velocity { get; set; }
     internal Vector3 SmoothedVelocity { get; set; }
     internal Vector3 DesiredVelocity { get; set; }
+    internal Vector3 DesiredFacingDirection { get; set; }
     internal Quaternion Rotation { get; set; }
 
     private void Awake()
@@ -46,6 +47,7 @@ namespace Movement
       Velocity = Vector3.zero;
       SmoothedVelocity = Vector3.zero;
       DesiredVelocity = Vector3.zero;
+      DesiredFacingDirection = Vector3.zero;
     }
 
     internal void ApplyResult()
