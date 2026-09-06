@@ -23,8 +23,8 @@ namespace Map
   public class HouseSet : ScriptableObject
   {
     public const int DifficultyLevelCount = 5;
-    public const float RouteT1End = 0.20f;
-    public const float RouteT2End = 0.60f;
+    public const float RouteT1End = 0.33f;
+    public const float RouteT2End = 0.67f;
 
     [SerializeField] private List<HouseObject> houses = new();
     [SerializeField] private List<SpecialHouseObject> specials = new();

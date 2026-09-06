@@ -29,8 +29,6 @@ namespace Timer
     private static readonly Vector3 EarlySpecialClusterAnchor = new(-700f, 0f, -700f);
     private const int EarlySpecialClusterRespawns = 3;
     private const float EarlySpecialClusterRadius = 20f;
-    private const float ZigZagPlacementJitter = 4f;
-
     private readonly BattleService _battleService;
     private readonly MapEnvironmentSpawner _spawner;
     private readonly SpecialSpawnSettings _spawnSettings;
@@ -189,17 +187,28 @@ namespace Timer
       if (_timerRoute == null)
         TimerRoute.TryCreateForBattle(
           player.position,
-          _battleBalance != null ? _battleBalance.TimerLateralDistanceRatio : 0.5f,
+          _battleBalance != null ? _battleBalance.TimerRouteLateralAmplitude : 60f,
+          _battleBalance != null ? _battleBalance.TimerRouteForwardFraction : 0.9f,
+          _battleBalance != null ? _battleBalance.TimerRouteOscillations : 1.5f,
+          _spawnSettings,
+          0,
           out _timerRoute);
+        _telemetry?.RecordRoute(_timerRoute);
 
       if (_timerRoute != null && _timerRoute.TryGetHop(_respawnCount, out var anchor, out var nextRouteProgress))
       {
         routeProgress = nextRouteProgress;
         totalRouteProgress = _timerRoute.TotalLength;
         // TrySpawnSpecial still validates the candidate against live specials and TheGoal. A small
-        // jitter around the directed anchor gives it a few nearby options without losing the route.
+        // configurable jitter around the directed anchor gives it nearby options without losing the
+        // absolute route leg.
         if (_spawner.TrySpawnSpecial(
-          SpecialHouses.Timer, anchor, player, 0f, ZigZagPlacementJitter, out timerInstance))
+          SpecialHouses.Timer,
+          anchor,
+          player,
+          0f,
+          _battleBalance != null ? _battleBalance.TimerRoutePlacementJitter : 4f,
+          out timerInstance))
           return true;
 
         routeProgress = 0f;
@@ -220,7 +229,8 @@ namespace Timer
 
       foreach (var special in houseSet.Specials)
       {
-        if (special.type == SpecialHouses.Timer || !special.enabled || special.prefab == null)
+        if (special.type == SpecialHouses.Timer || !special.enabled || special.prefab == null
+            || _spawner.IsSpecialDestroyed(special.type))
           continue;
 
         if ((special.type == SpecialHouses.Health || special.type == SpecialHouses.Arrow)
@@ -295,7 +305,8 @@ namespace Timer
 
         foreach (var special in houseSet.Specials)
         {
-          if (special.type == SpecialHouses.Timer || !special.enabled || special.prefab == null)
+          if (special.type == SpecialHouses.Timer || !special.enabled || special.prefab == null
+              || _spawner.IsSpecialDestroyed(special.type))
             continue;
 
           if (special.type == SpecialHouses.Arrow)

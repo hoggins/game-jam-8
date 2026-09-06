@@ -19,6 +19,8 @@ namespace Map
     [SerializeField] private int seed;
     [SerializeField] private int gridExtent = 10;
     [SerializeField] private bool showGrid = true;
+    [SerializeField] private bool showTimerRoute = true;
+    [SerializeField] private bool showTimerRouteLabels = true;
     [HideInInspector] public bool isEditing;
 
     [Inject] private MapEnvironmentSpawner _spawner;
@@ -90,6 +92,89 @@ namespace Map
         Gizmos.DrawLine(new Vector3(-extent, 0f, offset), new Vector3(extent, 0f, offset));
       }
     }
+
+    private void OnDrawGizmosSelected()
+    {
+#if UNITY_EDITOR
+      if (!showTimerRoute)
+        return;
+
+      var player = GameObject.FindGameObjectWithTag("Player");
+      var origin = player != null ? player.transform.position : transform.position;
+      var battleBalance = Resources.Load<Balance.BattleBalanceConfig>("BattleBalanceConfig");
+      var spawnSettings = Resources.Load<SpecialSpawnSettings>("SpecialSpawnSettings");
+      if (!TimerRoute.TryCreateForBattle(
+        origin,
+        battleBalance != null ? battleBalance.TimerRouteLateralAmplitude : 60f,
+        battleBalance != null ? battleBalance.TimerRouteForwardFraction : 0.9f,
+        battleBalance != null ? battleBalance.TimerRouteOscillations : 1.5f,
+        spawnSettings,
+        seed,
+        out var route))
+        return;
+
+      var points = route.PathPoints;
+      for (var i = 1; i < points.Count; i++)
+      {
+        var isGoal = i == points.Count - 1;
+        Handles.color = isGoal
+          ? Color.white
+          : RouteColor(RouteStage(route.NormalizeProgress(route.GetPathProgress(i))));
+        var start = points[i - 1] + Vector3.up * 0.35f;
+        var end = points[i] + Vector3.up * 0.35f;
+        if (isGoal)
+          Handles.DrawDottedLine(start, end, 5f);
+        else
+          Handles.DrawAAPolyLine(4f, start, end);
+      }
+
+      var routeOrigin = route.Origin + Vector3.up * 0.35f;
+      Handles.color = Color.white;
+      Handles.SphereHandleCap(0, routeOrigin, Quaternion.identity, 1.1f, EventType.Repaint);
+      if (showTimerRouteLabels)
+        Handles.Label(routeOrigin + Vector3.up * 1.25f, "Player");
+
+      var checkpoints = route.CheckpointPoints;
+      for (var i = 0; i < checkpoints.Count; i++)
+      {
+        var point = checkpoints[i] + Vector3.up * 0.35f;
+        Handles.color = RouteColor(RouteStage(route.NormalizeProgress(route.GetCheckpointProgress(i))));
+        Handles.SphereHandleCap(0, point, Quaternion.identity, 1.1f, EventType.Repaint);
+
+        if (!showTimerRouteLabels)
+          continue;
+
+        var label = i == 0
+          ? $"Initial Timer  {route.GetSegmentLength(0):0} wu"
+          : $"Timer {i} (T{RouteStage(route.NormalizeProgress(route.GetCheckpointProgress(i)))})  {route.GetSegmentLength(i):0} wu";
+        Handles.Label(point + Vector3.up * 1.25f, label);
+      }
+
+      var goal = route.Goal + Vector3.up * 0.35f;
+      Handles.color = Color.white;
+      Handles.SphereHandleCap(0, goal, Quaternion.identity, 1.5f, EventType.Repaint);
+      if (showTimerRouteLabels)
+        Handles.Label(goal + Vector3.up * 1.25f, "Goal");
+#endif
+    }
+
+#if UNITY_EDITOR
+    private static Color RouteColor(int routeStage)
+    {
+      if (routeStage == 1)
+        return new Color(0.2f, 0.85f, 1f, 0.95f);
+
+      if (routeStage == 2)
+        return new Color(1f, 0.8f, 0.15f, 0.95f);
+
+      return new Color(1f, 0.3f, 0.25f, 0.95f);
+    }
+
+    private static int RouteStage(float normalizedProgress) =>
+      normalizedProgress < HouseSet.RouteT1End ? 1
+        : normalizedProgress < HouseSet.RouteT2End ? 2
+        : 3;
+#endif
 
     private static void DrawZoneGizmos(IReadOnlyList<Vector2Int> cells, int cellSize, Color color)
     {
@@ -163,9 +248,14 @@ namespace Map
       var originPosition = player != null ? player.transform.position : transform.position;
       var originCell = new Vector2(originPosition.x / cellSize, originPosition.z / cellSize);
       var battleBalance = Resources.Load<Balance.BattleBalanceConfig>("BattleBalanceConfig");
+      var spawnSettings = Resources.Load<SpecialSpawnSettings>("SpecialSpawnSettings");
       TimerRoute.TryCreateForBattle(
         originPosition,
-        battleBalance != null ? battleBalance.TimerLateralDistanceRatio : 0.5f,
+        battleBalance != null ? battleBalance.TimerRouteLateralAmplitude : 60f,
+        battleBalance != null ? battleBalance.TimerRouteForwardFraction : 0.9f,
+        battleBalance != null ? battleBalance.TimerRouteOscillations : 1.5f,
+        spawnSettings,
+        seed,
         out var timerRoute);
 
       if (houseSet != null)

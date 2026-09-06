@@ -70,6 +70,9 @@ namespace Map.Editor
       EditorGUILayout.PropertyField(so.FindProperty("seed"));
       EditorGUILayout.PropertyField(so.FindProperty("gridExtent"));
       EditorGUILayout.PropertyField(so.FindProperty("showGrid"));
+      EditorGUILayout.PropertyField(so.FindProperty("showTimerRoute"));
+      if (so.FindProperty("showTimerRoute").boolValue)
+        EditorGUILayout.PropertyField(so.FindProperty("showTimerRouteLabels"));
 
       so.ApplyModifiedProperties();
 

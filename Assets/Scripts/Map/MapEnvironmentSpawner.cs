@@ -2,6 +2,7 @@ using Balance;
 using System.Collections.Generic;
 using Destruction;
 using Movement;
+using Telemetry;
 using UnityEngine;
 using Unity.Profiling;
 
@@ -82,6 +83,10 @@ namespace Map
     // respawn (e.g. the Upgrade house respawning alongside the Timer) replaces its predecessor
     // instead of leaving it standing forever as an ever-growing pile of stale duplicates.
     private readonly Dictionary<SpecialHouses, (int id, GameObject instance)> _currentSpecial = new();
+    // Special objects are one-shot within a battle. Once their destructible body has been broken,
+    // a timer respawn must not mistake the missing runtime instance for a request to create it
+    // again.
+    private readonly HashSet<SpecialHouses> _destroyedSpecials = new();
     // Real footprint of each special's prefab (from its renderer bounds, not the grid size it's
     // configured with), computed once per type and reused on every spawn/respawn.
     private readonly Dictionary<SpecialHouses, Vector2> _specialHalfExtentsCache = new();
@@ -97,6 +102,7 @@ namespace Map
     private readonly EnvironmentVisibilitySettings _visibilitySettings;
     private readonly SpecialSpawnSettings _specialSpawnSettings;
     private readonly BattleBalanceConfig _battleBalance;
+    private readonly EconomyTelemetryService _telemetry;
 
     private Transform _container;
     private HouseSet _houseSet;
@@ -112,12 +118,13 @@ namespace Map
 
     public MapEnvironmentSpawner(
       MovementUpdater movementUpdater, EnvironmentVisibilitySettings visibilitySettings, SpecialSpawnSettings specialSpawnSettings,
-      BattleBalanceConfig battleBalance)
+      BattleBalanceConfig battleBalance, EconomyTelemetryService telemetry)
     {
       _movementUpdater = movementUpdater;
       _visibilitySettings = visibilitySettings;
       _specialSpawnSettings = specialSpawnSettings;
       _battleBalance = battleBalance;
+      _telemetry = telemetry;
     }
 
     public IReadOnlyCollection<RuntimeEnvironmentObject> SpawnedObjects => _objects.Values;
@@ -147,6 +154,14 @@ namespace Map
       instance = null;
       return false;
     }
+
+    /// <summary>
+    /// True when the special's destructible body was broken during the current generated battle.
+    /// A missing current instance alone is not enough to infer this because a spawn may also have
+    /// failed to find a valid placement.
+    /// </summary>
+    public bool IsSpecialDestroyed(SpecialHouses type) => _destroyedSpecials.Contains(type);
+
     public HouseSet CurrentHouseSet => _houseSet;
 
     /// Refreshes movement blockers after a batch of special placements has completed.
@@ -167,6 +182,7 @@ namespace Map
       _specialIds.Clear();
       _currentSpecial.Clear();
       ClearTrackedProps();
+      _destroyedSpecials.Clear();
       _occupied.Clear();
       _timerRoute = null;
       DisposeRenderCulling();
@@ -182,8 +198,13 @@ namespace Map
       var originCell = new Vector2(originPosition.x / cellSize, originPosition.z / cellSize);
       TimerRoute.TryCreateForBattle(
         originPosition,
-        _battleBalance != null ? _battleBalance.TimerLateralDistanceRatio : 0.5f,
+        _battleBalance != null ? _battleBalance.TimerRouteLateralAmplitude : 60f,
+        _battleBalance != null ? _battleBalance.TimerRouteForwardFraction : 0.9f,
+        _battleBalance != null ? _battleBalance.TimerRouteOscillations : 1.5f,
+        _specialSpawnSettings,
+        seed,
         out _timerRoute);
+      _telemetry?.RecordRoute(_timerRoute);
 
       var housePlacements = MapFiller.Fill(mapData, houseSet, originCell, seed, _timerRoute);
       var roadPlacements = roadSet != null
@@ -279,9 +300,10 @@ namespace Map
     /// Places every configured special (e.g. the Timer) after the grid fill, the same freely-placed
     /// way a respawn works (<see cref="TrySpawnSpecial"/>) rather than as part of <see cref="MapFiller.Fill"/>:
     /// specials are rotated to face the player and clear their own footprint, which the blocky grid
-    /// placement isn't built for. The Timer goes down first (near the player, per its own configured
-    /// distance); every other special then follows the same between/near-player rule a respawn uses
-    /// (see <see cref="GetOtherSpecialPlacement"/>), so it never starts right on top of the player.
+    /// placement isn't built for. The Timer goes down first on the absolute route's initial leg when
+    /// a Goal is available; every other special then follows the same between/near-player rule a
+    /// respawn uses (see <see cref="GetOtherSpecialPlacement"/>), so it never starts right on top of
+    /// the player.
     /// </summary>
     private void SpawnInitialSpecials(Transform parent)
     {
@@ -297,6 +319,12 @@ namespace Map
       {
         if (special.type != SpecialHouses.Timer || !special.enabled || special.prefab == null)
           continue;
+
+        if (_timerRoute != null && _timerRoute.TryGetInitial(out var routePosition, out _))
+        {
+          if (TrySpawnSpecial(special.type, routePosition, lookTarget, 0f, 0f, out timerInstance))
+            continue;
+        }
 
         if (_specialSpawnSettings == null || !_specialSpawnSettings.TryGetInitialDistance(special.type, out var timerMinDistance, out var timerMaxDistance))
         {
@@ -481,10 +509,9 @@ namespace Map
         if (special.type == SpecialHouses.Timer || !special.enabled || special.prefab == null || types.Contains(special.type))
           continue;
 
-        // Health and Arrow are intentionally not recreated after they have been destroyed. If they
-        // are still live, they participate in the fence; a missing one is simply left out.
-        if ((special.type == SpecialHouses.Health || special.type == SpecialHouses.Arrow)
-            && !TryGetCurrentSpecial(special.type, out _))
+        // Every special is one-shot within a battle. If it was destroyed, leave it out of the
+        // fence instead of allowing the missing runtime record to turn into a fresh instance.
+        if (_destroyedSpecials.Contains(special.type))
           continue;
 
         types.Add(special.type);
@@ -571,6 +598,11 @@ namespace Map
         if (!TryResolveSpecial(type, "TrySpawnSpecial", out var special))
           return false;
 
+        // A destroyed special stays gone for the rest of the generated battle. The timer is the
+        // only intentional exception: its own destruction is exactly what invokes this method.
+        if (type != SpecialHouses.Timer && _destroyedSpecials.Contains(type))
+          return false;
+
         var worldHalfExtents = SpecialHalfExtents(special);
         var previousInstance = TryGetCurrentSpecial(type, out var currentInstance) ? currentInstance : null;
         var excludedTransform = previousInstance != null ? previousInstance.transform : null;
@@ -606,6 +638,7 @@ namespace Map
       {
         instance = null;
         if (!TryResolveSpecial(type, "TryArrangeSpecialFence", out var special)
+            || (type != SpecialHouses.Timer && _destroyedSpecials.Contains(type))
             || HasSpecialOverlap(position, rotation, worldHalfExtents, null, ignoredSpecialIds))
           return false;
 
@@ -651,7 +684,13 @@ namespace Map
         _currentSpecial[type] = (id, instance);
 
         if (destructible != null)
-          destructible.Destroyed += _ => Release(id);
+          destructible.Destroyed += _ =>
+          {
+            if (type != SpecialHouses.Timer)
+              _destroyedSpecials.Add(type);
+
+            Release(id);
+          };
 
         return instance;
       }

@@ -25,7 +25,10 @@ MonoBehaviour:
   _timerSecondsPerBuilding: 1.5
   _timerSlack: 1.15
   _timerMinSeconds: 12
-  _timerLateralDistanceRatio: 0.5
+  _timerRouteLateralAmplitude: 60
+  _timerRouteForwardFraction: 0.9
+  _timerRouteOscillations: 1.5
+  _timerRoutePlacementJitter: 4
   _duckMaxHealth: 6
   _duckAttackDamage: 1
   _duckAttackDistance: 3

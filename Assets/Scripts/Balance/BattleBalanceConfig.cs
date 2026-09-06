@@ -50,7 +50,11 @@ namespace Balance
     [Tooltip("Primary dial for the time budget slack applied to timer hops.")]
     [SerializeField, Min(0f)] private float _timerSlack = 1.15f;
     [SerializeField, Min(0f)] private float _timerMinSeconds = 12f;
-    [SerializeField, Min(0f)] private float _timerLateralDistanceRatio = 0.5f;
+    [SerializeField, Min(0f)] private float _timerRouteLateralAmplitude = 60f;
+    [SerializeField, Range(0f, 1f)] private float _timerRouteForwardFraction = 0.9f;
+    [SerializeField, Min(0f)] private float _timerRouteOscillations = 1.5f;
+    [Tooltip("Random placement radius around each absolute route waypoint. Set to 0 for exact waypoint placement.")]
+    [SerializeField, Min(0f)] private float _timerRoutePlacementJitter = 4f;
 
     [Header("Duck (Mob)")]
     [SerializeField, Min(0)] private int _duckMaxHealth = 2;
@@ -104,7 +108,10 @@ namespace Balance
     public float TimerSecondsPerBuilding => _timerSecondsPerBuilding;
     public float TimerSlack => _timerSlack;
     public float TimerMinSeconds => _timerMinSeconds;
-    public float TimerLateralDistanceRatio => _timerLateralDistanceRatio;
+    public float TimerRouteLateralAmplitude => _timerRouteLateralAmplitude;
+    public float TimerRouteForwardFraction => _timerRouteForwardFraction;
+    public float TimerRouteOscillations => _timerRouteOscillations;
+    public float TimerRoutePlacementJitter => _timerRoutePlacementJitter;
     public int DuckMaxHealth => _duckMaxHealth;
     public int DuckAttackDamage => _duckAttackDamage;
     public float DuckAttackDistance => _duckAttackDistance;
@@ -168,7 +175,10 @@ namespace Balance
       _timerSecondsPerBuilding = Mathf.Max(0f, _timerSecondsPerBuilding);
       _timerSlack = Mathf.Max(0f, _timerSlack);
       _timerMinSeconds = Mathf.Max(0f, _timerMinSeconds);
-      _timerLateralDistanceRatio = Mathf.Max(0f, _timerLateralDistanceRatio);
+      _timerRouteLateralAmplitude = Mathf.Max(0f, _timerRouteLateralAmplitude);
+      _timerRouteForwardFraction = Mathf.Clamp01(_timerRouteForwardFraction);
+      _timerRouteOscillations = Mathf.Max(0f, _timerRouteOscillations);
+      _timerRoutePlacementJitter = Mathf.Max(0f, _timerRoutePlacementJitter);
       _duckMaxHealth = Mathf.Max(0, _duckMaxHealth);
       _duckAttackDamage = Mathf.Max(0, _duckAttackDamage);
       _duckAttackDistance = Mathf.Max(0f, _duckAttackDistance);
