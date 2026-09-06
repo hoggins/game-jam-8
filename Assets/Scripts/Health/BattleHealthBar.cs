@@ -1,8 +1,11 @@
+using System.Collections;
 using App;
 using Combat;
 using Destruction;
 using Model;
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 using VContainer;
 
 namespace Health
@@ -33,6 +36,10 @@ namespace Health
     public const int Columns = 12;
     public const int PixelCount = Rows * Columns;
 
+    private const float HitVignetteDuration = 0.25f;
+    private const float HitVignetteIntensity = 0.6f;
+    private const float HitVignettePriority = 100f;
+
     [Tooltip("Column-major, left to right: index = column * Rows + row. The bar empties from the last index back, so the pixels have to be ordered as the bar reads.")]
     [SerializeField] private DecayPart[] _pixels = new DecayPart[PixelCount];
 
@@ -41,6 +48,10 @@ namespace Health
 
     private DestructibleObject _destructible;
     private HitFx _hitFx;
+    private Volume _hitVignetteVolume;
+    private VolumeProfile _hitVignetteProfile;
+    private Vignette _hitVignette;
+    private Coroutine _hitVignetteCoroutine;
 
     private const int HitCount = 10;
     private int HealthPerHit =>
@@ -64,6 +75,7 @@ namespace Health
       this.AsInjected();
       _destructible = GetComponent<DestructibleObject>();
       _hitFx = GetComponent<HitFx>();
+      CreateHitVignette();
     }
 
     private void OnEnable()
@@ -81,6 +93,72 @@ namespace Health
     {
       _characterService.HealthChanged -= OnHealthChanged;
       _battleService.BattleStarted -= OnBattleStarted;
+
+      if (_hitVignetteCoroutine != null)
+      {
+        StopCoroutine(_hitVignetteCoroutine);
+        _hitVignetteCoroutine = null;
+      }
+
+      if (_hitVignetteVolume != null)
+        _hitVignetteVolume.weight = 0f;
+    }
+
+    private void OnDestroy()
+    {
+      if (_hitVignetteProfile != null)
+        Destroy(_hitVignetteProfile);
+    }
+
+    private void CreateHitVignette()
+    {
+      // The bar root is on the damageable layer, while the gameplay camera only samples volumes
+      // from the Default layer. Keep the runtime volume on its own Default-layer child.
+      var volumeObject = new GameObject("HealthBarHitVignette");
+      volumeObject.layer = 0;
+      volumeObject.transform.SetParent(transform, false);
+
+      _hitVignetteVolume = volumeObject.AddComponent<Volume>();
+      _hitVignetteVolume.isGlobal = true;
+      _hitVignetteVolume.priority = HitVignettePriority;
+      _hitVignetteVolume.weight = 0f;
+
+      _hitVignetteProfile = ScriptableObject.CreateInstance<VolumeProfile>();
+      _hitVignetteProfile.name = "HealthBarHitVignette";
+      _hitVignetteVolume.sharedProfile = _hitVignetteProfile;
+
+      _hitVignette = _hitVignetteProfile.Add<Vignette>(true);
+      _hitVignette.color.value = new Color(1f, 0.03f, 0.03f);
+      _hitVignette.intensity.value = HitVignetteIntensity;
+      _hitVignette.smoothness.value = 0.2f;
+    }
+
+    private void PlayHitVignette()
+    {
+      if (_hitVignetteVolume == null || _hitVignette == null)
+        return;
+
+      if (_hitVignetteCoroutine != null)
+        StopCoroutine(_hitVignetteCoroutine);
+
+      _hitVignetteCoroutine = StartCoroutine(AnimateHitVignette());
+    }
+
+    private IEnumerator AnimateHitVignette()
+    {
+      var elapsed = 0f;
+      _hitVignetteVolume.weight = 1f;
+
+      while (elapsed < HitVignetteDuration)
+      {
+        elapsed += Time.deltaTime;
+        var progress = Mathf.Clamp01(elapsed / HitVignetteDuration);
+        _hitVignetteVolume.weight = 1f - progress;
+        yield return null;
+      }
+
+      _hitVignetteVolume.weight = 0f;
+      _hitVignetteCoroutine = null;
     }
 
     private void OnBattleStarted()
@@ -98,6 +176,8 @@ namespace Health
 
       if (_hitFx != null)
         _hitFx.PlayHit();
+
+      PlayHitVignette();
 
       _characterService.TakeDamage(HealthPerHit);
 
