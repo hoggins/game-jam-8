@@ -1,7 +1,9 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using VContainer;
+using Destruction;
 using Model;
+using Movement;
 using Timer;
 
 namespace App
@@ -42,6 +44,9 @@ namespace App
 
       if (keyboard.f10Key.wasPressedThisFrame)
         EnablePlayerInvincibility();
+
+      if (keyboard.f5Key.wasPressedThisFrame)
+        TeleportPlayerToGoal();
 
       if (keyboard.f11Key.wasPressedThisFrame)
         EnableInfiniteTimer();
@@ -86,6 +91,20 @@ namespace App
       return true;
     }
 
+    /// <summary>Teleports the player to the active goal. Press F5 during a battle.</summary>
+    public bool TeleportPlayerToGoal()
+    {
+      var goal = TheGoal.Current;
+      if (goal == null || goal.IsDestroyed)
+        return false;
+
+      if (!TeleportPlayer(goal.transform.position))
+        return false;
+
+      Debug.Log("Player teleported to the goal (cheat).", this);
+      return true;
+    }
+
     /// <summary>Enables the infinite battle timer cheat. Press F11 during a battle.</summary>
     public bool EnableInfiniteTimer()
     {
@@ -125,7 +144,12 @@ namespace App
       if (player == null)
         return false;
 
-      player.transform.position = worldPosition;
+      var movementAgent = player.GetComponent<MovementAgent>();
+      if (movementAgent != null)
+        movementAgent.Teleport(worldPosition);
+      else
+        player.transform.position = worldPosition;
+
       Debug.Log($"Player teleported to {worldPosition}.", player);
       return true;
     }
