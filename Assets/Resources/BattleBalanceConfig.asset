@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7037fc6b267f44c228536aa48a008d98, type: 3}
   m_Name: BattleBalanceConfig
   m_EditorClassIdentifier: Assembly-CSharp::Balance.BattleBalanceConfig
-  _battleDuration: 90
+  _battleDuration: 30
   _winGraceDuration: 5
   _specialBetweenMaxDistance: 50
   _specialBetweenMinDistance: 40
@@ -59,7 +59,7 @@ MonoBehaviour:
   - type: 5
     maxHealth: 36
   - type: 6
-    maxHealth: 324
+    maxHealth: 1080
   - type: 7
     maxHealth: 1
   _houseMaxHealthByDifficulty:

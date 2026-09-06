@@ -23,7 +23,7 @@ namespace Balance
   public sealed class BattleBalanceConfig : ScriptableObject
   {
     [Header("Timing")]
-    [SerializeField, Min(0f)] private float _battleDuration = 90f;
+    [SerializeField, Min(0f)] private float _battleDuration = 30f;
     [SerializeField, Min(0f)] private float _winGraceDuration = 2f;
 
     [Header("Special Object Respawn")]
@@ -86,7 +86,7 @@ namespace Balance
       new DestructibleMaxHealthEntry { type = DestructibleObjectType.Arrow, maxHealth = 12 },
       new DestructibleMaxHealthEntry { type = DestructibleObjectType.HealthBar, maxHealth = 10 },
       new DestructibleMaxHealthEntry { type = DestructibleObjectType.Upgrade, maxHealth = 36 },
-      new DestructibleMaxHealthEntry { type = DestructibleObjectType.Goal, maxHealth = 324 },
+      new DestructibleMaxHealthEntry { type = DestructibleObjectType.Goal, maxHealth = 1080 },
       new DestructibleMaxHealthEntry { type = DestructibleObjectType.Prop, maxHealth = 1 },
     };
 
