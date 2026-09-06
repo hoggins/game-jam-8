@@ -22,8 +22,11 @@ namespace Upgrade
 
     private void Awake()
     {
-      if (_body == null)
-        _body = GetComponentInChildren<DestructibleObject>(true);
+      // The visual prefab may contain an inactive legacy House01 alongside the live upgrade
+      // body. Always bind to a live body so destruction disables the HUD shortcut and the root can
+      // clean itself up when that body's debris has decayed.
+      if (_body == null || !_body.gameObject.activeInHierarchy)
+        _body = FindLiveBody();
 
       if (_hudCamera == null)
         _hudCamera = GetComponentInChildren<Camera>(true);
@@ -73,13 +76,15 @@ namespace Upgrade
         hud.SetProgressionInputEnabled(enabled);
     }
 
-    private bool HasDestructibleChildren()
+    private DestructibleObject FindLiveBody()
     {
-      for (var i = 0; i < transform.childCount; i++)
-        if (transform.GetChild(i).GetComponent<DestructibleObject>() != null)
-          return true;
+      foreach (var candidate in GetComponentsInChildren<DestructibleObject>(true))
+        if (candidate != null && candidate.gameObject.activeInHierarchy)
+          return candidate;
 
-      return false;
+      return null;
     }
+
+    private bool HasDestructibleChildren() => _body != null;
   }
 }

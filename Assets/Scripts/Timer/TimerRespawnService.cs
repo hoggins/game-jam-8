@@ -26,9 +26,7 @@ namespace Timer
     private static readonly ProfilerMarker ArrangeFenceMarker = new("TimerRespawnService.ArrangeFence");
     private static readonly ProfilerMarker OtherSpecialsMarker = new("TimerRespawnService.OtherSpecials");
 
-    private static readonly Vector3 EarlySpecialClusterAnchor = new(-700f, 0f, -700f);
-    private const int EarlySpecialClusterRespawns = 3;
-    private const float EarlySpecialClusterRadius = 20f;
+    private const int EarlySpecialStagedRespawns = 3;
     private readonly BattleService _battleService;
     private readonly MapEnvironmentSpawner _spawner;
     private readonly SpecialSpawnSettings _spawnSettings;
@@ -135,7 +133,7 @@ namespace Timer
           _characterService.AttackPower,
           intendedHouseTier);
 
-        if (_respawnCount <= EarlySpecialClusterRespawns)
+        if (_respawnCount <= EarlySpecialStagedRespawns)
         {
           MoveSpecialsOutOfMap(player.transform);
           _spawner.RefreshNoGoZones();
@@ -232,6 +230,7 @@ namespace Timer
       if (houseSet == null)
         return;
 
+      var stagedSpecialIndex = 0;
       foreach (var special in houseSet.Specials)
       {
         if (special.type == SpecialHouses.Timer || !special.enabled || special.prefab == null
@@ -242,21 +241,22 @@ namespace Timer
             && !_spawner.TryGetCurrentSpecial(special.type, out _))
           continue;
 
+        var stagingPosition = MapEnvironmentSpawner.EarlySpecialStagingPosition(stagedSpecialIndex++);
         if (_spawner.TryGetCurrentSpecial(special.type, out var existing))
           _spawner.TryMoveSpecial(
             special.type,
             existing,
-            EarlySpecialClusterAnchor,
+            stagingPosition,
             player,
             0f,
-            EarlySpecialClusterRadius);
+            0f);
         else
           _spawner.TrySpawnSpecial(
             special.type,
-            EarlySpecialClusterAnchor,
+            stagingPosition,
             player,
             0f,
-            EarlySpecialClusterRadius,
+            0f,
             out _);
       }
     }

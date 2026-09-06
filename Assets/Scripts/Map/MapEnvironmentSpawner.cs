@@ -58,6 +58,8 @@ namespace Map
     }
 
     private const string ContainerName = "SpawnedEnvironment";
+    private const float EarlySpecialStagingCoordinate = 700f;
+    private const float EarlySpecialStagingSpacing = 70f;
     // Extra margin added on top of a special's real bounding box when clearing houses out of its
     // way, so the cleared area isn't drawn exactly flush with the mesh.
     private const float SpecialClearMargin = 5f;
@@ -305,9 +307,7 @@ namespace Map
     /// way a respawn works (<see cref="TrySpawnSpecial"/>) rather than as part of <see cref="MapFiller.Fill"/>:
     /// specials are rotated to face the player and clear their own footprint, which the blocky grid
     /// placement isn't built for. The Timer goes down first on the absolute route's initial leg when
-    /// a Goal is available; every other special then follows the same between/near-player rule a
-    /// respawn uses (see <see cref="GetOtherSpecialPlacement"/>), so it never starts right on top of
-    /// the player.
+    /// a Goal is available; every other special starts at a fixed off-map staging position.
     /// </summary>
     private void SpawnInitialSpecials(Transform parent)
     {
@@ -339,31 +339,22 @@ namespace Map
         TrySpawnSpecial(special.type, fallbackAnchor, lookTarget, timerMinDistance, timerMaxDistance, out timerInstance);
       }
 
+      var stagedSpecialIndex = 0;
       foreach (var special in _houseSet.Specials)
       {
         if (special.type == SpecialHouses.Timer || !special.enabled || special.prefab == null)
           continue;
 
-        Vector3 anchor;
-        float minDistance;
-        float maxDistance;
-        if (timerInstance != null && player != null)
-        {
-          GetOtherSpecialPlacement(timerInstance.transform.position, player.transform.position, out anchor, out minDistance, out maxDistance);
-        }
-        else if (_specialSpawnSettings != null && _specialSpawnSettings.TryGetInitialDistance(special.type, out minDistance, out maxDistance))
-        {
-          anchor = fallbackAnchor;
-        }
-        else
-        {
-          Debug.LogWarning($"MapEnvironmentSpawner.SpawnInitialSpecials: no initial spawn distance configured for '{special.type}' in SpecialSpawnSettings.");
-          continue;
-        }
-
-        TrySpawnSpecial(special.type, anchor, lookTarget, minDistance, maxDistance, out _);
+        var stagingPosition = EarlySpecialStagingPosition(stagedSpecialIndex++);
+        TrySpawnSpecial(special.type, stagingPosition, lookTarget, 0f, 0f, out _);
       }
     }
+
+    internal static Vector3 EarlySpecialStagingPosition(int index) =>
+      new(
+        EarlySpecialStagingCoordinate + EarlySpecialStagingSpacing * index,
+        0f,
+        EarlySpecialStagingCoordinate + EarlySpecialStagingSpacing * index);
 
     /// <summary>
     /// Where a non-Timer special should aim, given the timer's current position and the player:

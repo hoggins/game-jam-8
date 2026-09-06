@@ -47,7 +47,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2eb31575cfd2b0b47820218cd736e4ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Upgrade.BattleUpgradeObject
-  _body: {fileID: 1532023428618225708}
+  _body: {fileID: 8883069617615792716}
   _hudCamera: {fileID: 2451956408318533681}
 --- !u!1 &6407177081546492527
 GameObject:
@@ -499,17 +499,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a0fec0480e2d7453bb6c593f9d9b01b8, type: 3}
---- !u!114 &1532023428618225708 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 1997281867488192494, guid: a0fec0480e2d7453bb6c593f9d9b01b8, type: 3}
-  m_PrefabInstance: {fileID: 1077787984808112066}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ae3a31e081dac4ba2acd27782b575bb6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Destruction.DestructibleObject
 --- !u!4 &7294173618317043837 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7768443499820337087, guid: a0fec0480e2d7453bb6c593f9d9b01b8, type: 3}
