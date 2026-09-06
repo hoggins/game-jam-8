@@ -37,6 +37,9 @@ namespace Destruction.Editor
       EditorGUILayout.PropertyField(
         so.FindProperty(nameof(baseDecaySettings)).FindPropertyRelative(nameof(PartDecaySettings.baseFallSpeed)),
         new GUIContent("Base Fall Speed"));
+      EditorGUILayout.PropertyField(
+        so.FindProperty(nameof(baseDecaySettings)).FindPropertyRelative(nameof(PartDecaySettings.timeoutMultiplier)),
+        new GUIContent("Timeout Multiplier"));
       so.ApplyModifiedProperties();
 
       EditorGUILayout.Space();

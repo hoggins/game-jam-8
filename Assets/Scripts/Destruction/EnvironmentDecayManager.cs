@@ -15,6 +15,7 @@ namespace Destruction
     {
       public DestructibleObject Owner;
       public Rigidbody Body;
+      public PartDecaySettings Settings;
       public float DecayStartTimer;
       public float GroundY;
       public bool Sinking;
@@ -30,7 +31,10 @@ namespace Destruction
       _settings = settings;
     }
 
-    public void RegisterPart(DestructibleObject owner, Rigidbody body)
+    public void RegisterPart(
+      DestructibleObject owner,
+      Rigidbody body,
+      PartDecaySettings decaySettings = null)
     {
       _remainingParts.TryGetValue(owner, out var count);
       _remainingParts[owner] = count + 1;
@@ -39,6 +43,7 @@ namespace Destruction
       {
         Owner = owner,
         Body = body,
+        Settings = decaySettings ?? new PartDecaySettings(),
         DecayStartTimer = 0f,
       });
     }
@@ -79,7 +84,7 @@ namespace Destruction
 
           if (!part.Sinking)
           {
-            if (part.DecayStartTimer < _settings.DecayStartDelay)
+            if (part.DecayStartTimer < _settings.DecayStartDelay * part.Settings.TimeoutMultiplier)
               continue;
 
             part.GroundY = SampleGround(part.Body.position);

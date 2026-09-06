@@ -190,7 +190,7 @@ namespace Destruction
       body.AddForceAtPosition(direction * magnitude, hitPoint, ForceMode.Impulse);
 
       if (Application.isPlaying && _decayManager != null)
-        _decayManager.RegisterPart(this, body);
+        _decayManager.RegisterPart(this, body, part.Settings);
     }
 
     private void RemoveMissingParts()

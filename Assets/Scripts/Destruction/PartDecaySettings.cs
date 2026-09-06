@@ -12,7 +12,11 @@ namespace Destruction
     [Tooltip("Per-part multiplier applied to the base fall speed. Derived from the part's volume so bigger parts decay faster, capped for very large parts.")]
     [Min(0f)] public float speedMultiplier = 1f;
 
+    [Tooltip("Per-part multiplier applied to the delay before this part starts falling. Values above 1 delay falling; values below 1 start it sooner.")]
+    [Min(0f)] public float timeoutMultiplier = 1f;
+
     public float FallSpeed => baseFallSpeed * speedMultiplier;
+    public float TimeoutMultiplier => timeoutMultiplier;
 
     /// <summary>
     /// Derives this part's multiplier from its bounds volume (in cubic units), capped so very large
@@ -24,6 +28,7 @@ namespace Destruction
       {
         baseFallSpeed = baseFallSpeed,
         speedMultiplier = Mathf.Clamp(volume, 0.001f, maxMultiplier),
+        timeoutMultiplier = timeoutMultiplier,
       };
     }
   }

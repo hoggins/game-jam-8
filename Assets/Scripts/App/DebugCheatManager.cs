@@ -1,4 +1,5 @@
 using UnityEngine;
+using Unity.Cinemachine;
 using UnityEngine.InputSystem;
 using VContainer;
 using Destruction;
@@ -144,11 +145,16 @@ namespace App
       if (player == null)
         return false;
 
+      var previousPosition = player.transform.position;
       var movementAgent = player.GetComponent<MovementAgent>();
       if (movementAgent != null)
         movementAgent.Teleport(worldPosition);
       else
         player.transform.position = worldPosition;
+
+      var positionDelta = player.transform.position - previousPosition;
+      if (positionDelta != Vector3.zero)
+        CinemachineCore.OnTargetObjectWarped(player.transform, positionDelta);
 
       Debug.Log($"Player teleported to {worldPosition}.", player);
       return true;
