@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a86b8688010a64349af7a655e25e79b5, type: 3}
   m_Name: EnvironmentVisibilitySettings
   m_EditorClassIdentifier: Assembly-CSharp::Map.EnvironmentVisibilitySettings
-  visibleRadius: 100
+  visibleRadius: 75
   hiddenMargin: 15

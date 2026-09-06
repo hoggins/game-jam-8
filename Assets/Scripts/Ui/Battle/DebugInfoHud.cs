@@ -49,6 +49,20 @@ namespace Battle
     }
 
 #if UNITY_EDITOR
+    private readonly GUIContent[] _labelContents =
+    {
+      new("DEBUG INFO"),
+      new(),
+      new(),
+      new(),
+      new(),
+      new(),
+      new(),
+      new(),
+    };
+
+    private int _lastContentFrame = -1;
+
     private void Update()
     {
       if (Keyboard.current != null && Keyboard.current.f2Key.wasPressedThisFrame)
@@ -85,28 +99,39 @@ namespace Battle
         Mathf.Max(1f, _size.y));
 
       GUI.Box(panelRect, GUIContent.none, _boxStyle);
-      GUILayout.BeginArea(panelRect);
-      GUILayout.BeginVertical(GUILayout.MinHeight(panelRect.height));
-      GUILayout.Label("DEBUG INFO", _labelStyle);
-      GUILayout.Label($"Timer: {FormatTime(_battleService?.Timer ?? 0f)}", _labelStyle);
-      GUILayout.Label(
-        $"Player HP: {_characterService?.CurrentHealth ?? 0}/{_characterService?.MaxHealth ?? 0}",
-        _labelStyle);
-      GUILayout.Label(
-        $"Battle: {GetBattleState()} | Timer destroyed: {_battleService?.IsTimerDestroyed ?? false}",
-        _labelStyle);
-      GUILayout.Label(
-        $"Coins: {_characterService?.CurrentCoins ?? 0} | Attack: {_characterService?.AttackPower ?? 0}",
-        _labelStyle);
-      GUILayout.Label(
-        $"Ducks killed: {_storage?.DucksKilled ?? 0} | Buildings: {_storage?.BuildingsDestroyed ?? 0}",
-        _labelStyle);
-      GUILayout.Label(
-        $"Active agents: {GetActiveAgentCount()} | Live ducks: {GetLiveDuckCount()}",
-        _labelStyle);
-      GUILayout.Label($"Time scale: {Time.timeScale:0.##}", _labelStyle);
-      GUILayout.EndVertical();
-      GUILayout.EndArea();
+      RefreshLabelContents();
+
+      var labelRect = new Rect(
+        panelRect.x + 10f,
+        panelRect.y + 8f,
+        Mathf.Max(1f, panelRect.width - 20f),
+        Mathf.Max(1f, _labelStyle.lineHeight));
+      var labelHeight = Mathf.Max(1f, _labelStyle.lineHeight);
+      for (var i = 0; i < _labelContents.Length; i++)
+      {
+        labelRect.y = panelRect.y + 8f + i * labelHeight;
+        GUI.Label(labelRect, _labelContents[i], _labelStyle);
+      }
+    }
+
+    private void RefreshLabelContents()
+    {
+      if (_lastContentFrame == Time.frameCount)
+        return;
+
+      _lastContentFrame = Time.frameCount;
+      _labelContents[1].text = $"Timer: {FormatTime(_battleService?.Timer ?? 0f)}";
+      _labelContents[2].text =
+        $"Player HP: {_characterService?.CurrentHealth ?? 0}/{_characterService?.MaxHealth ?? 0}";
+      _labelContents[3].text =
+        $"Battle: {GetBattleState()} | Timer destroyed: {_battleService?.IsTimerDestroyed ?? false}";
+      _labelContents[4].text =
+        $"Coins: {_characterService?.CurrentCoins ?? 0} | Attack: {_characterService?.AttackPower ?? 0}";
+      _labelContents[5].text =
+        $"Ducks killed: {_storage?.DucksKilled ?? 0} | Buildings: {_storage?.BuildingsDestroyed ?? 0}";
+      _labelContents[6].text =
+        $"Active agents: {GetActiveAgentCount()} | Live ducks: {GetLiveDuckCount()}";
+      _labelContents[7].text = $"Time scale: {Time.timeScale:0.##}";
     }
 
     private void EnsureStyles()

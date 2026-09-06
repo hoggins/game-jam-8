@@ -28,7 +28,6 @@ Shader "Env/GroundEnvShader"
 		_VertexAnimAmplitude( "VertexAnimAmplitude", Float ) = 1
 		_DamageColor( "DamageColor", 2D ) = "white" {}
 		[Normal] _DamageNormal( "DamageNormal", 2D ) = "bump" {}
-		_DamageMask( "DamageMask", 2D ) = "black" {}
 		_DamageColorMul( "DamageColorMul", Float ) = 1
 		_DamageColorAdd( "DamageColorAdd", Float ) = 0
 
@@ -93,6 +92,9 @@ Shader "Env/GroundEnvShader"
 		
 
 		HLSLINCLUDE
+		// The active level supplies these shared values through Shader.SetGlobal*.
+		float4 _DamageMask_ST;
+
 		#pragma target 4.5
 		#pragma prefer_hlslcc gles
 		#pragma only_renderers d3d11 glcore gles gles3 metal vulkan // ensure rendering platforms toggle list is visible
@@ -391,7 +393,6 @@ Shader "Env/GroundEnvShader"
 			float4 _Color0;
 			float4 _PrintsColorTex_ST;
 			float4 _PrintsColor;
-			float4 _DamageMask_ST;
 			float4 _DamageColor_ST;
 			float3 _Vector0;
 			float2 _PrintsScale;
@@ -1096,7 +1097,6 @@ Shader "Env/GroundEnvShader"
 			float4 _Color0;
 			float4 _PrintsColorTex_ST;
 			float4 _PrintsColor;
-			float4 _DamageMask_ST;
 			float4 _DamageColor_ST;
 			float3 _Vector0;
 			float2 _PrintsScale;
@@ -1446,7 +1446,6 @@ Shader "Env/GroundEnvShader"
 			float4 _Color0;
 			float4 _PrintsColorTex_ST;
 			float4 _PrintsColor;
-			float4 _DamageMask_ST;
 			float4 _DamageColor_ST;
 			float3 _Vector0;
 			float2 _PrintsScale;

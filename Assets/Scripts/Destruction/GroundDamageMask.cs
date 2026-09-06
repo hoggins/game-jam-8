@@ -12,6 +12,7 @@ namespace Destruction
   {
     private static readonly int DamageMaskId = Shader.PropertyToID("_DamageMask");
     private static readonly int DamageMaskStId = Shader.PropertyToID("_DamageMask_ST");
+    private static readonly Vector4 DefaultDamageMaskSt = new(1f, 1f, 0f, 0f);
 
     public static GroundDamageMask Instance { get; private set; }
 
@@ -24,7 +25,6 @@ namespace Destruction
     private Renderer[] _groundRenderers;
     private Texture2D _damageMask;
     private Color[] _pixels;
-    private MaterialPropertyBlock _propertyBlock;
     private Bounds _levelWorldBounds;
 
     private bool _isDuplicate;
@@ -55,6 +55,9 @@ namespace Destruction
 
     private void OnDisable()
     {
+      if (_isDuplicate)
+        return;
+
       ReleaseTexture();
     }
 
@@ -151,9 +154,14 @@ namespace Destruction
         anisoLevel = 0,
       };
 
-      _propertyBlock ??= new MaterialPropertyBlock();
+      var worldMin = _levelWorldBounds.min;
+      Shader.SetGlobalTexture(DamageMaskId, _damageMask);
+      Shader.SetGlobalVector(DamageMaskStId, new Vector4(
+        1f / worldSize.x,
+        1f / worldSize.z,
+        -worldMin.x / worldSize.x,
+        -worldMin.z / worldSize.z));
       UploadTexture();
-      AssignTextureToRenderers();
     }
 
     private void ReleaseTexture()
@@ -168,6 +176,8 @@ namespace Destruction
       }
 
       _pixels = null;
+      Shader.SetGlobalTexture(DamageMaskId, null);
+      Shader.SetGlobalVector(DamageMaskStId, DefaultDamageMaskSt);
     }
 
     private bool Paint(
@@ -305,37 +315,6 @@ namespace Destruction
         worldBounds.Encapsulate(renderers[i].bounds);
 
       return worldBounds;
-    }
-
-    private void AssignTextureToRenderers()
-    {
-      for (var rendererIndex = 0; rendererIndex < _groundRenderers.Length; rendererIndex++)
-        ApplyDamageMaskToRenderer(_groundRenderers[rendererIndex]);
-    }
-
-    public void ApplyDamageMaskToRenderer(Renderer renderer)
-    {
-      if (renderer == null || _damageMask == null)
-        return;
-
-      var worldSize = _levelWorldBounds.size;
-      var worldMin = _levelWorldBounds.min;
-      var maskSt = new Vector4(
-        1f / worldSize.x,
-        1f / worldSize.z,
-        -worldMin.x / worldSize.x,
-        -worldMin.z / worldSize.z);
-      var materials = renderer.sharedMaterials;
-      _propertyBlock ??= new MaterialPropertyBlock();
-
-      for (var materialIndex = 0; materialIndex < materials.Length; materialIndex++)
-      {
-        _propertyBlock.Clear();
-        renderer.GetPropertyBlock(_propertyBlock, materialIndex);
-        _propertyBlock.SetTexture(DamageMaskId, _damageMask);
-        _propertyBlock.SetVector(DamageMaskStId, maskSt);
-        renderer.SetPropertyBlock(_propertyBlock, materialIndex);
-      }
     }
 
     private enum BrushShape

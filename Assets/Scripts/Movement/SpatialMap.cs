@@ -5,8 +5,9 @@ namespace Movement
 {
   internal sealed class SpatialMap
   {
-    private readonly Dictionary<Vector2Int, List<MovementAgent>> _cells = new();
-    private readonly HashSet<MovementAgent> _seen = new();
+    private readonly Dictionary<Vector2Int, List<MovementAgent>> _cells = new(1024);
+    private readonly List<Vector2Int> _activeCells = new(256);
+    private readonly HashSet<MovementAgent> _seen = new(64);
 
     private float _cellSize = 1f;
 
@@ -14,8 +15,9 @@ namespace Movement
     {
       _cellSize = Mathf.Max(0.01f, cellSize);
 
-      foreach (var entries in _cells.Values)
-        entries.Clear();
+      for (var i = 0; i < _activeCells.Count; i++)
+        _cells[_activeCells[i]].Clear();
+      _activeCells.Clear();
 
       for (var i = 0; i < agents.Count; i++)
       {
@@ -34,9 +36,12 @@ namespace Movement
           var cell = new Vector2Int(x, y);
           if (!_cells.TryGetValue(cell, out var entries))
           {
-            entries = new List<MovementAgent>(4);
+            entries = new List<MovementAgent>(8);
             _cells.Add(cell, entries);
           }
+
+          if (entries.Count == 0)
+            _activeCells.Add(cell);
 
           entries.Add(agent);
         }

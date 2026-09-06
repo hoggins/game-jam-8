@@ -73,6 +73,8 @@ namespace Map
     // Real footprint of each special's prefab (from its renderer bounds, not the grid size it's
     // configured with), computed once per type and reused on every spawn/respawn.
     private readonly Dictionary<SpecialHouses, Vector2> _specialHalfExtentsCache = new();
+    private readonly List<Renderer> _rendererScratch = new();
+    private readonly List<Renderer> _allRenderers = new();
     private readonly HashSet<Vector2Int> _occupied = new();
     private readonly MovementUpdater _movementUpdater;
     private readonly EnvironmentVisibilitySettings _visibilitySettings;
@@ -81,11 +83,11 @@ namespace Map
 
     private Transform _container;
     private HouseSet _houseSet;
-    private GroundDamageMask _groundDamageMask;
     private int _cellSize;
     private int _nextId;
     private CullingGroup _cullingGroup;
-    private Renderer[][] _renderersByObject = System.Array.Empty<Renderer[]>();
+    private int[] _rendererStartByObject = System.Array.Empty<int>();
+    private int[] _rendererCountByObject = System.Array.Empty<int>();
     private BoundingSphere[] _boundingSpheres = System.Array.Empty<BoundingSphere>();
     private bool[] _distanceVisibleByObject = System.Array.Empty<bool>();
     private bool _hasVisibilityHysteresis;
@@ -147,7 +149,6 @@ namespace Map
       _currentSpecial.Clear();
       _occupied.Clear();
       DisposeRenderCulling();
-      _groundDamageMask = GroundDamageMask.Instance;
 
       _container = new GameObject(ContainerName).transform;
       _container.SetParent(parent, false);
@@ -609,7 +610,6 @@ namespace Map
         }
 
         instance.name = special.type.ToString();
-        RegisterDamageMaskRenderers(instance.GetComponentsInChildren<Renderer>(true));
 
         var destructible = instance.GetComponentInChildren<DestructibleObject>();
         var id = _nextId++;
@@ -913,15 +913,16 @@ namespace Map
 
     private static Vector2 ClearMargin => new(SpecialClearMargin, SpecialClearMargin);
 
-    private static Vector2 PrefabHalfExtents(GameObject prefab)
+    private Vector2 PrefabHalfExtents(GameObject prefab)
     {
-      var renderers = prefab.GetComponentsInChildren<Renderer>(true);
-      if (renderers.Length == 0)
+      _rendererScratch.Clear();
+      prefab.GetComponentsInChildren<Renderer>(true, _rendererScratch);
+      if (_rendererScratch.Count == 0)
         return Vector2.zero;
 
-      var bounds = renderers[0].bounds;
-      for (var i = 1; i < renderers.Length; i++)
-        bounds.Encapsulate(renderers[i].bounds);
+      var bounds = _rendererScratch[0].bounds;
+      for (var i = 1; i < _rendererScratch.Count; i++)
+        bounds.Encapsulate(_rendererScratch[i].bounds);
 
       return new Vector2(bounds.extents.x, bounds.extents.z);
     }
@@ -964,7 +965,9 @@ namespace Map
       if (objectCount <= 0)
         return;
 
-      _renderersByObject = new Renderer[objectCount][];
+      _rendererStartByObject = new int[objectCount];
+      _rendererCountByObject = new int[objectCount];
+      _allRenderers.Clear();
       _boundingSpheres = new BoundingSphere[objectCount];
       _distanceVisibleByObject = new bool[objectCount];
 
@@ -1003,64 +1006,58 @@ namespace Map
 
     private void RegisterRenderers(int index, GameObject instance)
     {
-      var renderers = instance.GetComponentsInChildren<Renderer>(true);
-      RegisterDamageMaskRenderers(renderers);
+      _rendererScratch.Clear();
+      instance.GetComponentsInChildren<Renderer>(true, _rendererScratch);
 
       if (_cullingGroup == null)
         return;
 
-      _renderersByObject[index] = renderers;
+      _rendererStartByObject[index] = _allRenderers.Count;
+      _rendererCountByObject[index] = _rendererScratch.Count;
+      _allRenderers.AddRange(_rendererScratch);
       _distanceVisibleByObject[index] = true;
 
       var bounds = new Bounds(instance.transform.position, Vector3.zero);
-      if (renderers.Length > 0)
+      if (_rendererScratch.Count > 0)
       {
-        bounds = renderers[0].bounds;
-        for (var i = 1; i < renderers.Length; i++)
-          bounds.Encapsulate(renderers[i].bounds);
+        bounds = _rendererScratch[0].bounds;
+        for (var i = 1; i < _rendererScratch.Count; i++)
+          bounds.Encapsulate(_rendererScratch[i].bounds);
       }
 
       _boundingSpheres[index] = new BoundingSphere(bounds.center, bounds.extents.magnitude);
     }
 
-    private void RegisterDamageMaskRenderers(Renderer[] renderers)
-    {
-      for (var i = 0; i < renderers.Length; i++)
-      {
-        var renderer = renderers[i];
-        if (renderer == null)
-          continue;
-
-        _groundDamageMask?.ApplyDamageMaskToRenderer(renderer);
-      }
-    }
-
     private void OnCullingStateChanged(CullingGroupEvent eventData)
     {
       var index = eventData.index;
-      if (index < 0 || index >= _renderersByObject.Length)
+      if (index < 0 || index >= _rendererStartByObject.Length)
         return;
 
+      var visible = _distanceVisibleByObject[index];
       if (eventData.currentDistance == 0)
-        _distanceVisibleByObject[index] = true;
+        visible = true;
       else if (!_hasVisibilityHysteresis || eventData.currentDistance > 1)
-        _distanceVisibleByObject[index] = false;
+        visible = false;
 
-      ApplyVisibility(index, _distanceVisibleByObject[index]);
+      if (_distanceVisibleByObject[index] == visible)
+        return;
+
+      _distanceVisibleByObject[index] = visible;
+      ApplyVisibility(index, visible);
     }
 
     private void ApplyVisibility(int index, bool visible)
     {
-      if (index < 0 || index >= _renderersByObject.Length)
+      if (index < 0 || index >= _rendererStartByObject.Length)
         return;
 
-      var renderers = _renderersByObject[index];
-      if (renderers == null)
-        return;
+      var start = _rendererStartByObject[index];
+      var end = start + _rendererCountByObject[index];
 
-      for (var i = 0; i < renderers.Length; i++)
+      for (var i = start; i < end; i++)
       {
-        var renderer = renderers[i];
+        var renderer = _allRenderers[i];
         if (renderer != null)
           renderer.enabled = visible;
       }
@@ -1075,7 +1072,10 @@ namespace Map
         _cullingGroup = null;
       }
 
-      _renderersByObject = System.Array.Empty<Renderer[]>();
+      _rendererStartByObject = System.Array.Empty<int>();
+      _rendererCountByObject = System.Array.Empty<int>();
+      _allRenderers.Clear();
+      _rendererScratch.Clear();
       _boundingSpheres = System.Array.Empty<BoundingSphere>();
       _distanceVisibleByObject = System.Array.Empty<bool>();
       _hasVisibilityHysteresis = false;
@@ -1084,7 +1084,6 @@ namespace Map
     void System.IDisposable.Dispose()
     {
       DisposeRenderCulling();
-      _groundDamageMask = null;
     }
 
     private bool TryReserve(Vector2Int origin, Vector2Int size)

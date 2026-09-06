@@ -6,6 +6,8 @@ namespace Movement
 {
   internal sealed class FlowMap
   {
+    private const float NoGoZoneIndexCellSize = 16f;
+
     private static readonly ProfilerMarker RecalculateMarker =
       new("FlowMap.Recalculate");
     private static readonly ProfilerMarker MarkBlockedCellsMarker =
@@ -24,6 +26,8 @@ namespace Movement
     };
 
     private readonly MinHeap _candidates = new();
+    private readonly Dictionary<Vector2Int, List<FlowMapNoGoZone>> _noGoZonesByCell = new();
+    private readonly HashSet<FlowMapNoGoZone> _candidateNoGoZones = new();
 
     private Vector2[] _directions = System.Array.Empty<Vector2>();
     private float[] _costs = System.Array.Empty<float>();
@@ -38,6 +42,7 @@ namespace Movement
     private bool _hasField;
     private bool _overflowed;
     private int _noGoZoneRevision = -1;
+    private int _indexedNoGoZoneRevision = -1;
     private float _clearance;
 
     internal bool HasField => _hasField;
@@ -261,7 +266,8 @@ namespace Movement
           _blocked[i] = false;
         }
 
-        MarkBlockedCells(noGoZones);
+        EnsureNoGoZoneIndex(noGoZones, noGoZoneRevision);
+        MarkBlockedCells();
 
         if (!TryGetIndex(_targetCell, out var targetIndex))
         {
@@ -308,7 +314,7 @@ namespace Movement
       }
     }
 
-    private void MarkBlockedCells(IReadOnlyList<FlowMapNoGoZone> noGoZones)
+    private void MarkBlockedCells()
     {
       MarkBlockedCellsMarker.Begin();
       try
@@ -318,9 +324,21 @@ namespace Movement
         var fieldMaxX = _offset.x + _width * _cellSize + _clearance;
         var fieldMaxY = _offset.y + _height * _cellSize + _clearance;
 
-        for (var i = 0; i < noGoZones.Count; i++)
+        _candidateNoGoZones.Clear();
+        var minIndexCell = GetNoGoZoneIndexCell(new Vector2(fieldMinX, fieldMinY));
+        var maxIndexCell = GetNoGoZoneIndexCell(new Vector2(fieldMaxX, fieldMaxY));
+        for (var y = minIndexCell.y; y <= maxIndexCell.y; y++)
+        for (var x = minIndexCell.x; x <= maxIndexCell.x; x++)
         {
-          var zone = noGoZones[i];
+          if (!_noGoZonesByCell.TryGetValue(new Vector2Int(x, y), out var zones))
+            continue;
+
+          for (var i = 0; i < zones.Count; i++)
+            _candidateNoGoZones.Add(zones[i]);
+        }
+
+        foreach (var zone in _candidateNoGoZones)
+        {
           var collider = zone != null ? zone.Collider : null;
           if (zone == null
               || zone.IgnoreMobs
@@ -365,6 +383,50 @@ namespace Movement
         MarkBlockedCellsMarker.End();
       }
     }
+
+    private void EnsureNoGoZoneIndex(
+      IReadOnlyList<FlowMapNoGoZone> noGoZones,
+      int noGoZoneRevision)
+    {
+      if (_indexedNoGoZoneRevision == noGoZoneRevision)
+        return;
+
+      _noGoZonesByCell.Clear();
+      for (var i = 0; i < noGoZones.Count; i++)
+      {
+        var zone = noGoZones[i];
+        var collider = zone != null ? zone.Collider : null;
+        if (zone == null
+            || zone.IgnoreMobs
+            || collider == null
+            || !collider.enabled
+            || !collider.gameObject.activeInHierarchy)
+          continue;
+
+        var bounds = zone.WorldBounds;
+        var minCell = GetNoGoZoneIndexCell(new Vector2(bounds.min.x, bounds.min.z));
+        var maxCell = GetNoGoZoneIndexCell(new Vector2(bounds.max.x, bounds.max.z));
+        for (var y = minCell.y; y <= maxCell.y; y++)
+        for (var x = minCell.x; x <= maxCell.x; x++)
+        {
+          var cell = new Vector2Int(x, y);
+          if (!_noGoZonesByCell.TryGetValue(cell, out var zones))
+          {
+            zones = new List<FlowMapNoGoZone>(4);
+            _noGoZonesByCell.Add(cell, zones);
+          }
+
+          zones.Add(zone);
+        }
+      }
+
+      _indexedNoGoZoneRevision = noGoZoneRevision;
+    }
+
+    private static Vector2Int GetNoGoZoneIndexCell(Vector2 position) =>
+      new(
+        Mathf.FloorToInt(position.x / NoGoZoneIndexCellSize),
+        Mathf.FloorToInt(position.y / NoGoZoneIndexCellSize));
 
     private bool CutsBlockedCorner(Vector2Int cell, Vector2Int offset)
     {
