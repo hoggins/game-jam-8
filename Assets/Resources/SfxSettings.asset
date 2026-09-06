@@ -47,7 +47,13 @@ MonoBehaviour:
   playerDamagedMaxQueued: 1
   battleWinClip: {fileID: 8300000, guid: b5157531740fa44d78514c8401e19ebb, type: 3}
   battleWinVolume: 1
-  battleMusicClip: {fileID: 8300000, guid: cfa623690ac584cd998e76444e9db460, type: 3}
+  battleMusicClips:
+  - {fileID: 8300000, guid: cfa623690ac584cd998e76444e9db460, type: 3}
+  - {fileID: 8300000, guid: 84ee4edf0bbf5481f90ffec90f38d004, type: 3}
+  - {fileID: 8300000, guid: 497c7e01e12974fd693aa8db3b5460d4, type: 3}
+  - {fileID: 8300000, guid: 1d789dfe029ae4f9bb065f772351e0e9, type: 3}
+  - {fileID: 8300000, guid: c3778743e995247fea11e8d638504e96, type: 3}
+  - {fileID: 8300000, guid: 2767816cf7c3c4ba7b2a72e715a78e3c, type: 3}
   battleMusicVolume: 0.5
   battleMusicLoop: 1
   battleMusicFadeOut: 1

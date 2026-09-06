@@ -54,8 +54,9 @@ namespace Sfx
     [SerializeField, Range(0f, 1f)] private float battleWinVolume = 1f;
 
     [Header("Battle Music")]
-    [Tooltip("Plays for the length of a battle, from the first frame to win, defeat or abandon.")]
-    [SerializeField] private AudioClip battleMusicClip;
+    [Tooltip("Plays for the length of a battle, from the first frame to win, defeat or abandon. " +
+             "Battles cycle through these in order, starting over when the app restarts.")]
+    [SerializeField] private AudioClip[] battleMusicClips;
     [SerializeField, Range(0f, 1f)] private float battleMusicVolume = 1f;
     [SerializeField] private bool battleMusicLoop = true;
     [Tooltip("Seconds the track takes to fade out under the win or defeat sting. 0 cuts it dead.")]
@@ -73,7 +74,7 @@ namespace Sfx
     public AudioClip[] PlayerDamagedClips => playerDamagedClips;
     public AudioClip BattleWinClip => battleWinClip;
     public AudioClip BattleDefeatClip => battleDefeatClip;
-    public AudioClip BattleMusicClip => battleMusicClip;
+    public AudioClip[] BattleMusicClips => battleMusicClips;
     public bool BattleMusicLoop => battleMusicLoop;
     public float BattleMusicFadeOut => battleMusicFadeOut;
 

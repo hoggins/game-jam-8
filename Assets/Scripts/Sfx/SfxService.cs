@@ -18,6 +18,7 @@ namespace Sfx
 
     private readonly CharacterService _characterService;
     private readonly BattleService _battleService;
+    private readonly Storage _storage;
 
     /// Ducks die in waves, often several within the same frame, and the player takes several hits
     /// in a row. Playing them all at once smears into one loud noise, and dropping the extras
@@ -40,10 +41,11 @@ namespace Sfx
     private int _lastButtonClickIndex = -1;
     private int _lastPlayerDamagedIndex = -1;
 
-    public SfxService(CharacterService characterService, BattleService battleService)
+    public SfxService(CharacterService characterService, BattleService battleService, Storage storage)
     {
       _characterService = characterService;
       _battleService = battleService;
+      _storage = storage;
     }
 
     void IInitializable.Initialize()
@@ -172,10 +174,23 @@ namespace Sfx
       // its part-way volume.
       _isMusicFading = false;
 
-      if (_musicSource == null || _settings.BattleMusicClip == null)
+      var clips = _settings.BattleMusicClips;
+      if (_musicSource == null || clips == null || clips.Length == 0)
         return;
 
-      _musicSource.clip = _settings.BattleMusicClip;
+      // Straight cycle rather than the random no-repeat pick the one-shots use: a battle should
+      // not open on the same track twice running just because the roll said so. The count lives
+      // in Storage, so the rotation carries on across restarts instead of resetting to track 1.
+      var runCount = _storage.BattleMusicRunCount;
+      _storage.BattleMusicRunCount = runCount + 1;
+
+      // A count persisted from an older build could sit outside the current array, and int would
+      // eventually wrap negative - both would throw on the indexer.
+      var clip = clips[(int)((uint)runCount % (uint)clips.Length)];
+      if (clip == null)
+        return;
+
+      _musicSource.clip = clip;
       _musicSource.loop = _settings.BattleMusicLoop;
       _musicSource.volume = _settings.BattleMusicVolume;
       _musicSource.Play();
@@ -293,8 +308,7 @@ namespace Sfx
       if (_settings.BattleDefeatClip == null)
         Debug.LogError($"{nameof(SfxSettings)}.{nameof(SfxSettings.BattleDefeatClip)} is not assigned.");
 
-      if (_settings.BattleMusicClip == null)
-        Debug.LogError($"{nameof(SfxSettings)}.{nameof(SfxSettings.BattleMusicClip)} is not assigned.");
+      WarnIfEmpty(_settings.BattleMusicClips, nameof(SfxSettings.BattleMusicClips));
     }
 
     private static void WarnIfEmpty(AudioClip[] clips, string groupName)

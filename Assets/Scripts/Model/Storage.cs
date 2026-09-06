@@ -18,6 +18,12 @@ namespace Model
     private const string GunPowerKey = "Player.GunPower";
     private const string TimerKey = "Player.Timer";
 
+    /// Deliberately not a "Player." key and deliberately absent from AllKeys: this is a playback
+    /// bookmark, not progress. In AllKeys it would make HasSavedProgress true after a single
+    /// battle started, lighting up the Progression and Reset buttons with nothing saved, and a
+    /// progress wipe would restart the music rotation for no reason.
+    private const string BattleMusicRunCountKey = "Audio.BattleMusicRunCount";
+
     private static readonly string[] AllKeys =
     {
       AttackPowerKey, MaxHealthKey, DucksKilledKey, BuildingsDestroyedKey,
@@ -32,6 +38,7 @@ namespace Model
     private int _speed;
     private int _gunPower;
     private int _timer;
+    private int _battleMusicRunCount;
     private bool _isInitialized;
 
     private readonly ProgressionBalanceConfig _progressionBalance;
@@ -114,6 +121,14 @@ namespace Model
       set => SetValue(ref _timer, value, TimerKey);
     }
 
+    /// How many battles have started across every session, so the battle music can carry its
+    /// rotation across restarts instead of always opening on the first track.
+    public int BattleMusicRunCount
+    {
+      get => _battleMusicRunCount;
+      set => SetValue(ref _battleMusicRunCount, value, BattleMusicRunCountKey);
+    }
+
     /// Wipes every stored player value and reloads the balance defaults.
     public void Reset()
     {
@@ -141,6 +156,7 @@ namespace Model
       _speed = PlayerPrefs.GetInt(SpeedKey, _progressionBalance.StartingSpeed);
       _gunPower = PlayerPrefs.GetInt(GunPowerKey, _progressionBalance.StartingGunPower);
       _timer = PlayerPrefs.GetInt(TimerKey, _progressionBalance.StartingTimer);
+      _battleMusicRunCount = PlayerPrefs.GetInt(BattleMusicRunCountKey, 0);
     }
 
     void IDisposable.Dispose()
