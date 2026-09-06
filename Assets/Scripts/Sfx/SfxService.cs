@@ -196,22 +196,24 @@ namespace Sfx
       _musicSource.Play();
     }
 
-    /// Pause rather than stop, so the track resumes where the battle left it. Driven from
-    /// BattleHudUi, the one place that sees both the pause menu and the upgrade screen.
-    public void SetMusicPaused(bool isPaused)
+    /// Driven from BattleHudUi, the one place that sees both the pause menu and the upgrade
+    /// screen. Music pauses rather than stops, so the track resumes where the battle left it.
+    public void SetBattleScreenOpen(bool isOpen)
     {
-      if (_musicSource == null)
-        return;
-
-      if (isPaused)
+      if (isOpen)
       {
-        _musicSource.Pause();
+        // The queues drain on unscaled time, which keeps running while a screen holds
+        // Time.timeScale at 0 - without this, kills and hits from before the screen opened keep
+        // firing behind it. They belong to a moment the player has stepped out of, so they are
+        // dropped rather than held: replaying a whole wave on resume would be worse.
+        ClearThrottleQueues();
+        _musicSource?.Pause();
         return;
       }
 
       // UnPause on a source that was stopped (battle over, or never started) does nothing, so a
       // screen closing after the battle ended cannot resurrect the track.
-      _musicSource.UnPause();
+      _musicSource?.UnPause();
     }
 
     private void BeginMusicFadeOut()

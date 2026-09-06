@@ -204,17 +204,18 @@ namespace Battle
       ApplyAnyScreenOpenState();
     }
 
-    /// Pause, the progression screen, and the cheats screen each drive Time.timeScale on their own, so whichever one
-    /// closes first restores it to 1 and unfreezes the world behind the other. This is the only
-    /// place that sees all three, so it re-freezes while any is still up - and holds the battle
-    /// music on the same condition, so the track cannot drift out of step with the freeze.
+    /// Pause, the progression screen, and the cheats screen each drive Time.timeScale on their
+    /// own, so whichever one closes first restores it to 1 and unfreezes the world behind the
+    /// others. This is the only place that sees all three, so it re-freezes while any is still
+    /// up - and hands the same condition to the sfx service, so the music and the queued battle
+    /// sounds cannot drift out of step with the freeze.
     private void ApplyAnyScreenOpenState()
     {
       var isAnyScreenOpen = _pauseShown || _progressionShown || _cheatsInfoShown;
       if (isAnyScreenOpen)
         Time.timeScale = 0f;
 
-      _sfxService?.SetMusicPaused(isAnyScreenOpen);
+      _sfxService?.SetBattleScreenOpen(isAnyScreenOpen);
     }
 
     private void OnBattleOver()
