@@ -156,6 +156,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &237617299282950670
 GameObject:
   m_ObjectHideFlags: 0
@@ -312,6 +313,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &393184555943109448
 GameObject:
   m_ObjectHideFlags: 0
@@ -468,6 +470,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &506172685619804794
 GameObject:
   m_ObjectHideFlags: 0
@@ -624,6 +627,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &538110873475157273
 GameObject:
   m_ObjectHideFlags: 0
@@ -780,6 +784,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &721331782438972169
 GameObject:
   m_ObjectHideFlags: 0
@@ -936,6 +941,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &824153971603710198
 GameObject:
   m_ObjectHideFlags: 0
@@ -1092,6 +1098,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &1063412343184259646
 GameObject:
   m_ObjectHideFlags: 0
@@ -1248,6 +1255,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &1333901439700535054
 GameObject:
   m_ObjectHideFlags: 0
@@ -1404,6 +1412,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &1354611125287516032
 GameObject:
   m_ObjectHideFlags: 0
@@ -1488,6 +1497,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Destruction.DestructibleObject
   _breakMagnitude: 6
   _spawnDestructionFx: 0
+  _houseDifficultyLevel: 1
 --- !u!114 &9128842591852813388
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1501,6 +1511,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Destruction.DestructibleHealth
   _objectType: 2
+  _minPartFalloutHealthPercentage: 0.25
+  _maxPartFalloutHealthPercentage: 0.35
+  _minPartsPerFallout: 1
+  _maxPartsPerFallout: 1
 --- !u!1 &1519794924922824911
 GameObject:
   m_ObjectHideFlags: 0
@@ -1600,6 +1614,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Destruction.DestructibleObject
   _breakMagnitude: 6
   _spawnDestructionFx: 0
+  _houseDifficultyLevel: 1
 --- !u!114 &4534774751376587712
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1613,6 +1628,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Destruction.DestructibleHealth
   _objectType: 1
+  _minPartFalloutHealthPercentage: 0.25
+  _maxPartFalloutHealthPercentage: 0.35
+  _minPartsPerFallout: 1
+  _maxPartsPerFallout: 1
 --- !u!114 &4902071143647305024
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1811,6 +1830,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &1655706135196290020
 GameObject:
   m_ObjectHideFlags: 0
@@ -1967,6 +1987,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &1669549536659984329
 GameObject:
   m_ObjectHideFlags: 0
@@ -2123,6 +2144,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &1676706513248324179
 GameObject:
   m_ObjectHideFlags: 0
@@ -2279,6 +2301,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &2034491917874440572
 GameObject:
   m_ObjectHideFlags: 0
@@ -2435,6 +2458,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &2069356330668540216
 GameObject:
   m_ObjectHideFlags: 0
@@ -2591,6 +2615,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &2255490426306232036
 GameObject:
   m_ObjectHideFlags: 0
@@ -2747,6 +2772,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &2401908956343146642
 GameObject:
   m_ObjectHideFlags: 0
@@ -2903,6 +2929,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &2502707363304420718
 GameObject:
   m_ObjectHideFlags: 0
@@ -3059,6 +3086,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &2511915468735135964
 GameObject:
   m_ObjectHideFlags: 0
@@ -3201,7 +3229,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SceneHud.SceneHudElement
   _id: 0
-  _resolution: {x: 724, y: 256}
+  _resolution: {x: 740, y: 256}
 --- !u!1 &2533088591562352129
 GameObject:
   m_ObjectHideFlags: 0
@@ -3358,6 +3386,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &2612518970004686876
 GameObject:
   m_ObjectHideFlags: 0
@@ -3514,6 +3543,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &2624309755072260702
 GameObject:
   m_ObjectHideFlags: 0
@@ -3670,6 +3700,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &2730661429386556725
 GameObject:
   m_ObjectHideFlags: 0
@@ -3826,6 +3857,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &2810318477788721085
 GameObject:
   m_ObjectHideFlags: 0
@@ -3982,6 +4014,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &2997124158316716275
 GameObject:
   m_ObjectHideFlags: 0
@@ -4138,6 +4171,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &3149428276506544270
 GameObject:
   m_ObjectHideFlags: 0
@@ -4294,6 +4328,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &3265203836360224829
 GameObject:
   m_ObjectHideFlags: 0
@@ -4450,6 +4485,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &3565152944122813829
 GameObject:
   m_ObjectHideFlags: 0
@@ -4606,6 +4642,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &3862313151216745438
 GameObject:
   m_ObjectHideFlags: 0
@@ -4762,6 +4799,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &3883383659524666948
 GameObject:
   m_ObjectHideFlags: 0
@@ -4918,6 +4956,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &4055829592294515445
 GameObject:
   m_ObjectHideFlags: 0
@@ -5074,6 +5113,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &4188281835595758510
 GameObject:
   m_ObjectHideFlags: 0
@@ -5230,6 +5270,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &4316805449023417479
 GameObject:
   m_ObjectHideFlags: 0
@@ -5386,6 +5427,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &4598227373616421876
 GameObject:
   m_ObjectHideFlags: 0
@@ -5542,6 +5584,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &4615558489729084206
 GameObject:
   m_ObjectHideFlags: 0
@@ -5698,6 +5741,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &4928340025514502201
 GameObject:
   m_ObjectHideFlags: 0
@@ -5854,6 +5898,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &4970611955721663957
 GameObject:
   m_ObjectHideFlags: 0
@@ -6010,6 +6055,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &5383297738471329376
 GameObject:
   m_ObjectHideFlags: 0
@@ -6166,6 +6212,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &5627422739930074380
 GameObject:
   m_ObjectHideFlags: 0
@@ -6322,6 +6369,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &5918848183107616259
 GameObject:
   m_ObjectHideFlags: 0
@@ -6478,6 +6526,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &6174625884650207478
 GameObject:
   m_ObjectHideFlags: 0
@@ -6634,6 +6683,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &6604859253549763300
 GameObject:
   m_ObjectHideFlags: 0
@@ -6790,6 +6840,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &6766803647715360038
 GameObject:
   m_ObjectHideFlags: 0
@@ -6946,6 +6997,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &6775418544681209697
 GameObject:
   m_ObjectHideFlags: 0
@@ -7157,6 +7209,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &6944888038037664600
 GameObject:
   m_ObjectHideFlags: 0
@@ -7313,6 +7366,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &7048605791084384812
 GameObject:
   m_ObjectHideFlags: 0
@@ -7412,6 +7466,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Destruction.DestructibleObject
   _breakMagnitude: 6
   _spawnDestructionFx: 0
+  _houseDifficultyLevel: 1
 --- !u!114 &5266013732636789037
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7425,6 +7480,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Destruction.DestructibleHealth
   _objectType: 1
+  _minPartFalloutHealthPercentage: 0.25
+  _maxPartFalloutHealthPercentage: 0.35
+  _minPartsPerFallout: 1
+  _maxPartsPerFallout: 1
 --- !u!114 &1438609858275624878
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7623,6 +7682,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &7243670020817590454
 GameObject:
   m_ObjectHideFlags: 0
@@ -7779,6 +7839,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &7251779121825311773
 GameObject:
   m_ObjectHideFlags: 0
@@ -7935,6 +7996,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &7357971959951019621
 GameObject:
   m_ObjectHideFlags: 0
@@ -8091,6 +8153,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &7599927880108980017
 GameObject:
   m_ObjectHideFlags: 0
@@ -8247,6 +8310,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &7635330342597838729
 GameObject:
   m_ObjectHideFlags: 0
@@ -8403,6 +8467,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &7685142080461982481
 GameObject:
   m_ObjectHideFlags: 0
@@ -8559,6 +8624,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &7687771641797059165
 GameObject:
   m_ObjectHideFlags: 0
@@ -8658,6 +8724,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Destruction.DestructibleObject
   _breakMagnitude: 6
   _spawnDestructionFx: 0
+  _houseDifficultyLevel: 1
 --- !u!114 &8572593337839459793
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8671,6 +8738,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Destruction.DestructibleHealth
   _objectType: 1
+  _minPartFalloutHealthPercentage: 0.25
+  _maxPartFalloutHealthPercentage: 0.35
+  _minPartsPerFallout: 1
+  _maxPartsPerFallout: 1
 --- !u!114 &6280976794846872012
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8869,6 +8940,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &7852490821143797519
 GameObject:
   m_ObjectHideFlags: 0
@@ -9025,6 +9097,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &7873790957458281306
 GameObject:
   m_ObjectHideFlags: 0
@@ -9181,6 +9254,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &7894903238956286842
 GameObject:
   m_ObjectHideFlags: 0
@@ -9337,6 +9411,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &8073436068254812991
 GameObject:
   m_ObjectHideFlags: 0
@@ -9493,6 +9568,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &8181969302758858677
 GameObject:
   m_ObjectHideFlags: 0
@@ -9649,6 +9725,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &8215449563552137056
 GameObject:
   m_ObjectHideFlags: 0
@@ -9805,6 +9882,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &8249093853913078470
 GameObject:
   m_ObjectHideFlags: 0
@@ -9961,6 +10039,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &8270444091088094865
 GameObject:
   m_ObjectHideFlags: 0
@@ -10117,6 +10196,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &8730868390995818843
 GameObject:
   m_ObjectHideFlags: 0
@@ -10216,6 +10296,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Destruction.DestructibleObject
   _breakMagnitude: 6
   _spawnDestructionFx: 0
+  _houseDifficultyLevel: 1
 --- !u!114 &5418043152357378114
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10229,6 +10310,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Destruction.DestructibleHealth
   _objectType: 1
+  _minPartFalloutHealthPercentage: 0.25
+  _maxPartFalloutHealthPercentage: 0.35
+  _minPartsPerFallout: 1
+  _maxPartsPerFallout: 1
 --- !u!114 &8154832176430320146
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10427,6 +10512,7 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
 --- !u!1 &9135690102459635813
 GameObject:
   m_ObjectHideFlags: 0
@@ -10583,3 +10669,4 @@ MonoBehaviour:
   settings:
     baseFallSpeed: 1
     speedMultiplier: 0.7289999
+    timeoutMultiplier: 1
