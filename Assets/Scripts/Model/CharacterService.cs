@@ -183,6 +183,16 @@ namespace Model
       CoinsChanged?.Invoke(_storage.CurrentCoins);
     }
 
+    /// Wipes saved progression and refreshes the values currently shown by battle and metagame UI.
+    public void ResetProgression()
+    {
+      _storage.Reset();
+      CurrentHealth = Math.Min(CurrentHealth, MaxHealth);
+      ProgressionChanged?.Invoke();
+      CoinsChanged?.Invoke(CurrentCoins);
+      HealthChanged?.Invoke(CurrentHealth);
+    }
+
     public void UpgradeAttackPower()
     {
       if (IsAttackPowerMaxLevel)

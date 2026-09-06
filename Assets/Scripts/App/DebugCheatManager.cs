@@ -2,9 +2,11 @@ using UnityEngine;
 using Unity.Cinemachine;
 using UnityEngine.InputSystem;
 using VContainer;
+using Battle;
 using Destruction;
 using Model;
 using Movement;
+using ScenesManagement;
 using Timer;
 
 namespace App
@@ -22,6 +24,7 @@ namespace App
 
     [Inject] private CharacterService _characterService;
     [Inject] private BattleService _battleService;
+    [Inject] private SceneService _sceneService;
 
     private void Awake() => this.AsInjected();
 
@@ -37,11 +40,17 @@ namespace App
       if (keyboard.minusKey.wasPressedThisFrame || keyboard.numpadMinusKey.wasPressedThisFrame)
         Time.timeScale *= 0.5f;
 
+      if (keyboard.f2Key.wasPressedThisFrame)
+        ToggleCheatsInfo();
+
       if (keyboard.f8Key.wasPressedThisFrame)
         TeleportPlayer(_teleportPosition);
 
       if (keyboard.f9Key.wasPressedThisFrame)
         TeleportPlayer(Vector3.zero);
+
+      if (keyboard.f3Key.wasPressedThisFrame)
+        ResetProgress();
 
       if (keyboard.f10Key.wasPressedThisFrame)
         EnablePlayerInvincibility();
@@ -78,6 +87,29 @@ namespace App
 
       _characterService.AddCoins(_coinsToAdd);
       Debug.Log($"Added {_coinsToAdd} coins to the player.", this);
+      return true;
+    }
+
+    /// <summary>Resets all saved player progression. Press F3 during a battle.</summary>
+    public bool ResetProgress()
+    {
+      if (_characterService == null)
+        return false;
+
+      _characterService.ResetProgression();
+      _sceneService?.LoadMainMenuScene();
+      Debug.Log("All player progression reset.", this);
+      return true;
+    }
+
+    /// <summary>Toggles the cheats info view. Press F2 during a battle.</summary>
+    public bool ToggleCheatsInfo()
+    {
+      var cheatsInfoUi = FindFirstObjectByType<CheatsInfoUi>(FindObjectsInactive.Include);
+      if (cheatsInfoUi == null)
+        return false;
+
+      cheatsInfoUi.Toggle();
       return true;
     }
 

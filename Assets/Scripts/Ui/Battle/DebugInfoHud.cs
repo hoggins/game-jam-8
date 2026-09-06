@@ -3,15 +3,13 @@ using Combat;
 using Model;
 using Movement;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using VContainer;
 
 namespace Battle
 {
   /// <summary>
   /// Lightweight runtime diagnostics for the battle HUD. The panel is compiled out of the player
-  /// by the preprocessor, can be hidden in the editor with <see cref="_showInEditor"/>, and can be
-  /// toggled with F2. The toggle is remembered between Play Mode sessions.
+  /// by the preprocessor and can be hidden in the editor with <see cref="_showInEditor"/>.
   /// </summary>
   [DisallowMultipleComponent]
   public sealed class DebugInfoHud : MonoBehaviour
@@ -30,7 +28,6 @@ namespace Battle
 
     private GUIStyle _boxStyle;
     private GUIStyle _labelStyle;
-    private int _lastToggleFrame = -1;
 
     private void Awake()
     {
@@ -63,30 +60,8 @@ namespace Battle
 
     private int _lastContentFrame = -1;
 
-    private void Update()
-    {
-      if (Keyboard.current != null && Keyboard.current.f2Key.wasPressedThisFrame)
-        ToggleVisibility();
-    }
-
-    private void ToggleVisibility()
-    {
-      if (_lastToggleFrame == Time.frameCount)
-        return;
-
-      _lastToggleFrame = Time.frameCount;
-      _showInEditor = !_showInEditor;
-      UnityEditor.EditorPrefs.SetBool(ShowInEditorPreferenceKey, _showInEditor);
-    }
-
     private void OnGUI()
     {
-      if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.F2)
-      {
-        ToggleVisibility();
-        Event.current.Use();
-      }
-
       if (!_showInEditor)
         return;
 

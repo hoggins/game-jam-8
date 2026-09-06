@@ -36,6 +36,8 @@ namespace Battle
     private Coroutine _transitionCoroutine;
     private bool _pauseShown;
     private bool _progressionShown;
+    private CheatsInfoUi _cheatsInfoUi;
+    private bool _cheatsInfoShown;
     private bool _battleOverShown;
     private bool _hudVisible = true;
 
@@ -67,9 +69,14 @@ namespace Battle
       if (_progressionUi != null)
         _progressionUi.ShownChanged += OnProgressionShownChanged;
 
+      _cheatsInfoUi ??= FindFirstObjectByType<CheatsInfoUi>(FindObjectsInactive.Include);
+      if (_cheatsInfoUi != null)
+        _cheatsInfoUi.ShownChanged += OnCheatsInfoShownChanged;
+
       // The popups are siblings that reset themselves on Awake, so the HUD comes up unobscured.
       _pauseShown = _pauseMenuUi != null && _pauseMenuUi.IsPaused;
       _progressionShown = _progressionUi != null && _progressionUi.IsShown;
+      _cheatsInfoShown = _cheatsInfoUi != null && _cheatsInfoUi.IsShown;
       ApplyHudVisibility(false);
 
       if (_upgradeButton != null)
@@ -103,6 +110,9 @@ namespace Battle
 
       if (_progressionUi != null)
         _progressionUi.ShownChanged -= OnProgressionShownChanged;
+
+      if (_cheatsInfoUi != null)
+        _cheatsInfoUi.ShownChanged -= OnCheatsInfoShownChanged;
 
       if (_transitionCoroutine != null)
       {
@@ -187,13 +197,20 @@ namespace Battle
       ApplyAnyScreenOpenState();
     }
 
-    /// Pause and the progression screen each drive Time.timeScale on their own, so whichever one
+    private void OnCheatsInfoShownChanged(bool isShown)
+    {
+      _cheatsInfoShown = isShown;
+      ApplyHudVisibility(true);
+      ApplyAnyScreenOpenState();
+    }
+
+    /// Pause, the progression screen, and the cheats screen each drive Time.timeScale on their own, so whichever one
     /// closes first restores it to 1 and unfreezes the world behind the other. This is the only
-    /// place that sees both, so it re-freezes while either is still up - and holds the battle
+    /// place that sees all three, so it re-freezes while any is still up - and holds the battle
     /// music on the same condition, so the track cannot drift out of step with the freeze.
     private void ApplyAnyScreenOpenState()
     {
-      var isAnyScreenOpen = _pauseShown || _progressionShown;
+      var isAnyScreenOpen = _pauseShown || _progressionShown || _cheatsInfoShown;
       if (isAnyScreenOpen)
         Time.timeScale = 0f;
 
@@ -218,7 +235,7 @@ namespace Battle
     /// and stops taking clicks so the popup underneath owns the input.
     private void ApplyHudVisibility(bool animate)
     {
-      var visible = !_pauseShown && !_progressionShown && !_battleOverShown;
+      var visible = !_pauseShown && !_progressionShown && !_cheatsInfoShown && !_battleOverShown;
       if (_hudVisible == visible && animate)
         return;
 
@@ -253,7 +270,7 @@ namespace Battle
       var startScale = transform.localScale;
       var targetScale = Vector3.one * (visible ? 1f : _hiddenScale);
 
-      // Pause and the upgrade screen both drive timeScale to 0, so this cannot use scaled time.
+      // Pause, the upgrade screen, and the cheats screen all drive timeScale to 0, so this cannot use scaled time.
       for (var elapsed = 0f; elapsed < _transitionDuration; elapsed += Time.unscaledDeltaTime)
       {
         var progress = _transitionCurve.Evaluate(Mathf.Clamp01(elapsed / _transitionDuration));
