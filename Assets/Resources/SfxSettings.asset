@@ -22,6 +22,11 @@ MonoBehaviour:
   duckKilledSpread: 0.5
   duckKilledCooldown: 0.15
   duckKilledMaxQueued: 8
+  buildingDestroyedClips:
+  - {fileID: 8300000, guid: 26cc1dac9815f4bf28449977cc141537, type: 3}
+  - {fileID: 8300000, guid: a5b6d3caa2ede4f9aa1929eaf52bb6b4, type: 3}
+  buildingDestroyedVolumeMin: 0.6
+  buildingDestroyedVolumeMax: 1
   buttonClickClips:
   - {fileID: 8300000, guid: 7ce0b9291ea5f4316aec404f89d63e65, type: 3}
   - {fileID: 8300000, guid: 84fcfca595d9d45c7ad9abbc4eb966a4, type: 3}

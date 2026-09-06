@@ -30,6 +30,7 @@ namespace Sfx
     private AudioSource _source;
 
     private int _lastDuckKilledIndex = -1;
+    private int _lastBuildingDestroyedIndex = -1;
     private int _lastButtonClickIndex = -1;
     private int _lastPlayerDamagedIndex = -1;
 
@@ -63,6 +64,7 @@ namespace Sfx
       _source.ignoreListenerPause = true;
 
       _characterService.DuckKilled += OnDuckKilled;
+      _characterService.BuildingDestroyed += OnBuildingDestroyed;
       _characterService.Damaged += OnPlayerDamaged;
       _battleService.BattleWon += OnBattleWon;
       _battleService.BattleDefeated += OnBattleDefeated;
@@ -71,6 +73,7 @@ namespace Sfx
     void IDisposable.Dispose()
     {
       _characterService.DuckKilled -= OnDuckKilled;
+      _characterService.BuildingDestroyed -= OnBuildingDestroyed;
       _characterService.Damaged -= OnPlayerDamaged;
       _battleService.BattleWon -= OnBattleWon;
       _battleService.BattleDefeated -= OnBattleDefeated;
@@ -85,6 +88,11 @@ namespace Sfx
       if (_duckKilledThrottle.Request(_settings.DuckKilledSpread, _settings.DuckKilledCooldown, _settings.DuckKilledMaxQueued))
         PlayDuckKilled();
     }
+
+    /// Unthrottled: a building takes a sustained beating to bring down, so these arrive spaced
+    /// out on their own rather than in the same-frame bursts the duck and damage groups see.
+    private void OnBuildingDestroyed() =>
+      Play(PickClip(_settings.BuildingDestroyedClips, ref _lastBuildingDestroyedIndex), _settings.RollBuildingDestroyedVolume());
 
     private void OnPlayerDamaged()
     {
@@ -164,6 +172,7 @@ namespace Sfx
     private void WarnOnEmptyGroups()
     {
       WarnIfEmpty(_settings.DuckKilledClips, nameof(SfxSettings.DuckKilledClips));
+      WarnIfEmpty(_settings.BuildingDestroyedClips, nameof(SfxSettings.BuildingDestroyedClips));
       WarnIfEmpty(_settings.ButtonClickClips, nameof(SfxSettings.ButtonClickClips));
       WarnIfEmpty(_settings.PlayerDamagedClips, nameof(SfxSettings.PlayerDamagedClips));
 
