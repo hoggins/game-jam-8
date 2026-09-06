@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Destruction;
 using UnityEngine;
@@ -11,6 +12,8 @@ namespace Map
   public sealed class TimerRoute
   {
     public const int HopCount = 8;
+    private const int MaxGenerationAttempts = 8;
+    private const int LateralNormalizationSamples = 1024;
 
     private readonly Vector3[] _pathPoints;
     private readonly float[] _pathCumulativeLengths;
@@ -24,6 +27,9 @@ namespace Map
       Vector3[] pathPoints, float[] pathCumulativeLengths,
       Vector3[] checkpointPoints, float[] checkpointProgresses, float[] checkpointLegLengths,
       float directDistance, float scale, float lateralAmplitude, float oscillations,
+      int routeSeed, int generationAttempts, bool mirrored,
+      float harmonicWeight, float phase, float secondHarmonicPhase,
+      float peakLateralExcursion,
       float[] checkpointTurnAngles, float[] checkpointLateralOffsets)
     {
       _pathPoints = pathPoints;
@@ -37,6 +43,13 @@ namespace Map
       Scale = scale;
       LateralAmplitude = lateralAmplitude;
       Oscillations = oscillations;
+      RouteSeed = routeSeed;
+      GenerationAttempts = generationAttempts;
+      Mirrored = mirrored;
+      HarmonicWeight = harmonicWeight;
+      Phase = phase;
+      SecondHarmonicPhase = secondHarmonicPhase;
+      PeakLateralExcursion = peakLateralExcursion;
       TotalLength = pathCumulativeLengths[pathCumulativeLengths.Length - 1];
 
       var turnTotal = 0f;
@@ -68,6 +81,13 @@ namespace Map
     public float Scale { get; }
     public float LateralAmplitude { get; }
     public float Oscillations { get; }
+    public int RouteSeed { get; }
+    public int GenerationAttempts { get; }
+    public bool Mirrored { get; }
+    public float HarmonicWeight { get; }
+    public float Phase { get; }
+    public float SecondHarmonicPhase { get; }
+    public float PeakLateralExcursion { get; }
     public float MaxTurnAngleDeg { get; }
     public float MeanTurnAngleDeg { get; }
     public float FinalSegmentTurnAngleDeg { get; }
@@ -91,6 +111,19 @@ namespace Map
       float forwardFraction, float oscillations,
       float initialDistance, IReadOnlyList<float> hopDistances, out TimerRoute route)
     {
+      return TryCreate(
+        origin, goal, lateralAmplitude, forwardFraction, oscillations,
+        initialDistance, hopDistances, false, 0f, 0f, 0f,
+        0, 1, out route);
+    }
+
+    private static bool TryCreate(
+      Vector3 origin, Vector3 goal, float lateralAmplitude,
+      float forwardFraction, float oscillations,
+      float initialDistance, IReadOnlyList<float> hopDistances,
+      bool mirrored, float harmonicWeight, float phase, float secondHarmonicPhase,
+      int routeSeed, int generationAttempts, out TimerRoute route)
+    {
       route = null;
 
       var toGoal = goal - origin;
@@ -101,6 +134,8 @@ namespace Map
 
       var forward = toGoal / directDistance;
       var side = new Vector3(-forward.z, 0f, forward.x);
+      if (mirrored)
+        side = -side;
       var points = new Vector3[HopCount + 3];
       points[0] = origin;
 
@@ -114,6 +149,8 @@ namespace Map
         : 0f;
       var scaledForwardDistance = requestedForwardDistance * scale;
       var amplitude = Mathf.Max(0f, lateralAmplitude);
+      var normalization = CalculateLateralNormalization(
+        oscillations, harmonicWeight, phase, secondHarmonicPhase);
 
       var current = origin;
       var cumulativeForwardDistance = 0f;
@@ -121,7 +158,8 @@ namespace Map
         points, 1, ref current, forward, side,
         Mathf.Max(0f, initialDistance) * scale,
         ref cumulativeForwardDistance,
-        scaledForwardDistance, amplitude, oscillations);
+        scaledForwardDistance, amplitude, oscillations,
+        harmonicWeight, phase, secondHarmonicPhase, normalization);
       for (var i = 0; i < HopCount; i++)
       {
         AppendLeg(
@@ -134,7 +172,11 @@ namespace Map
           ref cumulativeForwardDistance,
           scaledForwardDistance,
           amplitude,
-          oscillations);
+          oscillations,
+          harmonicWeight,
+          phase,
+          secondHarmonicPhase,
+          normalization);
       }
 
       goal.y = origin.y;
@@ -162,6 +204,13 @@ namespace Map
         scale,
         amplitude,
         oscillations,
+        routeSeed,
+        generationAttempts,
+        mirrored,
+        harmonicWeight,
+        phase,
+        secondHarmonicPhase,
+        amplitude,
         checkpointTurnAngles,
         checkpointLateralOffsets);
       return route.TotalLength > 0.001f;
@@ -171,14 +220,19 @@ namespace Map
       Vector3[] points, int pointIndex, ref Vector3 current,
       Vector3 forward, Vector3 side, float distance,
       ref float cumulativeForwardDistance, float totalForwardDistance,
-      float amplitude, float oscillations)
+      float amplitude, float oscillations,
+      float harmonicWeight, float phase, float secondHarmonicPhase,
+      float normalization)
     {
       cumulativeForwardDistance += distance;
       var normalizedProgress = totalForwardDistance > 0f
         ? cumulativeForwardDistance / totalForwardDistance
         : (float)pointIndex / (HopCount + 1);
-      var lateralOffset = amplitude
-        * Mathf.Sin(2f * Mathf.PI * oscillations * normalizedProgress);
+      var rawOffset = EvaluateLateralSeries(
+        normalizedProgress, oscillations, harmonicWeight, phase, secondHarmonicPhase);
+      var originOffset = EvaluateLateralSeries(
+        0f, oscillations, harmonicWeight, phase, secondHarmonicPhase);
+      var lateralOffset = amplitude * (rawOffset - originOffset) / normalization;
       current = points[0]
         + forward * cumulativeForwardDistance
         + side * lateralOffset;
@@ -195,40 +249,96 @@ namespace Map
       out TimerRoute route)
     {
       return TryCreateForBattle(
-        origin, lateralAmplitude, 0.9f, 1.5f, spawnSettings, seed, out route);
+        origin, lateralAmplitude, 0.9f, 1.5f, 45f, 2,
+        spawnSettings, seed, out route, out _);
     }
 
     public static bool TryCreateForBattle(
       Vector3 origin, float lateralAmplitude, float forwardFraction, float oscillations,
       SpecialSpawnSettings spawnSettings, int seed, out TimerRoute route)
     {
+      return TryCreateForBattle(
+        origin, lateralAmplitude, forwardFraction, oscillations, 45f, 2,
+        spawnSettings, seed, out route, out _);
+    }
+
+    public static bool TryCreateForBattle(
+      Vector3 origin, float lateralAmplitude, float forwardFraction, float oscillations,
+      float maxTurnAngle, int minCheckpointsPerTier,
+      SpecialSpawnSettings spawnSettings, int seed,
+      out TimerRoute route, out int generationAttempts)
+    {
+      route = null;
+      generationAttempts = 0;
       var goal = TheGoal.Current;
       if (goal == null)
-        goal = Object.FindFirstObjectByType<TheGoal>();
+        goal = UnityEngine.Object.FindFirstObjectByType<TheGoal>();
 
       if (goal == null || goal.IsDestroyed)
       {
-        route = null;
         return false;
       }
 
       var random = new System.Random(seed);
-      var initialDistance = PickDistance(
-        spawnSettings, SpecialHouses.Timer, -1, random, 30f);
-      var hopDistances = new float[HopCount];
-      for (var i = 0; i < HopCount; i++)
-        hopDistances[i] = PickDistance(
-          spawnSettings, SpecialHouses.Timer, i, random, i == 0 ? 30f : 60f);
+      var candidateHopDistances = new float[HopCount];
+      for (var attempt = 1; attempt <= MaxGenerationAttempts; attempt++)
+      {
+        var initialDistance = PickDistance(
+          spawnSettings, SpecialHouses.Timer, -1, random, 30f);
+        for (var i = 0; i < HopCount; i++)
+          candidateHopDistances[i] = PickDistance(
+            spawnSettings, SpecialHouses.Timer, i, random, i == 0 ? 30f : 60f);
 
-      return TryCreate(
+        var mirrored = random.Next(0, 2) == 0;
+        var harmonicWeight = (float)random.NextDouble() * 0.4f;
+        var phase = (float)random.NextDouble() * 2f * Mathf.PI;
+        var secondHarmonicPhase = (float)random.NextDouble() * 2f * Mathf.PI;
+        if (!TryCreate(
+          origin,
+          goal.transform.position,
+          lateralAmplitude,
+          forwardFraction,
+          oscillations,
+          initialDistance,
+          candidateHopDistances,
+          mirrored,
+          harmonicWeight,
+          phase,
+          secondHarmonicPhase,
+          seed,
+          attempt,
+          out var candidate))
+          continue;
+
+        if (!MeetsGenerationConstraints(candidate, maxTurnAngle, minCheckpointsPerTier))
+          continue;
+
+        route = candidate;
+        generationAttempts = attempt;
+        return true;
+      }
+
+      var fallbackLegs = new float[HopCount];
+      for (var i = 0; i < fallbackLegs.Length; i++)
+        fallbackLegs[i] = 1f;
+
+      TryCreate(
         origin,
         goal.transform.position,
         lateralAmplitude,
         forwardFraction,
         oscillations,
-        initialDistance,
-        hopDistances,
+        1f,
+        fallbackLegs,
+        false,
+        0f,
+        0f,
+        0f,
+        seed,
+        MaxGenerationAttempts,
         out route);
+      generationAttempts = MaxGenerationAttempts;
+      return route != null;
     }
 
     private static float PickDistance(
@@ -244,6 +354,57 @@ namespace Map
         return fallback;
 
       return Mathf.Lerp(minDistance, maxDistance, (float)random.NextDouble());
+    }
+
+    public static int CreateSeed() => Guid.NewGuid().GetHashCode();
+
+    private static float EvaluateLateralSeries(
+      float normalizedProgress, float oscillations, float harmonicWeight,
+      float phase, float secondHarmonicPhase)
+    {
+      var firstHarmonic = 2f * Mathf.PI * oscillations * normalizedProgress + phase;
+      var secondHarmonic = 4f * Mathf.PI * oscillations * normalizedProgress + secondHarmonicPhase;
+      return Mathf.Sin(firstHarmonic) + harmonicWeight * Mathf.Sin(secondHarmonic);
+    }
+
+    private static float CalculateLateralNormalization(
+      float oscillations, float harmonicWeight, float phase, float secondHarmonicPhase)
+    {
+      var originOffset = EvaluateLateralSeries(
+        0f, oscillations, harmonicWeight, phase, secondHarmonicPhase);
+      var maximum = 0f;
+      for (var i = 0; i <= LateralNormalizationSamples; i++)
+      {
+        var normalizedProgress = i / (float)LateralNormalizationSamples;
+        var centeredOffset = EvaluateLateralSeries(
+          normalizedProgress, oscillations, harmonicWeight, phase, secondHarmonicPhase)
+          - originOffset;
+        maximum = Mathf.Max(maximum, Mathf.Abs(centeredOffset));
+      }
+
+      return Mathf.Max(0.000001f, maximum);
+    }
+
+    private static bool MeetsGenerationConstraints(
+      TimerRoute route, float maxTurnAngle, int minCheckpointsPerTier)
+    {
+      if (route.MaxTurnAngleDeg > Mathf.Max(0f, maxTurnAngle))
+        return false;
+
+      var tierCounts = new int[3];
+      for (var i = 0; i < route.CheckpointCount; i++)
+      {
+        var normalizedProgress = route.NormalizeProgress(route.GetCheckpointProgress(i));
+        var tier = normalizedProgress < HouseSet.RouteT1End
+          ? 0
+          : normalizedProgress < HouseSet.RouteT2End ? 1 : 2;
+        tierCounts[tier]++;
+      }
+
+      var minimum = Mathf.Max(0, minCheckpointsPerTier);
+      return tierCounts[0] >= minimum
+        && tierCounts[1] >= minimum
+        && tierCounts[2] >= minimum;
     }
 
     private static float[] BuildCumulativeLengths(IReadOnlyList<Vector3> points)

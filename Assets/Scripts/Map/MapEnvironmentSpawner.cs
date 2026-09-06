@@ -196,14 +196,18 @@ namespace Map
       var player = GameObject.FindGameObjectWithTag("Player");
       var originPosition = player != null ? player.transform.position : parent.position;
       var originCell = new Vector2(originPosition.x / cellSize, originPosition.z / cellSize);
+      var routeSeed = TimerRoute.CreateSeed();
       TimerRoute.TryCreateForBattle(
         originPosition,
         _battleBalance != null ? _battleBalance.TimerRouteLateralAmplitude : 60f,
         _battleBalance != null ? _battleBalance.TimerRouteForwardFraction : 0.9f,
         _battleBalance != null ? _battleBalance.TimerRouteOscillations : 1.5f,
+        _battleBalance != null ? _battleBalance.TimerRouteMaxTurnAngle : 45f,
+        _battleBalance != null ? _battleBalance.TimerRouteMinCheckpointsPerTier : 2,
         _specialSpawnSettings,
-        seed,
-        out _timerRoute);
+        routeSeed,
+        out _timerRoute,
+        out _);
       _telemetry?.RecordRoute(_timerRoute);
 
       var housePlacements = MapFiller.Fill(mapData, houseSet, originCell, seed, _timerRoute);

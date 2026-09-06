@@ -108,9 +108,12 @@ namespace Map
         battleBalance != null ? battleBalance.TimerRouteLateralAmplitude : 60f,
         battleBalance != null ? battleBalance.TimerRouteForwardFraction : 0.9f,
         battleBalance != null ? battleBalance.TimerRouteOscillations : 1.5f,
+        battleBalance != null ? battleBalance.TimerRouteMaxTurnAngle : 45f,
+        battleBalance != null ? battleBalance.TimerRouteMinCheckpointsPerTier : 2,
         spawnSettings,
         seed,
-        out var route))
+        out var route,
+        out _))
         return;
 
       var points = route.PathPoints;
@@ -254,9 +257,12 @@ namespace Map
         battleBalance != null ? battleBalance.TimerRouteLateralAmplitude : 60f,
         battleBalance != null ? battleBalance.TimerRouteForwardFraction : 0.9f,
         battleBalance != null ? battleBalance.TimerRouteOscillations : 1.5f,
+        battleBalance != null ? battleBalance.TimerRouteMaxTurnAngle : 45f,
+        battleBalance != null ? battleBalance.TimerRouteMinCheckpointsPerTier : 2,
         spawnSettings,
         seed,
-        out var timerRoute);
+        out var timerRoute,
+        out _);
 
       if (houseSet != null)
         foreach (var placement in MapFiller.Fill(mapData, houseSet, originCell, seed, timerRoute))

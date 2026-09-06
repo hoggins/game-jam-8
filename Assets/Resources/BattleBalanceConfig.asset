@@ -28,6 +28,8 @@ MonoBehaviour:
   _timerRouteLateralAmplitude: 60
   _timerRouteForwardFraction: 0.9
   _timerRouteOscillations: 1.5
+  _timerRouteMaxTurnAngle: 45
+  _timerRouteMinCheckpointsPerTier: 2
   _timerRoutePlacementJitter: 4
   _duckMaxHealth: 6
   _duckAttackDamage: 1

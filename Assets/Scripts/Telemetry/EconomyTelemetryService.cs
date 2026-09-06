@@ -553,8 +553,15 @@ namespace Telemetry
         totalLength = route.TotalLength,
         directDistance = route.DirectDistance,
         scale = route.Scale,
+        routeSeed = route.RouteSeed,
+        generationAttempts = route.GenerationAttempts,
         lateralAmplitude = route.LateralAmplitude,
         oscillations = route.Oscillations,
+        mirrored = route.Mirrored,
+        harmonicWeight = route.HarmonicWeight,
+        phase = route.Phase,
+        secondHarmonicPhase = route.SecondHarmonicPhase,
+        peakLateralExcursion = route.PeakLateralExcursion,
         maxTurnAngleDeg = route.MaxTurnAngleDeg,
         meanTurnAngleDeg = route.MeanTurnAngleDeg,
         finalSegmentTurnAngleDeg = route.FinalSegmentTurnAngleDeg,
@@ -632,8 +639,15 @@ namespace Telemetry
       public float totalLength;
       public float directDistance;
       public float scale;
+      public int routeSeed;
+      public int generationAttempts;
       public float lateralAmplitude;
       public float oscillations;
+      public bool mirrored;
+      public float harmonicWeight;
+      public float phase;
+      public float secondHarmonicPhase;
+      public float peakLateralExcursion;
       public float maxTurnAngleDeg;
       public float meanTurnAngleDeg;
       public float finalSegmentTurnAngleDeg;

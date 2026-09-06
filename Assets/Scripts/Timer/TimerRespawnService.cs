@@ -185,15 +185,20 @@ namespace Timer
 
       _timerRoute ??= _spawner.CurrentTimerRoute;
       if (_timerRoute == null)
+      {
         TimerRoute.TryCreateForBattle(
           player.position,
           _battleBalance != null ? _battleBalance.TimerRouteLateralAmplitude : 60f,
           _battleBalance != null ? _battleBalance.TimerRouteForwardFraction : 0.9f,
           _battleBalance != null ? _battleBalance.TimerRouteOscillations : 1.5f,
+          _battleBalance != null ? _battleBalance.TimerRouteMaxTurnAngle : 45f,
+          _battleBalance != null ? _battleBalance.TimerRouteMinCheckpointsPerTier : 2,
           _spawnSettings,
-          0,
-          out _timerRoute);
+          TimerRoute.CreateSeed(),
+          out _timerRoute,
+          out _);
         _telemetry?.RecordRoute(_timerRoute);
+      }
 
       if (_timerRoute != null && _timerRoute.TryGetHop(_respawnCount, out var anchor, out var nextRouteProgress))
       {

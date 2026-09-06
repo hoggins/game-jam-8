@@ -53,6 +53,8 @@ namespace Balance
     [SerializeField, Min(0f)] private float _timerRouteLateralAmplitude = 60f;
     [SerializeField, Range(0f, 1f)] private float _timerRouteForwardFraction = 0.9f;
     [SerializeField, Min(0f)] private float _timerRouteOscillations = 1.5f;
+    [SerializeField, Min(0f)] private float _timerRouteMaxTurnAngle = 45f;
+    [SerializeField, Min(0)] private int _timerRouteMinCheckpointsPerTier = 2;
     [Tooltip("Random placement radius around each absolute route waypoint. Set to 0 for exact waypoint placement.")]
     [SerializeField, Min(0f)] private float _timerRoutePlacementJitter = 4f;
 
@@ -111,6 +113,8 @@ namespace Balance
     public float TimerRouteLateralAmplitude => _timerRouteLateralAmplitude;
     public float TimerRouteForwardFraction => _timerRouteForwardFraction;
     public float TimerRouteOscillations => _timerRouteOscillations;
+    public float TimerRouteMaxTurnAngle => _timerRouteMaxTurnAngle;
+    public int TimerRouteMinCheckpointsPerTier => _timerRouteMinCheckpointsPerTier;
     public float TimerRoutePlacementJitter => _timerRoutePlacementJitter;
     public int DuckMaxHealth => _duckMaxHealth;
     public int DuckAttackDamage => _duckAttackDamage;
@@ -178,6 +182,8 @@ namespace Balance
       _timerRouteLateralAmplitude = Mathf.Max(0f, _timerRouteLateralAmplitude);
       _timerRouteForwardFraction = Mathf.Clamp01(_timerRouteForwardFraction);
       _timerRouteOscillations = Mathf.Max(0f, _timerRouteOscillations);
+      _timerRouteMaxTurnAngle = Mathf.Max(0f, _timerRouteMaxTurnAngle);
+      _timerRouteMinCheckpointsPerTier = Mathf.Max(0, _timerRouteMinCheckpointsPerTier);
       _timerRoutePlacementJitter = Mathf.Max(0f, _timerRoutePlacementJitter);
       _duckMaxHealth = Mathf.Max(0, _duckMaxHealth);
       _duckAttackDamage = Mathf.Max(0, _duckAttackDamage);
