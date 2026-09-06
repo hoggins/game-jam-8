@@ -44,6 +44,18 @@ namespace Map
       }
     }
 
+    private readonly struct PropFootprint
+    {
+      public readonly Vector3 Center;
+      public readonly Vector2 HalfExtents;
+
+      public PropFootprint(Vector3 center, Vector2 halfExtents)
+      {
+        Center = center;
+        HalfExtents = halfExtents;
+      }
+    }
+
     private const string ContainerName = "SpawnedEnvironment";
     // Extra margin added on top of a special's real bounding box when clearing houses out of its
     // way, so the cleared area isn't drawn exactly flush with the mesh.
@@ -73,7 +85,12 @@ namespace Map
     // Real footprint of each special's prefab (from its renderer bounds, not the grid size it's
     // configured with), computed once per type and reused on every spawn/respawn.
     private readonly Dictionary<SpecialHouses, Vector2> _specialHalfExtentsCache = new();
+    // Props are children of generated road/sidewalk prefabs rather than grid objects, so they need
+    // their own footprint index in order to be cleared when a special is spawned or moved.
+    private readonly Dictionary<DestructibleObject, PropFootprint> _props = new();
     private readonly List<Renderer> _rendererScratch = new();
+    private readonly List<Collider> _colliderScratch = new();
+    private readonly List<DestructibleObject> _destructibleScratch = new();
     private readonly List<Renderer> _allRenderers = new();
     private readonly HashSet<Vector2Int> _occupied = new();
     private readonly MovementUpdater _movementUpdater;
@@ -149,6 +166,7 @@ namespace Map
       _objects.Clear();
       _specialIds.Clear();
       _currentSpecial.Clear();
+      ClearTrackedProps();
       _occupied.Clear();
       _timerRoute = null;
       DisposeRenderCulling();
@@ -197,6 +215,7 @@ namespace Map
         var instance = Object.Instantiate(placement.House.prefab, position, rotation, _container);
         instance.name = placement.House.name;
         RegisterRenderers(placementIndex, instance);
+        RegisterProps(instance);
 
         var destructible = instance.GetComponentInChildren<DestructibleObject>();
         var id = _nextId++;
@@ -224,6 +243,7 @@ namespace Map
         var instance = Object.Instantiate(placement.Piece.prefab, position, rotation, _container);
         instance.name = placement.Piece.name;
         RegisterRenderers(roadCullingStart + placementIndex, instance);
+        RegisterProps(instance);
       }
 
       for (var placementIndex = 0; placementIndex < sidewalkPlacements.Count; placementIndex++)
@@ -238,6 +258,7 @@ namespace Map
         var instance = Object.Instantiate(placement.Piece.prefab, position, rotation, _container);
         instance.name = placement.Piece.name;
         RegisterRenderers(sidewalkCullingStart + placementIndex, instance);
+        RegisterProps(instance);
       }
 
       if (_cullingGroup != null)
@@ -247,7 +268,7 @@ namespace Map
       }
 
       // The final goal is authored directly in the scene, outside this service's runtime object
-      // bookkeeping. Clear only the generated houses around it so map generation cannot bury the
+      // bookkeeping. Clear generated houses and props around it so map generation cannot bury the
       // objective or make it impossible to reach.
       ClearSceneGoalFootprint();
       SpawnInitialSpecials(parent);
@@ -778,10 +799,103 @@ namespace Map
         : Quaternion.identity;
     }
 
+    private void RegisterProps(GameObject instance)
+    {
+      _destructibleScratch.Clear();
+      instance.GetComponentsInChildren<DestructibleObject>(true, _destructibleScratch);
+
+      foreach (var destructible in _destructibleScratch)
+      {
+        if (!IsProp(destructible) || !TryGetPropFootprint(destructible, out var footprint))
+          continue;
+
+        if (_props.ContainsKey(destructible))
+          continue;
+
+        _props.Add(destructible, footprint);
+        destructible.Destroyed += OnPropDestroyed;
+      }
+    }
+
+    private static bool IsProp(DestructibleObject destructible)
+    {
+      var health = destructible.GetComponent<DestructibleHealth>();
+      return destructible.CompareTag("Prop")
+        || (health != null && health.ObjectType == DestructibleObjectType.Prop);
+    }
+
+    private bool TryGetPropFootprint(DestructibleObject prop, out PropFootprint footprint)
+    {
+      var hasBounds = false;
+      var bounds = default(Bounds);
+
+      _rendererScratch.Clear();
+      prop.GetComponentsInChildren<Renderer>(true, _rendererScratch);
+      foreach (var renderer in _rendererScratch)
+      {
+        if (!hasBounds)
+        {
+          bounds = renderer.bounds;
+          hasBounds = true;
+        }
+        else
+        {
+          bounds.Encapsulate(renderer.bounds);
+        }
+      }
+
+      _colliderScratch.Clear();
+      prop.GetComponentsInChildren<Collider>(true, _colliderScratch);
+      foreach (var collider in _colliderScratch)
+      {
+        if (!collider.enabled)
+          continue;
+
+        if (!hasBounds)
+        {
+          bounds = collider.bounds;
+          hasBounds = true;
+        }
+        else
+        {
+          bounds.Encapsulate(collider.bounds);
+        }
+      }
+
+      if (!hasBounds)
+      {
+        footprint = default;
+        return false;
+      }
+
+      // Bounds are already axis-aligned in world space. Treating them as an identity-rotated
+      // rectangle is conservative and guarantees that the special cannot overlap the prop's
+      // actual rendered/collider footprint after either one is rotated.
+      footprint = new PropFootprint(bounds.center, new Vector2(bounds.extents.x, bounds.extents.z));
+      return true;
+    }
+
+    private void OnPropDestroyed(DestructibleObject prop)
+    {
+      if (prop == null || !_props.Remove(prop))
+        return;
+
+      prop.Destroyed -= OnPropDestroyed;
+    }
+
+    private void ClearTrackedProps()
+    {
+      foreach (var prop in _props.Keys)
+        if (prop != null)
+          prop.Destroyed -= OnPropDestroyed;
+
+      _props.Clear();
+    }
+
     /// <summary>
-    /// Removes every standing object whose footprint overlaps the given one, so a freely-placed
-    /// special never lands inside a house. This is a silent clearing, not a destruction action, so
-    /// the house is removed instantly with no break FX/physics. <paramref name="exclude"/> keeps a
+    /// Removes every standing house or prop whose footprint overlaps the given one, so a freely-placed
+    /// special never lands inside the environment. This is a silent clearing, not a destruction action,
+    /// so the object is removed instantly with no break FX/physics. <paramref name="exclude"/> keeps a
     /// moving object from clearing itself.
     /// </summary>
     private void ClearOverlapping(Vector3 position, Quaternion rotation, Vector2 worldHalfExtents, Transform exclude)
@@ -805,6 +919,24 @@ namespace Map
                 position, rotation.eulerAngles.y, worldHalfExtents,
                 standing.WorldCenter, standing.WorldRotation.eulerAngles.y, standing.WorldHalfExtents))
             standing.Destructible.DestroyInstant();
+        }
+
+        // Props live inside road/sidewalk instances and are not grid objects, so they are not in
+        // _objects. Use a snapshot for the same reason as above: DestroyInstant invokes Destroyed
+        // synchronously and removes the prop from _props.
+        var standingProps = new List<DestructibleObject>(_props.Keys);
+        foreach (var prop in standingProps)
+        {
+          if (prop == null || !_props.TryGetValue(prop, out var footprint))
+            continue;
+
+          if (exclude != null && prop.transform.IsChildOf(exclude))
+            continue;
+
+          if (RectanglesOverlap(
+                position, rotation.eulerAngles.y, worldHalfExtents,
+                footprint.Center, 0f, footprint.HalfExtents))
+            prop.DestroyInstant();
         }
       }
       finally
@@ -1090,6 +1222,7 @@ namespace Map
 
     void System.IDisposable.Dispose()
     {
+      ClearTrackedProps();
       DisposeRenderCulling();
     }
 
