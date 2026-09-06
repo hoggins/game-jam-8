@@ -104,9 +104,8 @@ namespace Health.Editor
         pixels[column * BattleHealthBar.Rows + row] = pixel.GetComponent<DecayPart>();
       }
 
-      // Trigger volume over the whole bar: melee damage query + flow-map no-go footprint. It stays
-      // the full length even as the bar empties, so the player can keep hitting what is left of it
-      // from where he was already standing.
+      // Trigger volume over the whole bar initially: BattleHealthObject shrinks it around the
+      // standing pixels as the bar empties, keeping melee queries and the flow-map footprint tight.
       var box = barRoot.AddComponent<BoxCollider>();
       box.isTrigger = true;
       box.center = new Vector3(0f, PixelSize * 0.5f, 0f);

@@ -1,4 +1,5 @@
 using Destruction;
+using Movement;
 using UnityEngine;
 
 namespace Health
@@ -19,6 +20,10 @@ namespace Health
     [SerializeField] private DestructibleObject _body;
 
     private GameObject _hudCameraObject;
+    private BoxCollider _barCollider;
+    private FlowMapNoGoZone _barNoGoZone;
+    private DecayPart[] _parts;
+    private Renderer[][] _partRenderers;
     private bool _isDead;
 
     private void Awake()
@@ -30,12 +35,26 @@ namespace Health
 
       var camera = GetComponentInChildren<Camera>(true);
       _hudCameraObject = camera != null ? camera.gameObject : null;
+
+      if (_body == null)
+        return;
+
+      _barCollider = _body.GetComponent<BoxCollider>();
+      _barNoGoZone = _body.GetComponent<FlowMapNoGoZone>();
+      _parts = _body.GetComponentsInChildren<DecayPart>(true);
+      _partRenderers = new Renderer[_parts.Length][];
+      for (var i = 0; i < _parts.Length; i++)
+        _partRenderers[i] = _parts[i] != null
+          ? _parts[i].GetComponentsInChildren<Renderer>(true)
+          : System.Array.Empty<Renderer>();
     }
 
     private void OnEnable()
     {
       if (_body != null)
         _body.Destroyed += OnBodyDestroyed;
+
+      UpdateBarCollider();
     }
 
     private void OnDisable()
@@ -46,6 +65,8 @@ namespace Health
 
     private void Update()
     {
+      UpdateBarCollider();
+
       if (!_isDead)
         return;
 
@@ -64,6 +85,78 @@ namespace Health
       // soon as there is nothing left to show rather than waiting for the debris to decay.
       if (_hudCameraObject != null)
         _hudCameraObject.SetActive(false);
+    }
+
+    private void UpdateBarCollider()
+    {
+      if (_barCollider == null || _parts == null)
+        return;
+
+      if (!TryGetStandingPartsBounds(out var bounds))
+      {
+        if (_barCollider.enabled && _barCollider.size != Vector3.zero)
+        {
+          _barCollider.size = Vector3.zero;
+          _barNoGoZone?.RefreshCache();
+        }
+
+        return;
+      }
+
+      if (_barCollider.center == bounds.center && _barCollider.size == bounds.size)
+        return;
+
+      _barCollider.center = bounds.center;
+      _barCollider.size = bounds.size;
+      _barNoGoZone?.RefreshCache();
+    }
+
+    private bool TryGetStandingPartsBounds(out Bounds bounds)
+    {
+      var hasBounds = false;
+      bounds = default;
+
+      for (var i = 0; i < _parts.Length; i++)
+      {
+        var part = _parts[i];
+        if (part == null || !part.gameObject.activeInHierarchy)
+          continue;
+
+        var rigidbody = part.GetComponent<Rigidbody>();
+        if (rigidbody != null && !rigidbody.isKinematic)
+          continue;
+
+        foreach (var renderer in _partRenderers[i])
+        {
+          if (renderer == null || !renderer.enabled)
+            continue;
+
+          EncapsulateWorldBounds(renderer.bounds, ref bounds, ref hasBounds);
+        }
+      }
+
+      return hasBounds;
+    }
+
+    private void EncapsulateWorldBounds(Bounds worldBounds, ref Bounds localBounds, ref bool hasBounds)
+    {
+      var extents = worldBounds.extents;
+      for (var x = -1; x <= 1; x += 2)
+      for (var y = -1; y <= 1; y += 2)
+      for (var z = -1; z <= 1; z += 2)
+      {
+        var worldPoint = worldBounds.center + Vector3.Scale(extents, new Vector3(x, y, z));
+        var localPoint = _body.transform.InverseTransformPoint(worldPoint);
+        if (!hasBounds)
+        {
+          localBounds = new Bounds(localPoint, Vector3.zero);
+          hasBounds = true;
+        }
+        else
+        {
+          localBounds.Encapsulate(localPoint);
+        }
+      }
     }
 
     private bool HasDestructibleChildren()
