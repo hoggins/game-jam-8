@@ -5611,6 +5611,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Destruction.DestructibleHealth
   _objectType: 6
+  _minPartFalloutHealthPercentage: 0.05
+  _maxPartFalloutHealthPercentage: 0.05
+  _minPartsPerFallout: 1
+  _maxPartsPerFallout: 3
 --- !u!114 &8377352111599061663
 MonoBehaviour:
   m_ObjectHideFlags: 0

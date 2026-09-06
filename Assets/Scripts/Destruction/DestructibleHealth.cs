@@ -14,8 +14,16 @@ namespace Destruction
   {
     private const float MinPartFalloutHealthPercentage = 0.25f;
     private const float MaxPartFalloutHealthPercentage = 0.35f;
+    private const int MinPartsPerFallout = 1;
+    private const int MaxPartsPerFallout = 1;
 
     [SerializeField] private DestructibleObjectType _objectType;
+    [SerializeField, Range(0f, 1f)]
+    private float _minPartFalloutHealthPercentage = MinPartFalloutHealthPercentage;
+    [SerializeField, Range(0f, 1f)]
+    private float _maxPartFalloutHealthPercentage = MaxPartFalloutHealthPercentage;
+    [SerializeField, Min(1)] private int _minPartsPerFallout = MinPartsPerFallout;
+    [SerializeField, Min(1)] private int _maxPartsPerFallout = MaxPartsPerFallout;
 
     [Inject] private BattleBalanceConfig _battleBalance;
     [Inject] private EconomyTelemetryService _telemetry;
@@ -64,7 +72,7 @@ namespace Destruction
       var damageTaken = _maxHealth - CurrentHealth;
       while (CurrentHealth > 0
         && damageTaken >= _nextPartFalloutDamage
-        && _destructibleObject.FallOutRandomPart(origin))
+        && FallOutRandomParts(origin))
       {
         _nextPartFalloutDamage += RollPartFalloutDamage();
       }
@@ -79,7 +87,33 @@ namespace Destruction
 
     private float RollPartFalloutDamage() =>
       _maxHealth * UnityEngine.Random.Range(
-        MinPartFalloutHealthPercentage,
-        MaxPartFalloutHealthPercentage);
+        _minPartFalloutHealthPercentage,
+        _maxPartFalloutHealthPercentage);
+
+    private bool FallOutRandomParts(Vector3 origin)
+    {
+      var partCount = UnityEngine.Random.Range(_minPartsPerFallout, _maxPartsPerFallout + 1);
+      var fellOutPart = false;
+      for (var i = 0; i < partCount; i++)
+      {
+        if (!_destructibleObject.FallOutRandomPart(origin))
+          break;
+
+        fellOutPart = true;
+      }
+
+      return fellOutPart;
+    }
+
+    private void OnValidate()
+    {
+      _minPartFalloutHealthPercentage = Mathf.Clamp01(_minPartFalloutHealthPercentage);
+      _maxPartFalloutHealthPercentage = Mathf.Clamp(
+        _maxPartFalloutHealthPercentage,
+        _minPartFalloutHealthPercentage,
+        1f);
+      _minPartsPerFallout = Mathf.Max(1, _minPartsPerFallout);
+      _maxPartsPerFallout = Mathf.Max(_minPartsPerFallout, _maxPartsPerFallout);
+    }
   }
 }
