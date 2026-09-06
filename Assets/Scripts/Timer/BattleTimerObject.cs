@@ -1,6 +1,7 @@
 using App;
 using Destruction;
 using Model;
+using SceneHud;
 using UnityEngine;
 using Unity.Profiling;
 using VContainer;
@@ -27,6 +28,10 @@ namespace Timer
 
     private const int PlaceCount = 4;
 
+    /// How long the smashed clock stays on the HUD after its last digit falls, before the widget
+    /// cuts to the replacement timer. Long enough to watch it come apart.
+    private const float HudLingerSeconds = 2f;
+
     /// Seconds contributed by one unit in each place, most significant first.
     private static readonly int[] PlaceValues = { 600, 60, 10, 1 };
 
@@ -41,6 +46,8 @@ namespace Timer
     private DestructibleObject[] _destructibles;
     private HitFx[] _hitFx;
     private GameObject _hudCamera;
+    private SceneHudElement _hudElement;
+    private float _hudLingerUntil;
     private bool _isDead;
 
     /// True once every digit has been smashed. The husk lingers for a few seconds while the debris
@@ -69,6 +76,7 @@ namespace Timer
 
       var hudCamera = GetComponentInChildren<Camera>(true);
       _hudCamera = hudCamera != null ? hudCamera.gameObject : null;
+      _hudElement = GetComponentInChildren<SceneHudElement>(true);
     }
 
     private void OnEnable()
@@ -110,8 +118,9 @@ namespace Timer
       {
         // Only the digits and the divider are destructible; nothing owns this root, so once the
         // decay manager has retired the last of them the husk has to clear itself up. Left alone it
-        // would linger with its HUD camera and render texture, one more for every respawn.
-        if (!HasDestructibleChildren())
+        // would linger with its HUD camera and render texture, one more for every respawn. The husk
+        // outlives the HUD hold either way, so the widget is never left rendering a dead texture.
+        if (!HasDestructibleChildren() && Time.unscaledTime >= _hudLingerUntil)
           Destroy(gameObject);
 
         return;
@@ -185,8 +194,17 @@ namespace Timer
       if (newCount != 0)
         return;
 
+      // Not a hard cut: the HUD stays on this clock while it comes apart, so the camera keeps
+      // rendering and the replacement's texture waits its turn.
+      _hudLingerUntil = Time.unscaledTime + HudLingerSeconds;
+      if (_hudElement != null)
+        _hudElement.Linger(HudLingerSeconds);
+      else if (_hudCamera != null)
+        _hudCamera.SetActive(false);
+
       // DestroyTimer is what triggers the replacement timer, so it registers its HUD element before
-      // this one stands down; SceneHudService ignores the stale unregister that follows.
+      // this one stands down; the hold above is why that registration waits instead of taking the
+      // widget over on the spot, and SceneHudService ignores the stale unregister that follows.
       _battleService.DestroyTimer(_secondsRemainingOnArrival);
       _isDead = true;
 
@@ -194,9 +212,6 @@ namespace Timer
       // colon in a field is not a clock: collapse whatever is left so the whole thing decays away
       // together and this husk can retire.
       BreakRemainingParts();
-
-        if (_hudCamera != null)
-          _hudCamera.SetActive(false);
       }
       finally
       {

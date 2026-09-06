@@ -1,3 +1,4 @@
+using System.Collections;
 using App;
 using UnityEngine;
 using Unity.Profiling;
@@ -40,6 +41,30 @@ namespace SceneHud
     {
       this.AsInjected();
       _camera = GetComponent<UnityEngine.Camera>();
+    }
+
+    /// <summary>
+    /// Keeps this element on the HUD for <paramref name="seconds"/> after the world object it
+    /// mirrors has died: the camera goes on rendering the debris, and
+    /// <see cref="SceneHudService.Hold"/> parks the replacement's texture for the same window, so
+    /// the widget shows the thing coming apart instead of cutting to its successor mid-frame.
+    /// </summary>
+    public void Linger(float seconds)
+    {
+      if (seconds <= 0f || !isActiveAndEnabled)
+      {
+        gameObject.SetActive(false);
+        return;
+      }
+
+      _sceneHud.Hold(_id, seconds);
+      StartCoroutine(LingerThenStop(seconds));
+    }
+
+    private IEnumerator LingerThenStop(float seconds)
+    {
+      yield return new WaitForSecondsRealtime(seconds);
+      gameObject.SetActive(false);
     }
 
     private void OnEnable()
