@@ -1,5 +1,4 @@
 using App;
-using Balance;
 using Combat;
 using Destruction;
 using Model;
@@ -11,8 +10,8 @@ namespace Health
   /// <summary>
   /// The player's health, standing in the street as a 2x12 bar of 24 smashable pixels.
   ///
-  /// The bar is not a readout of health, it *is* the health: the pixels are the player's hit points
-  /// made physical, and knocking one off costs him a twenty-fourth of his maximum. Smash all of them
+  /// The bar is not a readout of health, it *is* the health: the ten logical segments are the
+  /// player's hit points made physical, and knocking one off costs him a tenth of his maximum. Smash all of them
   /// and he dies, which is the whole point of the object — it is a hazard the player can walk up to
   /// and hurt himself on, not a pickup.
   ///
@@ -38,27 +37,15 @@ namespace Health
     [SerializeField] private DecayPart[] _pixels = new DecayPart[PixelCount];
 
     [Inject] private CharacterService _characterService;
-    [Inject] private BattleBalanceConfig _battleBalance;
     [Inject] private BattleService _battleService;
 
     private DestructibleObject _destructible;
     private HitFx _hitFx;
 
-    /// Weapon damage this bar absorbs per pixel, from the balance row for
-    /// <see cref="DestructibleObjectType.HealthBar"/> spread across the 24 of them.
-    private float _damagePerPixel;
+    private const int HitCount = 10;
+    private int HealthPerHit =>
+      Mathf.Max(1, Mathf.RoundToInt(_characterService.MaxHealth / (float)HitCount));
 
-    /// <summary>
-    /// Health one pixel is worth, and what the player pays when one is knocked off. Read fresh
-    /// rather than cached: a Max Health upgrade bought mid-battle changes what a pixel stands for.
-    /// Rounded up, so the last pixel always finishes the player off rather than leaving him on a
-    /// sliver of health with no bar left to lose.
-    /// </summary>
-    private int HealthPerPixel =>
-      Mathf.Max(1, Mathf.CeilToInt(_characterService.MaxHealth / (float)PixelCount));
-
-    private float _damageTaken;
-    private int _pixelsPaidFor;
     private int _litCount = PixelCount;
     private bool _isDestroyed;
 
@@ -77,9 +64,6 @@ namespace Health
       this.AsInjected();
       _destructible = GetComponent<DestructibleObject>();
       _hitFx = GetComponent<HitFx>();
-
-      var durability = Mathf.Max(1, _battleBalance.GetDestructibleMaxHealth(DestructibleObjectType.HealthBar));
-      _damagePerPixel = durability / (float)PixelCount;
     }
 
     private void OnEnable()
@@ -115,17 +99,7 @@ namespace Health
       if (_hitFx != null)
         _hitFx.PlayHit();
 
-      _damageTaken += damage;
-
-      // Charge the player for every pixel the accumulated damage has now paid for. The pixels
-      // themselves are removed by Sync, off the back of the health change, so a pixel is never
-      // counted twice however the health was lost.
-      var owed = Mathf.Min(PixelCount, Mathf.FloorToInt(_damageTaken / _damagePerPixel));
-      while (_pixelsPaidFor < owed && _characterService.IsAlive)
-      {
-        _pixelsPaidFor++;
-        _characterService.TakeDamage(HealthPerPixel);
-      }
+      _characterService.TakeDamage(HealthPerHit);
 
       // The invincibility cheat swallows that damage, so the health never moves and Sync has nothing
       // to remove: an invincible player cannot smash his own health bar either. Sync anyway, so a

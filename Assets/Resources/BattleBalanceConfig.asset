@@ -20,9 +20,9 @@ MonoBehaviour:
   _specialFenceTimerOffset: 14
   _specialFencePlayerOffset: 8
   _timerTravelSpeedFactor: 0.8
-  _timerPathOverhead: 1.25
+  _timerPathOverhead: 1.45
   _timerWuPerBuilding: 38
-  _timerSecondsPerBuilding: 2.5
+  _timerSecondsPerBuilding: 1.5
   _timerSlack: 1.15
   _timerMinSeconds: 12
   _timerLateralDistanceRatio: 0.5
@@ -33,11 +33,11 @@ MonoBehaviour:
   _maxLiveMobs: 150
   _meleeAttackRadius: 5
   _duckCoinDropChances:
-  - 0.6
-  - 0.3
-  - 0.1
-  _buildingCoinDropMin: 5
-  _buildingCoinDropMax: 9
+  - 0.8
+  - 0.15
+  - 0.05
+  _buildingCoinDropMin: 8
+  _buildingCoinDropMax: 14
   _buildingCoinDropChance: 1
   _buildingCoinDropDistance: 1
   _destructibleMaxHealth:
@@ -50,17 +50,17 @@ MonoBehaviour:
   - type: 3
     maxHealth: 12
   - type: 4
-    maxHealth: 48
+    maxHealth: 10
   - type: 5
-    maxHealth: 50
+    maxHealth: 36
   - type: 6
-    maxHealth: 1250
+    maxHealth: 324
   - type: 7
     maxHealth: 1
   _houseMaxHealthByDifficulty:
   - difficultyLevel: 1
-    maxHealth: 50
+    maxHealth: 36
   - difficultyLevel: 2
-    maxHealth: 250
+    maxHealth: 108
   - difficultyLevel: 3
-    maxHealth: 1250
+    maxHealth: 324

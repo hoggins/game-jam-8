@@ -6,7 +6,7 @@ namespace Balance
   public sealed class ProgressionBalanceConfig : ScriptableObject
   {
     [Header("Starting Stats")]
-    [SerializeField, Min(0)] private int _startingAttackPower = 1;
+    [SerializeField, Min(0)] private int _startingAttackPower = 12;
     [SerializeField, Min(0)] private int _startingMaxHealth = 12;
     [SerializeField, Min(0)] private int _startingSpeed = 6;
     [SerializeField, Min(0)] private int _startingGunPower;
@@ -21,7 +21,7 @@ namespace Balance
     [SerializeField, Min(0)] private int _timerUpgradeCost = 100;
 
     [Header("Upgrade Amount")]
-    [SerializeField, Min(0)] private int _attackPowerUpgradeAmount = 1;
+    [SerializeField, Min(0)] private int _attackPowerUpgradeAmount = 4;
     [SerializeField, Min(0)] private int _maxHealthUpgradeAmount = 1;
     [SerializeField, Min(0)] private int _speedUpgradeAmount = 1;
     [SerializeField, Min(0)] private int _gunPowerUpgradeAmount = 1;

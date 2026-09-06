@@ -149,6 +149,7 @@ namespace Timer
         if (_battleService == null)
           return;
 
+        var secondsRemainingOnArrival = _battleService.Timer;
       // Snapshot what each surviving digit currently reads, derived from the authoritative time
       // rather than from the digits themselves: they only catch up in Update, and this fires
       // mid-frame.
@@ -178,7 +179,7 @@ namespace Timer
 
       // DestroyTimer is what triggers the replacement timer, so it registers its HUD element before
       // this one stands down; SceneHudService ignores the stale unregister that follows.
-      _battleService.DestroyTimer();
+      _battleService.DestroyTimer(secondsRemainingOnArrival);
       _isDead = true;
 
       // The divider carries no time, so it can still be standing when the last digit dies. A lone

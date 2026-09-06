@@ -44,9 +44,9 @@ namespace Balance
 
     [Header("Timer Route")]
     [SerializeField, Min(0f)] private float _timerTravelSpeedFactor = 0.8f;
-    [SerializeField, Min(0f)] private float _timerPathOverhead = 1.25f;
+    [SerializeField, Min(0f)] private float _timerPathOverhead = 1.45f;
     [SerializeField, Min(0f)] private float _timerWuPerBuilding = 38f;
-    [SerializeField, Min(0f)] private float _timerSecondsPerBuilding = 2.5f;
+    [SerializeField, Min(0f)] private float _timerSecondsPerBuilding = 1.5f;
     [Tooltip("Primary dial for the time budget slack applied to timer hops.")]
     [SerializeField, Min(0f)] private float _timerSlack = 1.15f;
     [SerializeField, Min(0f)] private float _timerMinSeconds = 12f;
@@ -63,11 +63,11 @@ namespace Balance
     [SerializeField, Min(0f)] private float _meleeAttackRadius = 2f;
 
     [Tooltip("Chance of dropping N coins on a duck kill, indexed by coin count. Must sum to 1.")]
-    [SerializeField] private float[] _duckCoinDropChances = { 0.6f, 0.3f, 0.1f };
+    [SerializeField] private float[] _duckCoinDropChances = { 0.8f, 0.15f, 0.05f };
 
     [Header("Building Coin Drop")]
-    [SerializeField, Min(0)] private int _buildingCoinDropMin = 1;
-    [SerializeField, Min(0)] private int _buildingCoinDropMax = 3;
+    [SerializeField, Min(0)] private int _buildingCoinDropMin = 8;
+    [SerializeField, Min(0)] private int _buildingCoinDropMax = 14;
     [SerializeField, Range(0f, 1f)] private float _buildingCoinDropChance = 0.5f;
     [SerializeField, Min(0f)] private float _buildingCoinDropDistance = 2f;
 
@@ -78,17 +78,17 @@ namespace Balance
       new DestructibleMaxHealthEntry { type = DestructibleObjectType.TimerDigit, maxHealth = 15 },
       new DestructibleMaxHealthEntry { type = DestructibleObjectType.TimerDivider, maxHealth = 10 },
       new DestructibleMaxHealthEntry { type = DestructibleObjectType.Arrow, maxHealth = 12 },
-      new DestructibleMaxHealthEntry { type = DestructibleObjectType.HealthBar, maxHealth = 48 },
-      new DestructibleMaxHealthEntry { type = DestructibleObjectType.Upgrade, maxHealth = 50 },
-      new DestructibleMaxHealthEntry { type = DestructibleObjectType.Goal, maxHealth = 1250 },
+      new DestructibleMaxHealthEntry { type = DestructibleObjectType.HealthBar, maxHealth = 10 },
+      new DestructibleMaxHealthEntry { type = DestructibleObjectType.Upgrade, maxHealth = 36 },
+      new DestructibleMaxHealthEntry { type = DestructibleObjectType.Goal, maxHealth = 324 },
       new DestructibleMaxHealthEntry { type = DestructibleObjectType.Prop, maxHealth = 1 },
     };
 
     [SerializeField] private List<HouseDifficultyMaxHealthEntry> _houseMaxHealthByDifficulty = new()
     {
-      new HouseDifficultyMaxHealthEntry { difficultyLevel = 1, maxHealth = 50 },
-      new HouseDifficultyMaxHealthEntry { difficultyLevel = 2, maxHealth = 250 },
-      new HouseDifficultyMaxHealthEntry { difficultyLevel = 3, maxHealth = 1250 },
+      new HouseDifficultyMaxHealthEntry { difficultyLevel = 1, maxHealth = 36 },
+      new HouseDifficultyMaxHealthEntry { difficultyLevel = 2, maxHealth = 108 },
+      new HouseDifficultyMaxHealthEntry { difficultyLevel = 3, maxHealth = 324 },
     };
 
     public float BattleDuration => _battleDuration;

@@ -33,7 +33,7 @@ namespace Model
     public event Action BattleWon;
     public event Action BattleDefeated;
     public event Action BattleAbandoned;
-    public event Action TimerDestroyed;
+    public event Action<float> TimerDestroyed;
 
     /// Fired once the clock hits 00:00 and the timeout defeat has been scheduled, carrying the delay
     /// in seconds until it lands. Lets the in-world timer blink a warning for that same window.
@@ -224,7 +224,10 @@ namespace Model
       BattleAbandoned?.Invoke();
     }
 
-    public void DestroyTimer()
+    public void DestroyTimer() =>
+      DestroyTimer(Timer);
+
+    public void DestroyTimer(float secondsRemainingOnArrival)
     {
       // Smashing the last digit while the clock is blinking out its timeout is how the player earns
       // extra time: cancel the pending defeat, a fresh timer is on its way in via TimerRespawnService.
@@ -232,7 +235,7 @@ namespace Model
       _defeatDelay = 0f;
 
       IsTimerDestroyed = true;
-      TimerDestroyed?.Invoke();
+      TimerDestroyed?.Invoke(Mathf.Max(0f, secondsRemainingOnArrival));
     }
 
     /// Brings the timer back after <see cref="TimerDestroyed"/>, once a new one has been placed

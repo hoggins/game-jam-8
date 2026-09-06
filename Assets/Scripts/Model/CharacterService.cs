@@ -207,7 +207,10 @@ namespace Model
         throw new InvalidOperationException($"Not enough coins to upgrade max health. Current coins: {_storage.CurrentCoins}, required: {_progressionBalance.MaxHealthUpgradeCost}");
 
       _storage.CurrentCoins -= _progressionBalance.MaxHealthUpgradeCost;
-      _storage.MaxHealth += _progressionBalance.MaxHealthUpgradeAmount;
+      var healthIncrease = _progressionBalance.MaxHealthUpgradeAmount;
+      _storage.MaxHealth += healthIncrease;
+      CurrentHealth = Math.Min(_storage.MaxHealth, CurrentHealth + healthIncrease);
+      HealthChanged?.Invoke(CurrentHealth);
       ProgressionChanged?.Invoke();
       CoinsChanged?.Invoke(_storage.CurrentCoins);
       UpgradePurchased?.Invoke(UpgradeStat.Health, _progressionBalance.MaxHealthUpgradeCost);

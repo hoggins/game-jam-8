@@ -228,7 +228,7 @@ namespace Arrow
     /// old one dies. Re-finding waits until <see cref="BattleService.IsTimerDestroyed"/> clears,
     /// which is the respawn service's signal that a fresh timer is standing.
     /// </summary>
-    private void OnTimerDestroyed() => _timer = null;
+    private void OnTimerDestroyed(float _) => _timer = null;
 
     private void SubscribeGoal()
     {

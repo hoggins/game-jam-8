@@ -84,7 +84,7 @@ namespace Timer
       _routeProgress = 0f;
     }
 
-    private void OnTimerDestroyed()
+    private void OnTimerDestroyed(float secondsRemainingOnArrival)
     {
       RespawnMarker.Begin();
       try
@@ -96,7 +96,6 @@ namespace Timer
         if (_spawnSettings == null || !_spawnSettings.TryGetRespawnDistance(SpecialHouses.Timer, _respawnCount, out var minDistance, out var maxDistance))
           return;
 
-        var secondsRemainingOnArrival = _battleService.Timer;
         var playerSpeedAtStart = _characterService.Speed;
         GameObject timerInstance = null;
         Vector3 hopOrigin;
