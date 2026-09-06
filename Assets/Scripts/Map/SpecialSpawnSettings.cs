@@ -16,10 +16,10 @@ namespace Map
   {
     public SpecialHouses type;
 
-    [Tooltip("Distance range from the player this type may land at when the level first fills (placed on the grid, not via TrySpawnSpecial).")]
+    [Tooltip("Distance range from the player this type may land at when the level first fills. For the absolute zig-zag Timer route, the seeded value from this range is the first route leg.")]
     public SpecialSpawnDistance initial;
 
-    [Tooltip("Distance range for each successive runtime respawn, in order — each entry should reach further out than the last. Once exhausted, the last entry repeats for every further respawn.")]
+    [Tooltip("Distance range for each successive runtime respawn, in order. For the absolute zig-zag Timer route these are world-unit leg lengths; the predefined curve uses its fixed checkpoint distance instead.")]
     public SpecialSpawnDistance[] respawns;
   }
 

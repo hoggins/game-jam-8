@@ -165,6 +165,8 @@ namespace Map
       TimerRoute.TryCreateForBattle(
         originPosition,
         _battleBalance != null ? _battleBalance.TimerLateralDistanceRatio : 0.5f,
+        _specialSpawnSettings,
+        seed,
         out _timerRoute);
 
       var housePlacements = MapFiller.Fill(mapData, houseSet, originCell, seed, _timerRoute);
@@ -258,9 +260,10 @@ namespace Map
     /// Places every configured special (e.g. the Timer) after the grid fill, the same freely-placed
     /// way a respawn works (<see cref="TrySpawnSpecial"/>) rather than as part of <see cref="MapFiller.Fill"/>:
     /// specials are rotated to face the player and clear their own footprint, which the blocky grid
-    /// placement isn't built for. The Timer goes down first (near the player, per its own configured
-    /// distance); every other special then follows the same between/near-player rule a respawn uses
-    /// (see <see cref="GetOtherSpecialPlacement"/>), so it never starts right on top of the player.
+    /// placement isn't built for. The Timer goes down first on the absolute route's initial leg when
+    /// a Goal is available; every other special then follows the same between/near-player rule a
+    /// respawn uses (see <see cref="GetOtherSpecialPlacement"/>), so it never starts right on top of
+    /// the player.
     /// </summary>
     private void SpawnInitialSpecials(Transform parent)
     {
@@ -276,6 +279,12 @@ namespace Map
       {
         if (special.type != SpecialHouses.Timer || !special.enabled || special.prefab == null)
           continue;
+
+        if (_timerRoute != null && _timerRoute.TryGetInitial(out var routePosition, out _))
+        {
+          if (TrySpawnSpecial(special.type, routePosition, lookTarget, 0f, 0f, out timerInstance))
+            continue;
+        }
 
         if (_specialSpawnSettings == null || !_specialSpawnSettings.TryGetInitialDistance(special.type, out var timerMinDistance, out var timerMaxDistance))
         {

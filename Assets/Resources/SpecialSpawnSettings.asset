@@ -20,8 +20,8 @@ MonoBehaviour:
     respawns:
     - minDistance: 25
       maxDistance: 35
-    - minDistance: 50
-      maxDistance: 70
+    - minDistance: 70
+      maxDistance: 100
   - type: 1
     initial:
       minDistance: 0

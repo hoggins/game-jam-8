@@ -51,6 +51,8 @@ namespace Balance
     [SerializeField, Min(0f)] private float _timerSlack = 1.15f;
     [SerializeField, Min(0f)] private float _timerMinSeconds = 12f;
     [SerializeField, Min(0f)] private float _timerLateralDistanceRatio = 0.5f;
+    [Tooltip("Random placement radius around each absolute route waypoint. Set to 0 for exact waypoint placement.")]
+    [SerializeField, Min(0f)] private float _timerRoutePlacementJitter = 4f;
 
     [Header("Duck (Mob)")]
     [SerializeField, Min(0)] private int _duckMaxHealth = 2;
@@ -105,6 +107,7 @@ namespace Balance
     public float TimerSlack => _timerSlack;
     public float TimerMinSeconds => _timerMinSeconds;
     public float TimerLateralDistanceRatio => _timerLateralDistanceRatio;
+    public float TimerRoutePlacementJitter => _timerRoutePlacementJitter;
     public int DuckMaxHealth => _duckMaxHealth;
     public int DuckAttackDamage => _duckAttackDamage;
     public float DuckAttackDistance => _duckAttackDistance;
@@ -169,6 +172,7 @@ namespace Balance
       _timerSlack = Mathf.Max(0f, _timerSlack);
       _timerMinSeconds = Mathf.Max(0f, _timerMinSeconds);
       _timerLateralDistanceRatio = Mathf.Max(0f, _timerLateralDistanceRatio);
+      _timerRoutePlacementJitter = Mathf.Max(0f, _timerRoutePlacementJitter);
       _duckMaxHealth = Mathf.Max(0, _duckMaxHealth);
       _duckAttackDamage = Mathf.Max(0, _duckAttackDamage);
       _duckAttackDistance = Mathf.Max(0f, _duckAttackDistance);
