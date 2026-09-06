@@ -25,6 +25,15 @@ namespace Battle
     [Tooltip("Scale the HUD reaches once it has faded out behind a popup.")]
     [SerializeField, Min(0f)] private float _hiddenScale = 1.2f;
 
+    [Tooltip("Golden duck shown instead of the goal arrow over the first seconds of a battle.")]
+    [SerializeField] private CanvasGroup _goldenDuck;
+
+    [Tooltip("Goal arrow, held back until the golden duck has had its turn.")]
+    [SerializeField] private CanvasGroup _theGoalArrowPanel;
+
+    [Tooltip("Seconds the golden duck stays up before the goal arrow takes over. Battle time, so pausing does not burn it.")]
+    [SerializeField, Min(0f)] private float _goldenDuckDuration = 10f;
+
     [Inject] private BattleService _battleService;
     [Inject] private Sfx.SfxService _sfxService;
 
@@ -40,6 +49,7 @@ namespace Battle
     private bool _cheatsInfoShown;
     private bool _battleOverShown;
     private bool _hudVisible = true;
+    private Coroutine _goldenDuckCoroutine;
 
     private void Awake()
     {
@@ -78,6 +88,7 @@ namespace Battle
       _progressionShown = _progressionUi != null && _progressionUi.IsShown;
       _cheatsInfoShown = _cheatsInfoUi != null && _cheatsInfoUi.IsShown;
       ApplyHudVisibility(false);
+      ApplyGoldenDuckShown(false);
 
       if (_upgradeButton != null)
       {
@@ -119,6 +130,8 @@ namespace Battle
         StopCoroutine(_transitionCoroutine);
         _transitionCoroutine = null;
       }
+
+      StopGoldenDuck();
 
       if (_upgradeButton != null)
         _upgradeButton.onClick.RemoveListener(ToggleProgression);
@@ -222,6 +235,9 @@ namespace Battle
     {
       _battleOverShown = true;
       ApplyHudVisibility(true);
+      // A battle that ends inside the duck's window must not hand the arrow back a beat later.
+      StopGoldenDuck();
+      ApplyGoldenDuckShown(false);
     }
 
     /// Abandoning tears the battle down without a win or defeat screen, so the latch that
@@ -230,6 +246,8 @@ namespace Battle
     {
       _battleOverShown = false;
       ApplyHudVisibility(true);
+      StopGoldenDuck();
+      ApplyGoldenDuckShown(false);
     }
 
     /// The HUD recedes while any popup is up: it fades out, scales up to <see cref="_hiddenScale"/>,
@@ -303,6 +321,7 @@ namespace Battle
     {
       _battleOverShown = false;
       ApplyHudVisibility(true);
+      StartGoldenDuck();
       _progressionInputEnabled = true;
       if (_upgradeButton != null)
         _upgradeButton.interactable = true;
@@ -317,6 +336,83 @@ namespace Battle
         _upgradeButton.interactable = false;
 
       ApplyProgressionInputState();
+    }
+
+    /// The battle opens on the golden duck instead of the goal arrow: the duck fades up, holds for
+    /// <see cref="_goldenDuckDuration"/> of battle time, then trades places with the arrow, which
+    /// stays for the rest of the battle.
+    private void StartGoldenDuck()
+    {
+      StopGoldenDuck();
+      if (_goldenDuck == null && _theGoalArrowPanel == null)
+        return;
+
+      if (!isActiveAndEnabled)
+      {
+        ApplyGoldenDuckShown(false);
+        return;
+      }
+
+      _goldenDuckCoroutine = StartCoroutine(RunGoldenDuck());
+    }
+
+    private void StopGoldenDuck()
+    {
+      if (_goldenDuckCoroutine == null)
+        return;
+
+      StopCoroutine(_goldenDuckCoroutine);
+      _goldenDuckCoroutine = null;
+    }
+
+    private IEnumerator RunGoldenDuck()
+    {
+      ApplyGoldenDuckAmount(0f);
+      yield return AnimateGoldenDuckSwap(1f);
+
+      // Battle time, so a pause does not eat into the duck's window - unlike the fades below,
+      // which are UI and run unscaled so they still play while a popup has frozen the world.
+      yield return new WaitForSeconds(_goldenDuckDuration);
+
+      yield return AnimateGoldenDuckSwap(0f);
+      _goldenDuckCoroutine = null;
+    }
+
+    /// Crossfades the pair towards <paramref name="targetDuckAmount"/> - 1 duck up and arrow down,
+    /// 0 the other way around - both in the same loop so neither leads the other.
+    private IEnumerator AnimateGoldenDuckSwap(float targetDuckAmount)
+    {
+      var startDuckAmount = 1f - targetDuckAmount;
+      if (_transitionDuration > 0f)
+      {
+        for (var elapsed = 0f; elapsed < _transitionDuration; elapsed += Time.unscaledDeltaTime)
+        {
+          var progress = _transitionCurve.Evaluate(Mathf.Clamp01(elapsed / _transitionDuration));
+          ApplyGoldenDuckAmount(Mathf.LerpUnclamped(startDuckAmount, targetDuckAmount, progress));
+          yield return null;
+        }
+      }
+
+      ApplyGoldenDuckAmount(targetDuckAmount);
+    }
+
+    private void ApplyGoldenDuckShown(bool shown) => ApplyGoldenDuckAmount(shown ? 1f : 0f);
+
+    /// Drives both groups from one value: at 1 the duck sits at alpha 1 and scale 1 while the arrow
+    /// is faded out at <see cref="_hiddenScale"/>, and at 0 the roles are swapped.
+    private void ApplyGoldenDuckAmount(float duckAmount)
+    {
+      ApplySwapState(_goldenDuck, duckAmount);
+      ApplySwapState(_theGoalArrowPanel, 1f - duckAmount);
+    }
+
+    private void ApplySwapState(CanvasGroup group, float shownAmount)
+    {
+      if (group == null)
+        return;
+
+      group.alpha = shownAmount;
+      group.transform.localScale = Vector3.one * Mathf.LerpUnclamped(_hiddenScale, 1f, shownAmount);
     }
 
     private void ApplyProgressionInputState()
