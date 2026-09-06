@@ -92,7 +92,7 @@ Material:
     - _VertexAnimAmplitude: 1
     - _XRMotionVectorsPass: 1
     m_Colors:
-    - _Color0: {r: 0.23920569, g: 0.735849, b: 0.05206478, a: 0}
+    - _Color0: {r: 0.35655686, g: 0.708, b: 0.22372799, a: 0}
     - _PrintsColor: {r: 1, g: 1, b: 1, a: 0}
     - _PrintsScale: {r: 0.05, g: 0.05, b: 0, a: 0}
     - _Vector0: {r: 3, g: 3, b: 3, a: 0}
