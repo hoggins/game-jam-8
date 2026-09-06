@@ -85,6 +85,7 @@ namespace Map
     private HouseSet _houseSet;
     private int _cellSize;
     private int _nextId;
+    private TimerRoute _timerRoute;
     private CullingGroup _cullingGroup;
     private int[] _rendererStartByObject = System.Array.Empty<int>();
     private int[] _rendererCountByObject = System.Array.Empty<int>();
@@ -103,6 +104,7 @@ namespace Map
     }
 
     public IReadOnlyCollection<RuntimeEnvironmentObject> SpawnedObjects => _objects.Values;
+    public TimerRoute CurrentTimerRoute => _timerRoute;
 
     /// <summary>
     /// The currently live instance of a special type spawned through <see cref="TrySpawnSpecial"/>,
@@ -148,6 +150,7 @@ namespace Map
       _specialIds.Clear();
       _currentSpecial.Clear();
       _occupied.Clear();
+      _timerRoute = null;
       DisposeRenderCulling();
 
       _container = new GameObject(ContainerName).transform;
@@ -159,8 +162,12 @@ namespace Map
       var player = GameObject.FindGameObjectWithTag("Player");
       var originPosition = player != null ? player.transform.position : parent.position;
       var originCell = new Vector2(originPosition.x / cellSize, originPosition.z / cellSize);
+      TimerRoute.TryCreateForBattle(
+        originPosition,
+        _battleBalance != null ? _battleBalance.TimerLateralDistanceRatio : 0.5f,
+        out _timerRoute);
 
-      var housePlacements = MapFiller.Fill(mapData, houseSet, originCell, seed);
+      var housePlacements = MapFiller.Fill(mapData, houseSet, originCell, seed, _timerRoute);
       var roadPlacements = roadSet != null
         ? RoadFiller.Fill(mapData, roadSet, seed)
         : new List<RoadPlacement>();

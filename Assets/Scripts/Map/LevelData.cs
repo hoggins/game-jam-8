@@ -162,9 +162,14 @@ namespace Map
       var player = GameObject.FindGameObjectWithTag("Player");
       var originPosition = player != null ? player.transform.position : transform.position;
       var originCell = new Vector2(originPosition.x / cellSize, originPosition.z / cellSize);
+      var battleBalance = Resources.Load<Balance.BattleBalanceConfig>("BattleBalanceConfig");
+      TimerRoute.TryCreateForBattle(
+        originPosition,
+        battleBalance != null ? battleBalance.TimerLateralDistanceRatio : 0.5f,
+        out var timerRoute);
 
       if (houseSet != null)
-        foreach (var placement in MapFiller.Fill(mapData, houseSet, originCell, seed))
+        foreach (var placement in MapFiller.Fill(mapData, houseSet, originCell, seed, timerRoute))
         {
           var size = MapFiller.RotatedSize(placement.House.size, placement.RotationDegrees);
           var position = new Vector3(

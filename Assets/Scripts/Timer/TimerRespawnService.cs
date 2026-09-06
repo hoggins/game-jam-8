@@ -1,7 +1,6 @@
 using System;
 using Arrow;
 using Balance;
-using Destruction;
 using Map;
 using Model;
 using Telemetry;
@@ -42,9 +41,7 @@ namespace Timer
     private int _respawnCount;
     private Vector3 _lastTimerPosition;
     private bool _hasLastTimerPosition;
-    private Vector3 _routeOrigin;
-    private bool _hasRouteOrigin;
-    private float _routeProgress;
+    private TimerRoute _timerRoute;
 
     public TimerRespawnService(
       BattleService battleService,
@@ -79,9 +76,7 @@ namespace Timer
       _respawnCount = 0;
       _lastTimerPosition = default;
       _hasLastTimerPosition = false;
-      _routeOrigin = default;
-      _hasRouteOrigin = false;
-      _routeProgress = 0f;
+      _timerRoute = null;
     }
 
     private void OnTimerDestroyed(float secondsRemainingOnArrival)
@@ -99,10 +94,19 @@ namespace Timer
         var playerSpeedAtStart = _characterService.Speed;
         GameObject timerInstance = null;
         Vector3 hopOrigin;
+        float routeProgress;
+        float totalRouteProgress;
         SpawnTimerMarker.Begin();
         try
         {
-          if (!TrySpawnTimer(player.transform, minDistance, maxDistance, out timerInstance, out hopOrigin))
+          if (!TrySpawnTimer(
+            player.transform,
+            minDistance,
+            maxDistance,
+            out timerInstance,
+            out hopOrigin,
+            out routeProgress,
+            out totalRouteProgress))
             return;
         }
         finally
@@ -117,7 +121,21 @@ namespace Timer
         _lastTimerPosition = timerInstance.transform.position;
         _hasLastTimerPosition = true;
         _respawnCount++;
-        _telemetry?.BeginTimerHop(_respawnCount, straightLineDistance, secondsGranted, playerSpeedAtStart);
+        var normalizedRouteProgress = _timerRoute != null
+          ? _timerRoute.NormalizeProgress(routeProgress)
+          : 0f;
+        var intendedHouseTier = _spawner.CurrentHouseSet != null
+          ? _spawner.CurrentHouseSet.PickDifficultyLevelByRouteProgress(normalizedRouteProgress)
+          : 1;
+        _telemetry?.BeginTimerHop(
+          _respawnCount,
+          straightLineDistance,
+          secondsGranted,
+          playerSpeedAtStart,
+          routeProgress,
+          totalRouteProgress,
+          _characterService.AttackPower,
+          intendedHouseTier);
 
         if (_respawnCount <= EarlySpecialClusterRespawns)
         {
@@ -156,39 +174,36 @@ namespace Timer
       float minDistance,
       float maxDistance,
       out GameObject timerInstance,
-      out Vector3 hopOrigin)
+      out Vector3 hopOrigin,
+      out float routeProgress,
+      out float totalRouteProgress)
     {
       timerInstance = null;
+      routeProgress = 0f;
+      totalRouteProgress = 0f;
       hopOrigin = _hasLastTimerPosition ? _lastTimerPosition : player.position;
       if (!_hasLastTimerPosition)
         TryGetCurrentTimerPosition(player.position, out hopOrigin);
 
-      if (!_hasRouteOrigin)
-      {
-        _routeOrigin = hopOrigin;
-        _hasRouteOrigin = true;
-        _routeProgress = 0f;
-      }
+      _timerRoute ??= _spawner.CurrentTimerRoute;
+      if (_timerRoute == null)
+        TimerRoute.TryCreateForBattle(
+          player.position,
+          _battleBalance != null ? _battleBalance.TimerLateralDistanceRatio : 0.5f,
+          out _timerRoute);
 
-      if (TryGetGoalPosition(out var goalPosition)
-          && TryGetZigZagAnchor(
-            _routeOrigin,
-            goalPosition,
-            minDistance,
-            maxDistance,
-            _respawnCount,
-            _routeProgress,
-            out var anchor,
-            out var nextRouteProgress))
+      if (_timerRoute != null && _timerRoute.TryGetHop(_respawnCount, out var anchor, out var nextRouteProgress))
       {
+        routeProgress = nextRouteProgress;
+        totalRouteProgress = _timerRoute.TotalLength;
         // TrySpawnSpecial still validates the candidate against live specials and TheGoal. A small
         // jitter around the directed anchor gives it a few nearby options without losing the route.
         if (_spawner.TrySpawnSpecial(
           SpecialHouses.Timer, anchor, player, 0f, ZigZagPlacementJitter, out timerInstance))
-        {
-          _routeProgress = nextRouteProgress;
           return true;
-        }
+
+        routeProgress = 0f;
+        totalRouteProgress = 0f;
       }
 
       // A missing goal, a short route, or a crowded candidate should not strand the battle. Keep the
@@ -245,69 +260,6 @@ namespace Timer
         }
 
       timerPosition = playerPosition;
-      return true;
-    }
-
-    private static bool TryGetGoalPosition(out Vector3 goalPosition)
-    {
-      var goal = TheGoal.Current;
-      if (goal == null)
-        goal = UnityEngine.Object.FindFirstObjectByType<TheGoal>();
-
-      if (goal == null || goal.IsDestroyed)
-      {
-        goalPosition = default;
-        return false;
-      }
-
-      goalPosition = goal.transform.position;
-      return true;
-    }
-
-    private bool TryGetZigZagAnchor(
-      Vector3 routeOrigin,
-      Vector3 goalPosition,
-      float minDistance,
-      float maxDistance,
-      int respawnIndex,
-      float routeProgress,
-      out Vector3 anchor,
-      out float nextRouteProgress)
-    {
-      var toGoal = goalPosition - routeOrigin;
-      toGoal.y = 0f;
-      var totalDistance = toGoal.magnitude;
-      var remainingDistance = totalDistance - routeProgress;
-      if (remainingDistance < 0.001f)
-      {
-        anchor = default;
-        nextRouteProgress = routeProgress;
-        return false;
-      }
-
-      var forward = toGoal / totalDistance;
-      var forwardDistance = Mathf.Min(UnityEngine.Random.Range(minDistance, maxDistance), remainingDistance * 0.8f);
-      if (forwardDistance < 0.001f)
-      {
-        anchor = default;
-        nextRouteProgress = routeProgress;
-        return false;
-      }
-
-      // Limit the lateral leg so the next point is still closer to the goal than the current one,
-      // especially when the timer is on its final leg.
-      var maxCloserLateralDistance = Mathf.Sqrt(
-        Mathf.Max(0f, 2f * remainingDistance * forwardDistance - forwardDistance * forwardDistance));
-      var lateralDistance = Mathf.Min(
-        forwardDistance * _battleBalance.TimerLateralDistanceRatio,
-        maxCloserLateralDistance);
-      var side = new Vector3(-forward.z, 0f, forward.x);
-      if ((respawnIndex & 1) == 0)
-        side = -side;
-
-      nextRouteProgress = routeProgress + forwardDistance;
-      anchor = routeOrigin + forward * nextRouteProgress + side * lateralDistance;
-      anchor.y = routeOrigin.y;
       return true;
     }
 

@@ -115,7 +115,15 @@ namespace Telemetry
         _currentSlice.buildingHits++;
     }
 
-    public void BeginTimerHop(int hopIndex, float straightLineDistance, float secondsGranted, float playerSpeedAtStart)
+    public void BeginTimerHop(
+      int hopIndex,
+      float straightLineDistance,
+      float secondsGranted,
+      float playerSpeedAtStart,
+      float routeProgress,
+      float totalRouteProgress,
+      int attackPowerAtSpawn,
+      int intendedHouseTier)
     {
       if (!_runActive || _run == null)
         return;
@@ -127,6 +135,10 @@ namespace Telemetry
         straightLineDistance = Mathf.Max(0f, straightLineDistance),
         secondsGranted = Mathf.Max(0f, secondsGranted),
         playerSpeedAtStart = Mathf.Max(0f, playerSpeedAtStart),
+        routeProgress = Mathf.Max(0f, routeProgress),
+        totalRouteProgress = Mathf.Max(0f, totalRouteProgress),
+        attackPowerAtSpawn = Mathf.Max(0, attackPowerAtSpawn),
+        intendedHouseTier = Mathf.Max(1, intendedHouseTier),
       };
       _run.timerHops.Add(_activeTimerHop);
       _timerHopStartDistance = _timerHopDistance;
@@ -671,6 +683,10 @@ namespace Telemetry
       public float secondsGranted;
       public float secondsRemainingOnArrival;
       public float playerSpeedAtStart;
+      public float routeProgress;
+      public float totalRouteProgress;
+      public int attackPowerAtSpawn;
+      public int intendedHouseTier;
       public bool reached;
     }
 

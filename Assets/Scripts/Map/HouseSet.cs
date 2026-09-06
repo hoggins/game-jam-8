@@ -23,6 +23,8 @@ namespace Map
   public class HouseSet : ScriptableObject
   {
     public const int DifficultyLevelCount = 5;
+    public const float RouteT1End = 0.20f;
+    public const float RouteT2End = 0.60f;
 
     [SerializeField] private List<HouseObject> houses = new();
     [SerializeField] private List<SpecialHouseObject> specials = new();
@@ -31,6 +33,14 @@ namespace Map
     public IReadOnlyList<HouseObject> Houses => houses;
     public IReadOnlyList<SpecialHouseObject> Specials => specials;
     public IReadOnlyList<HouseDifficultyRange> DifficultyRanges => difficultyRanges;
+
+    public int PickDifficultyLevelByRouteProgress(float normalizedProgress)
+    {
+      if (normalizedProgress < RouteT1End)
+        return 1;
+
+      return normalizedProgress < RouteT2End ? 2 : 3;
+    }
 
     public int PickDifficultyLevel(float distance, System.Random random)
     {

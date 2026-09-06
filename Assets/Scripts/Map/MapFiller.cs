@@ -24,7 +24,8 @@ namespace Map
     public static Vector2Int RotatedSize(Vector2Int size, int rotationDegrees) =>
       rotationDegrees == 90 || rotationDegrees == 270 ? new Vector2Int(size.y, size.x) : size;
 
-    public static List<HousePlacement> Fill(MapData mapData, HouseSet houseSet, Vector2 originCell, int seed = 0)
+    public static List<HousePlacement> Fill(
+      MapData mapData, HouseSet houseSet, Vector2 originCell, int seed = 0, TimerRoute route = null)
     {
       var placements = new List<HousePlacement>();
       if (mapData == null || houseSet == null)
@@ -60,8 +61,9 @@ namespace Map
         if (!free.Contains(cell))
           continue;
 
-        var distance = Vector2.Distance(cell, originCell);
-        var level = houseSet.PickDifficultyLevel(distance, random);
+        var level = route != null
+          ? houseSet.PickDifficultyLevelByRouteProgress(route.ProjectNormalizedProgress(CellCenter(cell, mapData.CellSize)))
+          : houseSet.PickDifficultyLevel(Vector2.Distance(cell, originCell), random);
         var candidates = housesByLevel.TryGetValue(level, out var levelHouses) ? levelHouses : houses;
 
         HouseObject chosen = null;
@@ -107,5 +109,8 @@ namespace Map
       for (var y = 0; y < size.y; y++)
         free.Remove(origin + new Vector2Int(x, y));
     }
+
+    private static Vector3 CellCenter(Vector2Int cell, int cellSize) =>
+      new((cell.x + 0.5f) * cellSize, 0f, (cell.y + 0.5f) * cellSize);
   }
 }
