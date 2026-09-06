@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1233149941 &-9006324185073191055
+AudioContainerElement:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: lordsonny_two-debris-break-3-457508_{-9006324185073191055}
+  m_AudioClip: {fileID: 8300000, guid: 97fe01c36f7114f95974f0a34e4d4d46, type: 3}
+  m_Volume: 0
+  m_Enabled: 1
+--- !u!1233149941 &-8942987621470172163
+AudioContainerElement:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: lordsonny_two-debris-break-253779_{-8942987621470172163}
+  m_AudioClip: {fileID: 8300000, guid: 071733b05375b403f82cebd357cc9e2f, type: 3}
+  m_Volume: 0
+  m_Enabled: 1
+--- !u!1233149941 &-2528524471488756420
+AudioContainerElement:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: lordsonny_two-debris-break-2-457507_{-2528524471488756420}
+  m_AudioClip: {fileID: 8300000, guid: 20ff3559e574f46ceb282e9e83a5a86d, type: 3}
+  m_Volume: 0
+  m_Enabled: 1
+--- !u!1307931743 &6418180475301049370
+AudioRandomContainer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: HouseDestructionRandom
+  m_Volume: 0
+  m_Pitch: 0
+  m_AutomaticTriggerTime: 0
+  m_LoopCount: 1
+  m_VolumeRandomizationRange: {x: -4.9947977, y: 0}
+  m_PitchRandomizationRange: {x: -258.48068, y: 159.83348}
+  m_AutomaticTriggerTimeRandomizationRange: {x: 0, y: 0}
+  m_LoopCountRandomizationRange: {x: 0, y: 0}
+  m_Elements:
+  - {fileID: -2528524471488756420}
+  - {fileID: -9006324185073191055}
+  - {fileID: -8942987621470172163}
+  m_AvoidRepeatingLast: 0
+  m_PlaybackMode: 2
+  m_TriggerMode: 0
+  m_AutomaticTriggerMode: 1
+  m_LoopMode: 2
+  m_VolumeRandomizationEnabled: 1
+  m_PitchRandomizationEnabled: 1
+  m_AutomaticTriggerTimeRandomizationEnabled: 0
+  m_LoopCountRandomizationEnabled: 0

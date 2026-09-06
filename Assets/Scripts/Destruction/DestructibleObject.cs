@@ -7,6 +7,7 @@ using Model;
 using Movement;
 using Pooling;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Unity.Profiling;
 using VContainer;
 
@@ -20,6 +21,8 @@ namespace Destruction
 
     private const string FrictionMaterialPath = "Descructable/FirstHouseFriction";
     private const string DestructionFxPath = "Fx/Prefabs/FxBuildingDucksDestruction01";
+    private const string HouseDestructionSoundPrefabPath = "SFX/HouseRandomDestruction";
+    private const float HouseDestructionSoundCooldown = 0.5f;
     private const string CoinPickupPrefabPath = "Prefabs/Interface/Coin01";
 
     [SerializeField, Min(0f)] private float _breakMagnitude = 5f;
@@ -38,6 +41,19 @@ namespace Destruction
     private bool _destroyed;
 
     private static GameObject _coinPickupPrefab;
+    private static GameObject _houseDestructionSoundPrefab;
+    private static float _nextHouseDestructionSoundTime = float.NegativeInfinity;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetHouseDestructionSoundState()
+    {
+      _nextHouseDestructionSoundTime = float.NegativeInfinity;
+      SceneManager.sceneLoaded -= OnSceneLoaded;
+      SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private static void OnSceneLoaded(Scene _, LoadSceneMode __) =>
+      _nextHouseDestructionSoundTime = float.NegativeInfinity;
 
     public event Action<DestructibleObject> Destroyed;
 
@@ -138,6 +154,7 @@ namespace Destruction
         ApplyGroundDamage();
         if (_spawnDestructionFx)
           SpawnDestructionFx();
+        SpawnHouseDestructionSound();
         SpawnBuildingCoinPickups();
 
         gameObject.layer = _partLayer!.Value;
@@ -211,6 +228,32 @@ namespace Destruction
       _pool.Get(_destructionFxPrefab, transform.position, rotation);
     }
 
+    private void SpawnHouseDestructionSound()
+    {
+      if (!Application.isPlaying || _pool == null)
+        return;
+
+      var health = GetComponent<DestructibleHealth>();
+      if (health == null || health.ObjectType != DestructibleObjectType.House)
+        return;
+
+      var now = Time.unscaledTime;
+      if (now < _nextHouseDestructionSoundTime)
+        return;
+
+      var prefab = HouseDestructionSoundPrefab;
+      if (prefab == null)
+        return;
+
+      var instance = _pool.Get(prefab, transform.position, Quaternion.identity);
+      var source = instance?.GetComponent<AudioSource>();
+      if (source == null)
+        return;
+
+      source.Play();
+      _nextHouseDestructionSoundTime = now + HouseDestructionSoundCooldown;
+    }
+
     private void SpawnBuildingCoinPickups()
     {
       if (!Application.isPlaying)
@@ -240,6 +283,11 @@ namespace Destruction
       _coinPickupPrefab = _coinPickupPrefab != null
         ? _coinPickupPrefab
         : Resources.Load<GameObject>(CoinPickupPrefabPath);
+
+    private static GameObject HouseDestructionSoundPrefab =>
+      _houseDestructionSoundPrefab = _houseDestructionSoundPrefab != null
+        ? _houseDestructionSoundPrefab
+        : Resources.Load<GameObject>(HouseDestructionSoundPrefabPath);
 
     private Vector3 GetBuildingCoinDropPosition()
     {

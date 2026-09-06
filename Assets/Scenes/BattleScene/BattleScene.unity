@@ -872,8 +872,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::App.DebugCheatManager
   _teleportPosition: {x: 0, y: 0, z: 0}
   _coinsToAdd: 100
-  _moneyButtonPosition: {x: 16, y: 276}
-  _moneyButtonSize: {x: 320, y: 32}
 --- !u!1001 &238091442
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8484,6 +8482,67 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2a61427168126454490fc82a1da79814, type: 3}
+--- !u!1001 &5483413509577161876
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 435305291584472978, guid: fa3875c841ba748a7ac93b37635ba31a, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -20.51322
+      objectReference: {fileID: 0}
+    - target: {fileID: 435305291584472978, guid: fa3875c841ba748a7ac93b37635ba31a, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.06149
+      objectReference: {fileID: 0}
+    - target: {fileID: 435305291584472978, guid: fa3875c841ba748a7ac93b37635ba31a, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 8.07455
+      objectReference: {fileID: 0}
+    - target: {fileID: 435305291584472978, guid: fa3875c841ba748a7ac93b37635ba31a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 435305291584472978, guid: fa3875c841ba748a7ac93b37635ba31a, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 435305291584472978, guid: fa3875c841ba748a7ac93b37635ba31a, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 435305291584472978, guid: fa3875c841ba748a7ac93b37635ba31a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 435305291584472978, guid: fa3875c841ba748a7ac93b37635ba31a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 435305291584472978, guid: fa3875c841ba748a7ac93b37635ba31a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 435305291584472978, guid: fa3875c841ba748a7ac93b37635ba31a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2369164270629148992, guid: fa3875c841ba748a7ac93b37635ba31a, type: 3}
+      propertyPath: m_Name
+      value: HouseRandomDestruction
+      objectReference: {fileID: 0}
+    - target: {fileID: 2369164270629148992, guid: fa3875c841ba748a7ac93b37635ba31a, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: fa3875c841ba748a7ac93b37635ba31a, type: 3}
 --- !u!1001 &5512967605845586138
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -9147,3 +9206,4 @@ SceneRoots:
   - {fileID: 1107993478}
   - {fileID: 2110317617}
   - {fileID: 1726088198}
+  - {fileID: 5483413509577161876}
