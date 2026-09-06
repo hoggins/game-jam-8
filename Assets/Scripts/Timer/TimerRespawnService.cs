@@ -187,10 +187,13 @@ namespace Timer
       if (_timerRoute == null)
         TimerRoute.TryCreateForBattle(
           player.position,
-          _battleBalance != null ? _battleBalance.TimerLateralDistanceRatio : 0.5f,
+          _battleBalance != null ? _battleBalance.TimerRouteLateralAmplitude : 60f,
+          _battleBalance != null ? _battleBalance.TimerRouteForwardFraction : 0.9f,
+          _battleBalance != null ? _battleBalance.TimerRouteOscillations : 1.5f,
           _spawnSettings,
           0,
           out _timerRoute);
+        _telemetry?.RecordRoute(_timerRoute);
 
       if (_timerRoute != null && _timerRoute.TryGetHop(_respawnCount, out var anchor, out var nextRouteProgress))
       {
@@ -226,7 +229,8 @@ namespace Timer
 
       foreach (var special in houseSet.Specials)
       {
-        if (special.type == SpecialHouses.Timer || !special.enabled || special.prefab == null)
+        if (special.type == SpecialHouses.Timer || !special.enabled || special.prefab == null
+            || _spawner.IsSpecialDestroyed(special.type))
           continue;
 
         if ((special.type == SpecialHouses.Health || special.type == SpecialHouses.Arrow)
@@ -301,7 +305,8 @@ namespace Timer
 
         foreach (var special in houseSet.Specials)
         {
-          if (special.type == SpecialHouses.Timer || !special.enabled || special.prefab == null)
+          if (special.type == SpecialHouses.Timer || !special.enabled || special.prefab == null
+              || _spawner.IsSpecialDestroyed(special.type))
             continue;
 
           if (special.type == SpecialHouses.Arrow)

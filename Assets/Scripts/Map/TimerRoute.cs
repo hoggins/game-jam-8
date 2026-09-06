@@ -10,24 +10,50 @@ namespace Map
   /// </summary>
   public sealed class TimerRoute
   {
-    public const int HopCount = 6;
+    public const int HopCount = 8;
 
     private readonly Vector3[] _pathPoints;
     private readonly float[] _pathCumulativeLengths;
     private readonly Vector3[] _checkpointPoints;
     private readonly float[] _checkpointProgresses;
     private readonly float[] _checkpointLegLengths;
+    private readonly float[] _checkpointTurnAngles;
+    private readonly float[] _checkpointLateralOffsets;
 
     private TimerRoute(
       Vector3[] pathPoints, float[] pathCumulativeLengths,
-      Vector3[] checkpointPoints, float[] checkpointProgresses, float[] checkpointLegLengths)
+      Vector3[] checkpointPoints, float[] checkpointProgresses, float[] checkpointLegLengths,
+      float directDistance, float scale, float lateralAmplitude, float oscillations,
+      float[] checkpointTurnAngles, float[] checkpointLateralOffsets)
     {
       _pathPoints = pathPoints;
       _pathCumulativeLengths = pathCumulativeLengths;
       _checkpointPoints = checkpointPoints;
       _checkpointProgresses = checkpointProgresses;
       _checkpointLegLengths = checkpointLegLengths;
+      _checkpointTurnAngles = checkpointTurnAngles;
+      _checkpointLateralOffsets = checkpointLateralOffsets;
+      DirectDistance = directDistance;
+      Scale = scale;
+      LateralAmplitude = lateralAmplitude;
+      Oscillations = oscillations;
       TotalLength = pathCumulativeLengths[pathCumulativeLengths.Length - 1];
+
+      var turnTotal = 0f;
+      var turnMaximum = 0f;
+      for (var i = 0; i < _checkpointTurnAngles.Length; i++)
+      {
+        turnTotal += _checkpointTurnAngles[i];
+        turnMaximum = Mathf.Max(turnMaximum, _checkpointTurnAngles[i]);
+      }
+
+      MaxTurnAngleDeg = turnMaximum;
+      MeanTurnAngleDeg = _checkpointTurnAngles.Length > 0
+        ? turnTotal / _checkpointTurnAngles.Length
+        : 0f;
+      FinalSegmentTurnAngleDeg = _checkpointTurnAngles.Length > 0
+        ? _checkpointTurnAngles[_checkpointTurnAngles.Length - 1]
+        : 0f;
     }
 
     public Vector3 Origin => _pathPoints[0];
@@ -38,15 +64,31 @@ namespace Map
     public int CheckpointCount => _checkpointPoints.Length;
     public int RespawnCount => Mathf.Max(0, _checkpointPoints.Length - 1);
     public float TotalLength { get; }
+    public float DirectDistance { get; }
+    public float Scale { get; }
+    public float LateralAmplitude { get; }
+    public float Oscillations { get; }
+    public float MaxTurnAngleDeg { get; }
+    public float MeanTurnAngleDeg { get; }
+    public float FinalSegmentTurnAngleDeg { get; }
     public Vector3 InitialPosition => _checkpointPoints[0];
 
     /// <summary>
-    /// Creates the absolute-distance zig-zag route retained as the fallback algorithm. The first
-    /// leg places the initial Timer; the following six legs place successive respawns. Each segment
-    /// has the requested world-unit length before runtime placement jitter is applied.
+    /// Creates the route with the first leg placing the initial Timer and the following eight legs
+    /// placing successive respawns.
     /// </summary>
     public static bool TryCreate(
-      Vector3 origin, Vector3 goal, float lateralDistanceRatio,
+      Vector3 origin, Vector3 goal, float lateralAmplitude,
+      float initialDistance, IReadOnlyList<float> hopDistances, out TimerRoute route)
+    {
+      return TryCreate(
+        origin, goal, lateralAmplitude, 0.9f, 1.5f,
+        initialDistance, hopDistances, out route);
+    }
+
+    public static bool TryCreate(
+      Vector3 origin, Vector3 goal, float lateralAmplitude,
+      float forwardFraction, float oscillations,
       float initialDistance, IReadOnlyList<float> hopDistances, out TimerRoute route)
     {
       route = null;
@@ -59,7 +101,6 @@ namespace Map
 
       var forward = toGoal / directDistance;
       var side = new Vector3(-forward.z, 0f, forward.x);
-      var lateralRatio = Mathf.Max(0f, lateralDistanceRatio);
       var points = new Vector3[HopCount + 3];
       points[0] = origin;
 
@@ -67,17 +108,20 @@ namespace Map
       for (var i = 0; i < HopCount; i++)
         requestedForwardDistance += Mathf.Max(0f, hopDistances[i]);
 
-      var forwardPerUnit = 1f / Mathf.Sqrt(1f + lateralRatio * lateralRatio);
-      var forwardDistance = requestedForwardDistance * forwardPerUnit;
-      var scale = forwardDistance > directDistance
-        ? directDistance / forwardDistance
-        : 1f;
+      var forwardBudget = directDistance * Mathf.Clamp01(forwardFraction);
+      var scale = requestedForwardDistance > 0f
+        ? forwardBudget / requestedForwardDistance
+        : 0f;
+      var scaledForwardDistance = requestedForwardDistance * scale;
+      var amplitude = Mathf.Max(0f, lateralAmplitude);
 
       var current = origin;
-      var legIndex = 0;
+      var cumulativeForwardDistance = 0f;
       AppendLeg(
         points, 1, ref current, forward, side,
-        Mathf.Max(0f, initialDistance) * scale, lateralRatio, legIndex++);
+        Mathf.Max(0f, initialDistance) * scale,
+        ref cumulativeForwardDistance,
+        scaledForwardDistance, amplitude, oscillations);
       for (var i = 0; i < HopCount; i++)
       {
         AppendLeg(
@@ -87,8 +131,10 @@ namespace Map
           forward,
           side,
           Mathf.Max(0f, hopDistances[i]) * scale,
-          lateralRatio,
-          legIndex++);
+          ref cumulativeForwardDistance,
+          scaledForwardDistance,
+          amplitude,
+          oscillations);
       }
 
       goal.y = origin.y;
@@ -103,24 +149,39 @@ namespace Map
       }
 
       var checkpointLegLengths = BuildCheckpointLegLengths(checkpointProgresses);
+      var checkpointTurnAngles = BuildCheckpointTurnAngles(points);
+      var checkpointLateralOffsets = BuildCheckpointLateralOffsets(
+        checkpointPoints, origin, side);
       route = new TimerRoute(
         points,
         cumulativeLengths,
         checkpointPoints,
         checkpointProgresses,
-        checkpointLegLengths);
+        checkpointLegLengths,
+        directDistance,
+        scale,
+        amplitude,
+        oscillations,
+        checkpointTurnAngles,
+        checkpointLateralOffsets);
       return route.TotalLength > 0.001f;
     }
 
     private static void AppendLeg(
       Vector3[] points, int pointIndex, ref Vector3 current,
-      Vector3 forward, Vector3 side, float distance, float lateralRatio, int legIndex)
+      Vector3 forward, Vector3 side, float distance,
+      ref float cumulativeForwardDistance, float totalForwardDistance,
+      float amplitude, float oscillations)
     {
-      var directionScale = 1f / Mathf.Sqrt(1f + lateralRatio * lateralRatio);
-      var forwardDistance = distance * directionScale;
-      var lateralDistance = distance * lateralRatio * directionScale;
-      var lateralSign = (legIndex & 1) == 0 ? -1f : 1f;
-      current += forward * forwardDistance + side * (lateralSign * lateralDistance);
+      cumulativeForwardDistance += distance;
+      var normalizedProgress = totalForwardDistance > 0f
+        ? cumulativeForwardDistance / totalForwardDistance
+        : (float)pointIndex / (HopCount + 1);
+      var lateralOffset = amplitude
+        * Mathf.Sin(2f * Mathf.PI * oscillations * normalizedProgress);
+      current = points[0]
+        + forward * cumulativeForwardDistance
+        + side * lateralOffset;
       current.y = points[0].y;
       points[pointIndex] = current;
     }
@@ -130,8 +191,16 @@ namespace Map
     /// preview pass the same route origin and endpoint when available.
     /// </summary>
     public static bool TryCreateForBattle(
-      Vector3 origin, float lateralDistanceRatio, SpecialSpawnSettings spawnSettings, int seed,
+      Vector3 origin, float lateralAmplitude, SpecialSpawnSettings spawnSettings, int seed,
       out TimerRoute route)
+    {
+      return TryCreateForBattle(
+        origin, lateralAmplitude, 0.9f, 1.5f, spawnSettings, seed, out route);
+    }
+
+    public static bool TryCreateForBattle(
+      Vector3 origin, float lateralAmplitude, float forwardFraction, float oscillations,
+      SpecialSpawnSettings spawnSettings, int seed, out TimerRoute route)
     {
       var goal = TheGoal.Current;
       if (goal == null)
@@ -154,7 +223,9 @@ namespace Map
       return TryCreate(
         origin,
         goal.transform.position,
-        lateralDistanceRatio,
+        lateralAmplitude,
+        forwardFraction,
+        oscillations,
         initialDistance,
         hopDistances,
         out route);
@@ -201,6 +272,37 @@ namespace Map
       return legLengths;
     }
 
+    private static float[] BuildCheckpointTurnAngles(IReadOnlyList<Vector3> points)
+    {
+      var turnAngles = new float[HopCount + 1];
+      for (var i = 0; i < turnAngles.Length; i++)
+        turnAngles[i] = CalculateTurnAngle(points[i], points[i + 1], points[i + 2]);
+
+      return turnAngles;
+    }
+
+    private static float[] BuildCheckpointLateralOffsets(
+      IReadOnlyList<Vector3> checkpointPoints, Vector3 origin, Vector3 side)
+    {
+      var lateralOffsets = new float[checkpointPoints.Count];
+      for (var i = 0; i < lateralOffsets.Length; i++)
+        lateralOffsets[i] = Vector3.Dot(checkpointPoints[i] - origin, side);
+
+      return lateralOffsets;
+    }
+
+    private static float CalculateTurnAngle(Vector3 previous, Vector3 current, Vector3 next)
+    {
+      var incoming = current - previous;
+      var outgoing = next - current;
+      incoming.y = 0f;
+      outgoing.y = 0f;
+      if (incoming.sqrMagnitude < 0.000001f || outgoing.sqrMagnitude < 0.000001f)
+        return 0f;
+
+      return Vector3.Angle(incoming, outgoing);
+    }
+
     public bool TryGetInitial(out Vector3 position, out float routeProgress)
     {
       if (_checkpointPoints.Length == 0)
@@ -235,6 +337,22 @@ namespace Map
         return 0f;
 
       return _checkpointLegLengths[segmentIndex];
+    }
+
+    public float GetCheckpointTurnAngle(int checkpointIndex)
+    {
+      if (checkpointIndex < 0 || checkpointIndex >= _checkpointTurnAngles.Length)
+        return 0f;
+
+      return _checkpointTurnAngles[checkpointIndex];
+    }
+
+    public float GetCheckpointLateralOffset(int checkpointIndex)
+    {
+      if (checkpointIndex < 0 || checkpointIndex >= _checkpointLateralOffsets.Length)
+        return 0f;
+
+      return _checkpointLateralOffsets[checkpointIndex];
     }
 
     public float GetCheckpointProgress(int checkpointIndex)

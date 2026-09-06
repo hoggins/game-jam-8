@@ -50,6 +50,8 @@ namespace Timer
     private readonly int[] _places = new int[PlaceCount];
     private readonly int[] _survivors = new int[PlaceCount];
     private readonly int[] _digitValues = new int[PlaceCount];
+    private float _secondsRemainingOnArrival;
+    private bool _hasSecondsRemainingOnArrival;
 
     private void Awake()
     {
@@ -71,6 +73,8 @@ namespace Timer
 
     private void OnEnable()
     {
+      _secondsRemainingOnArrival = 0f;
+      _hasSecondsRemainingOnArrival = false;
       foreach (var destructible in _destructibles)
         if (destructible != null)
           destructible.Destroyed += OnDigitDestroyed;
@@ -149,7 +153,11 @@ namespace Timer
         if (_battleService == null)
           return;
 
-        var secondsRemainingOnArrival = _battleService.Timer;
+        if (!_hasSecondsRemainingOnArrival)
+        {
+          _secondsRemainingOnArrival = _battleService.Timer;
+          _hasSecondsRemainingOnArrival = true;
+        }
       // Snapshot what each surviving digit currently reads, derived from the authoritative time
       // rather than from the digits themselves: they only catch up in Update, and this fires
       // mid-frame.
@@ -179,7 +187,7 @@ namespace Timer
 
       // DestroyTimer is what triggers the replacement timer, so it registers its HUD element before
       // this one stands down; SceneHudService ignores the stale unregister that follows.
-      _battleService.DestroyTimer(secondsRemainingOnArrival);
+      _battleService.DestroyTimer(_secondsRemainingOnArrival);
       _isDead = true;
 
       // The divider carries no time, so it can still be standing when the last digit dies. A lone

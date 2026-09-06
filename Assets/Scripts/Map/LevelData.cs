@@ -105,7 +105,9 @@ namespace Map
       var spawnSettings = Resources.Load<SpecialSpawnSettings>("SpecialSpawnSettings");
       if (!TimerRoute.TryCreateForBattle(
         origin,
-        battleBalance != null ? battleBalance.TimerLateralDistanceRatio : 0.5f,
+        battleBalance != null ? battleBalance.TimerRouteLateralAmplitude : 60f,
+        battleBalance != null ? battleBalance.TimerRouteForwardFraction : 0.9f,
+        battleBalance != null ? battleBalance.TimerRouteOscillations : 1.5f,
         spawnSettings,
         seed,
         out var route))
@@ -249,7 +251,9 @@ namespace Map
       var spawnSettings = Resources.Load<SpecialSpawnSettings>("SpecialSpawnSettings");
       TimerRoute.TryCreateForBattle(
         originPosition,
-        battleBalance != null ? battleBalance.TimerLateralDistanceRatio : 0.5f,
+        battleBalance != null ? battleBalance.TimerRouteLateralAmplitude : 60f,
+        battleBalance != null ? battleBalance.TimerRouteForwardFraction : 0.9f,
+        battleBalance != null ? battleBalance.TimerRouteOscillations : 1.5f,
         spawnSettings,
         seed,
         out var timerRoute);

@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using Balance;
 using Combat;
+using Map;
 using Model;
 using UnityEngine;
 using UnityEngine.Scripting;
@@ -24,6 +25,8 @@ namespace Telemetry
     private readonly ProgressionBalanceConfig _progressionBalance;
 
     private RunDump _run;
+    private TimerRoute _recordedRoute;
+    private RouteDump _pendingRoute;
     private RunSlice _currentSlice;
     private readonly List<RunSlice> _slices = new();
     private bool _runActive;
@@ -113,6 +116,19 @@ namespace Telemetry
     {
       if (_runActive)
         _currentSlice.buildingHits++;
+    }
+
+    public void RecordRoute(TimerRoute route)
+    {
+      if (route == null || ReferenceEquals(route, _recordedRoute))
+        return;
+
+      _recordedRoute = route;
+      var routeDump = BuildRouteDump(route);
+      if (_runActive && _run != null)
+        _run.route = routeDump;
+      else
+        _pendingRoute = routeDump;
     }
 
     public void BeginTimerHop(
@@ -210,10 +226,12 @@ namespace Telemetry
           },
         },
         totals = new RunTotals(),
+        route = _pendingRoute,
         slices = _slices,
         statTimeline = new List<PlayerStatPoint>(),
         timerHops = new List<TimerHop>(),
       };
+      _pendingRoute = null;
 
       CreateSlice(0f, _lastPosition);
       CaptureStats(0f);
@@ -528,6 +546,41 @@ namespace Telemetry
       Debug.Log($"Economy telemetry written to {path}");
     }
 
+    private static RouteDump BuildRouteDump(TimerRoute route)
+    {
+      var routeDump = new RouteDump
+      {
+        totalLength = route.TotalLength,
+        directDistance = route.DirectDistance,
+        scale = route.Scale,
+        lateralAmplitude = route.LateralAmplitude,
+        oscillations = route.Oscillations,
+        maxTurnAngleDeg = route.MaxTurnAngleDeg,
+        meanTurnAngleDeg = route.MeanTurnAngleDeg,
+        finalSegmentTurnAngleDeg = route.FinalSegmentTurnAngleDeg,
+        checkpoints = new List<RouteCheckpointDump>(),
+      };
+
+      for (var i = 0; i < route.CheckpointCount; i++)
+      {
+        var normalizedProgress = route.NormalizeProgress(route.GetCheckpointProgress(i));
+        routeDump.checkpoints.Add(new RouteCheckpointDump
+        {
+          index = i,
+          legLength = route.GetSegmentLength(i),
+          cumulativeLength = route.GetCheckpointProgress(i),
+          normalizedProgress = normalizedProgress,
+          tier = normalizedProgress < HouseSet.RouteT1End
+            ? 1
+            : normalizedProgress < HouseSet.RouteT2End ? 2 : 3,
+          turnAngleDeg = route.GetCheckpointTurnAngle(i),
+          lateralOffset = route.GetCheckpointLateralOffset(i),
+        });
+      }
+
+      return routeDump;
+    }
+
     private void FinalizeTimerHop()
     {
       if (_activeTimerHop == null)
@@ -566,10 +619,37 @@ namespace Telemetry
     {
       public RunHeader header;
       public RunTotals totals;
+      public RouteDump route;
       public List<RunSlice> slices;
       public List<PlayerStatPoint> statTimeline;
       public List<TimerHop> timerHops;
       public SanityChecks sanity;
+    }
+
+    [Serializable]
+    private sealed class RouteDump
+    {
+      public float totalLength;
+      public float directDistance;
+      public float scale;
+      public float lateralAmplitude;
+      public float oscillations;
+      public float maxTurnAngleDeg;
+      public float meanTurnAngleDeg;
+      public float finalSegmentTurnAngleDeg;
+      public List<RouteCheckpointDump> checkpoints;
+    }
+
+    [Serializable]
+    private sealed class RouteCheckpointDump
+    {
+      public int index;
+      public float legLength;
+      public float cumulativeLength;
+      public float normalizedProgress;
+      public int tier;
+      public float turnAngleDeg;
+      public float lateralOffset;
     }
 
     [Serializable]
