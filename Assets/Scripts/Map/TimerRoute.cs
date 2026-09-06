@@ -11,7 +11,7 @@ namespace Map
   /// </summary>
   public sealed class TimerRoute
   {
-    public const int HopCount = 8;
+    public const int HopCount = 9;
     private const int MaxGenerationAttempts = 8;
     private const int LateralNormalizationSamples = 1024;
 
@@ -94,7 +94,7 @@ namespace Map
     public Vector3 InitialPosition => _checkpointPoints[0];
 
     /// <summary>
-    /// Creates the route with the first leg placing the initial Timer and the following eight legs
+    /// Creates the route with the first leg placing the initial Timer and the following nine legs
     /// placing successive respawns.
     /// </summary>
     public static bool TryCreate(

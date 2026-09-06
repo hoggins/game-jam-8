@@ -94,7 +94,7 @@ namespace Balance
     {
       new HouseDifficultyMaxHealthEntry { difficultyLevel = 1, maxHealth = 36 },
       new HouseDifficultyMaxHealthEntry { difficultyLevel = 2, maxHealth = 108 },
-      new HouseDifficultyMaxHealthEntry { difficultyLevel = 3, maxHealth = 324 },
+      new HouseDifficultyMaxHealthEntry { difficultyLevel = 3, maxHealth = 232 },
     };
 
     public float BattleDuration => _battleDuration;
