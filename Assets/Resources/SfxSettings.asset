@@ -22,6 +22,14 @@ MonoBehaviour:
   duckKilledSpread: 0.5
   duckKilledCooldown: 0.15
   duckKilledMaxQueued: 8
+  buildingDestroyedClips:
+  - {fileID: 8300000, guid: 26cc1dac9815f4bf28449977cc141537, type: 3}
+  - {fileID: 8300000, guid: a5b6d3caa2ede4f9aa1929eaf52bb6b4, type: 3}
+  - {fileID: 8300000, guid: a5b6d3caa2ede4f9aa1929eaf52bb6b4, type: 3}
+  - {fileID: 8300000, guid: b2f2285e9eba54dc586c79163028f211, type: 3}
+  - {fileID: 8300000, guid: b2f2285e9eba54dc586c79163028f211, type: 3}
+  buildingDestroyedVolumeMin: 0.4
+  buildingDestroyedVolumeMax: 0.75
   buttonClickClips:
   - {fileID: 8300000, guid: 7ce0b9291ea5f4316aec404f89d63e65, type: 3}
   - {fileID: 8300000, guid: 84fcfca595d9d45c7ad9abbc4eb966a4, type: 3}
@@ -30,6 +38,7 @@ MonoBehaviour:
   buttonClickVolumeMax: 1
   playerDamagedClips:
   - {fileID: 8300000, guid: c50dfd0cf85b2484bb036fb64d802306, type: 3}
+  - {fileID: 8300000, guid: aa9735fb3bcce4ce695c5178d07d44be, type: 3}
   playerDamagedVolumeMin: 0.2
   playerDamagedVolumeMax: 0.3
   playerDamagedSpread: 0.2

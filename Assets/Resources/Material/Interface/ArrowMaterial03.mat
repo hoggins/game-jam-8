@@ -8,10 +8,11 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: ArrowMaterial03
-  m_Shader: {fileID: 4800000, guid: 66e2bce270a384c75854fe31e53c1e70, type: 3}
+  m_Shader: {fileID: 4800000, guid: 227a6f426f5014ec6a62259829d0557e, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
+  m_ValidKeywords:
+  - _ALPHATEST_ON
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -23,6 +24,18 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
+    - _DissolveTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _IDMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: 5f7e9ad156932bc4784fde47d5d8f102, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _PrintsColor:
         m_Texture: {fileID: 2800000, guid: 5392d500173844c49bba345eb58dbc4a, type: 3}
         m_Scale: {x: 1, y: 1}
@@ -50,13 +63,16 @@ Material:
     m_Ints: []
     m_Floats:
     - _AddPrecomputedVelocity: 1
+    - _AlphaClip: 1
     - _AnimSinAdd: 0
     - _AnimSinMul: 0
     - _AnimSpeed: 3
     - _AnimatePrints: 0
     - _EnvironmentReflections: 1
     - _Hit: 0
+    - _Inflate: 0
     - _Keyword0: 0
+    - _MainTexMul: 1
     - _Metal: 0
     - _PannerDuration: 24
     - _PannerJitterAmmount: 1
@@ -77,7 +93,9 @@ Material:
     - _VertexAnimAmplitude: 1
     - _XRMotionVectorsPass: 1
     m_Colors:
-    - _Color0: {r: 1, g: 0.88824064, b: 0.6556604, a: 0}
+    - _Color0: {r: 1, g: 0.02575107, b: 0, a: 0}
+    - _Color1: {r: 1, g: 0.027450982, b: 0, a: 0}
+    - _Color2: {r: 1, g: 0.68499196, b: 0.6761006, a: 0}
     - _PrintsColor: {r: 1, g: 1, b: 1, a: 0}
     - _PrintsScale: {r: 0.1, g: 0.1, b: 0, a: 0}
     - _Vector0: {r: 3, g: 3, b: 3, a: 0}

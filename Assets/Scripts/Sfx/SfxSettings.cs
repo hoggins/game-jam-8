@@ -24,6 +24,13 @@ namespace Sfx
     [Tooltip("Kills queued beyond this are dropped, so a big wave does not trail for seconds.")]
     [SerializeField, Min(0)] private int duckKilledMaxQueued = 8;
 
+    [Header("Building Destroyed")]
+    [Tooltip("One of these is picked per building, never the same one twice in a row.")]
+    [SerializeField] private AudioClip[] buildingDestroyedClips;
+    [Tooltip("Each building picks a volume in this range, so a run of them does not sound flat.")]
+    [SerializeField, Range(0f, 1f)] private float buildingDestroyedVolumeMin = 0.6f;
+    [SerializeField, Range(0f, 1f)] private float buildingDestroyedVolumeMax = 1f;
+
     [Header("Button Click")]
     [Tooltip("One of these is picked per click, never the same one twice in a row.")]
     [SerializeField] private AudioClip[] buttonClickClips;
@@ -53,6 +60,7 @@ namespace Sfx
     public float Volume => volume;
 
     public AudioClip[] DuckKilledClips => duckKilledClips;
+    public AudioClip[] BuildingDestroyedClips => buildingDestroyedClips;
     public AudioClip[] ButtonClickClips => buttonClickClips;
     public AudioClip[] PlayerDamagedClips => playerDamagedClips;
     public AudioClip BattleWinClip => battleWinClip;
@@ -67,6 +75,7 @@ namespace Sfx
     public int PlayerDamagedMaxQueued => playerDamagedMaxQueued;
 
     public float RollDuckKilledVolume() => Random.Range(duckKilledVolumeMin, duckKilledVolumeMax) * volume;
+    public float RollBuildingDestroyedVolume() => Random.Range(buildingDestroyedVolumeMin, buildingDestroyedVolumeMax) * volume;
     public float RollButtonClickVolume() => Random.Range(buttonClickVolumeMin, buttonClickVolumeMax) * volume;
     public float RollPlayerDamagedVolume() => Random.Range(playerDamagedVolumeMin, playerDamagedVolumeMax) * volume;
 
@@ -76,6 +85,7 @@ namespace Sfx
     private void OnValidate()
     {
       duckKilledVolumeMax = Mathf.Max(duckKilledVolumeMin, duckKilledVolumeMax);
+      buildingDestroyedVolumeMax = Mathf.Max(buildingDestroyedVolumeMin, buildingDestroyedVolumeMax);
       buttonClickVolumeMax = Mathf.Max(buttonClickVolumeMin, buttonClickVolumeMax);
       playerDamagedVolumeMax = Mathf.Max(playerDamagedVolumeMin, playerDamagedVolumeMax);
     }
