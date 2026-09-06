@@ -28,6 +28,12 @@ namespace Sfx
 
     private SfxSettings _settings;
     private AudioSource _source;
+    private AudioSource _musicSource;
+
+    private bool _isMusicFading;
+    private float _musicFadeFrom;
+    private float _musicFadeDuration;
+    private float _musicFadeElapsed;
 
     private int _lastDuckKilledIndex = -1;
     private int _lastBuildingDestroyedIndex = -1;
@@ -63,11 +69,21 @@ namespace Sfx
       // The pause menu sets Time.timeScale to 0 - the click still has to be audible there.
       _source.ignoreListenerPause = true;
 
+      // Music needs its own source: it loops and fades independently of the one-shots, which
+      // PlayOneShot layers on top of whatever the source is already doing.
+      _musicSource = host.AddComponent<AudioSource>();
+      _musicSource.playOnAwake = false;
+      _musicSource.spatialBlend = 0f;
+      _musicSource.dopplerLevel = 0f;
+      _musicSource.ignoreListenerPause = true;
+
       _characterService.DuckKilled += OnDuckKilled;
       _characterService.BuildingDestroyed += OnBuildingDestroyed;
       _characterService.Damaged += OnPlayerDamaged;
+      _battleService.BattleStarted += OnBattleStarted;
       _battleService.BattleWon += OnBattleWon;
       _battleService.BattleDefeated += OnBattleDefeated;
+      _battleService.BattleAbandoned += OnBattleAbandoned;
     }
 
     void IDisposable.Dispose()
@@ -75,8 +91,10 @@ namespace Sfx
       _characterService.DuckKilled -= OnDuckKilled;
       _characterService.BuildingDestroyed -= OnBuildingDestroyed;
       _characterService.Damaged -= OnPlayerDamaged;
+      _battleService.BattleStarted -= OnBattleStarted;
       _battleService.BattleWon -= OnBattleWon;
       _battleService.BattleDefeated -= OnBattleDefeated;
+      _battleService.BattleAbandoned -= OnBattleAbandoned;
     }
 
     /// Called from UiClickSfx on every button this sits on.
@@ -100,18 +118,32 @@ namespace Sfx
         PlayPlayerDamaged();
     }
 
+    private void OnBattleStarted() =>
+      StartMusic();
+
     /// The stings own the moment: whatever kill and hit sounds were still queued belong to a
-    /// fight that just ended, and letting them trail would play them over the popup.
+    /// fight that just ended, and letting them trail would play them over the popup. The music
+    /// fades rather than cuts, so the sting lands over a track that is getting out of its way.
     private void OnBattleWon()
     {
       ClearThrottleQueues();
+      BeginMusicFadeOut();
       Play(_settings.BattleWinClip, _settings.BattleWinVolume);
     }
 
     private void OnBattleDefeated()
     {
       ClearThrottleQueues();
+      BeginMusicFadeOut();
       Play(_settings.BattleDefeatClip, _settings.BattleDefeatVolume);
+    }
+
+    /// Quitting to the main menu - there is no sting to make room for and the scene is going
+    /// away, so the track stops outright rather than trailing into the menu.
+    private void OnBattleAbandoned()
+    {
+      ClearThrottleQueues();
+      StopMusic();
     }
 
     private void ClearThrottleQueues()
@@ -130,6 +162,85 @@ namespace Sfx
 
       if (_playerDamagedThrottle.TryDequeue(_settings.PlayerDamagedCooldown))
         PlayPlayerDamaged();
+
+      TickMusicFade();
+    }
+
+    private void StartMusic()
+    {
+      // A restart cancels a fade still running from the previous battle, rather than inheriting
+      // its part-way volume.
+      _isMusicFading = false;
+
+      if (_musicSource == null || _settings.BattleMusicClip == null)
+        return;
+
+      _musicSource.clip = _settings.BattleMusicClip;
+      _musicSource.loop = _settings.BattleMusicLoop;
+      _musicSource.volume = _settings.BattleMusicVolume;
+      _musicSource.Play();
+    }
+
+    /// Pause rather than stop, so the track resumes where the battle left it. Driven from
+    /// BattleHudUi, the one place that sees both the pause menu and the upgrade screen.
+    public void SetMusicPaused(bool isPaused)
+    {
+      if (_musicSource == null)
+        return;
+
+      if (isPaused)
+      {
+        _musicSource.Pause();
+        return;
+      }
+
+      // UnPause on a source that was stopped (battle over, or never started) does nothing, so a
+      // screen closing after the battle ended cannot resurrect the track.
+      _musicSource.UnPause();
+    }
+
+    private void BeginMusicFadeOut()
+    {
+      if (_musicSource == null || !_musicSource.isPlaying)
+        return;
+
+      if (_settings.BattleMusicFadeOut <= 0f)
+      {
+        StopMusic();
+        return;
+      }
+
+      _musicFadeFrom = _musicSource.volume;
+      _musicFadeDuration = _settings.BattleMusicFadeOut;
+      _musicFadeElapsed = 0f;
+      _isMusicFading = true;
+    }
+
+    /// Unscaled: the battle end that starts this fade also sets Time.timeScale to 0, so a scaled
+    /// delta would leave the track sitting at full volume forever.
+    private void TickMusicFade()
+    {
+      if (!_isMusicFading || _musicSource == null)
+        return;
+
+      _musicFadeElapsed += Time.unscaledDeltaTime;
+      var progress = Mathf.Clamp01(_musicFadeElapsed / _musicFadeDuration);
+      _musicSource.volume = Mathf.Lerp(_musicFadeFrom, 0f, progress);
+
+      if (progress >= 1f)
+        StopMusic();
+    }
+
+    private void StopMusic()
+    {
+      _isMusicFading = false;
+
+      if (_musicSource == null)
+        return;
+
+      _musicSource.Stop();
+      // Back to the configured level, so the next battle does not start silent.
+      _musicSource.volume = _settings.BattleMusicVolume;
     }
 
     private void PlayDuckKilled() =>
@@ -181,6 +292,9 @@ namespace Sfx
 
       if (_settings.BattleDefeatClip == null)
         Debug.LogError($"{nameof(SfxSettings)}.{nameof(SfxSettings.BattleDefeatClip)} is not assigned.");
+
+      if (_settings.BattleMusicClip == null)
+        Debug.LogError($"{nameof(SfxSettings)}.{nameof(SfxSettings.BattleMusicClip)} is not assigned.");
     }
 
     private static void WarnIfEmpty(AudioClip[] clips, string groupName)

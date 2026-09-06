@@ -53,6 +53,14 @@ namespace Sfx
     [SerializeField] private AudioClip battleWinClip;
     [SerializeField, Range(0f, 1f)] private float battleWinVolume = 1f;
 
+    [Header("Battle Music")]
+    [Tooltip("Plays for the length of a battle, from the first frame to win, defeat or abandon.")]
+    [SerializeField] private AudioClip battleMusicClip;
+    [SerializeField, Range(0f, 1f)] private float battleMusicVolume = 1f;
+    [SerializeField] private bool battleMusicLoop = true;
+    [Tooltip("Seconds the track takes to fade out under the win or defeat sting. 0 cuts it dead.")]
+    [SerializeField, Min(0f)] private float battleMusicFadeOut = 1f;
+
     [Header("Battle Defeat")]
     [SerializeField] private AudioClip battleDefeatClip;
     [SerializeField, Range(0f, 1f)] private float battleDefeatVolume = 1f;
@@ -65,6 +73,9 @@ namespace Sfx
     public AudioClip[] PlayerDamagedClips => playerDamagedClips;
     public AudioClip BattleWinClip => battleWinClip;
     public AudioClip BattleDefeatClip => battleDefeatClip;
+    public AudioClip BattleMusicClip => battleMusicClip;
+    public bool BattleMusicLoop => battleMusicLoop;
+    public float BattleMusicFadeOut => battleMusicFadeOut;
 
     public float DuckKilledSpread => duckKilledSpread;
     public float DuckKilledCooldown => duckKilledCooldown;
@@ -81,6 +92,7 @@ namespace Sfx
 
     public float BattleWinVolume => battleWinVolume * volume;
     public float BattleDefeatVolume => battleDefeatVolume * volume;
+    public float BattleMusicVolume => battleMusicVolume * volume;
 
     private void OnValidate()
     {

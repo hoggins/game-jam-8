@@ -26,6 +26,7 @@ namespace Battle
     [SerializeField, Min(0f)] private float _hiddenScale = 1.2f;
 
     [Inject] private BattleService _battleService;
+    [Inject] private Sfx.SfxService _sfxService;
 
     private InputAction _subscribedToggleAction;
     private bool _enabledToggleAction;
@@ -176,23 +177,27 @@ namespace Battle
     {
       _pauseShown = isShown;
       ApplyHudVisibility(true);
-      KeepFrozenWhileAnyScreenIsOpen();
+      ApplyAnyScreenOpenState();
     }
 
     private void OnProgressionShownChanged(bool isShown)
     {
       _progressionShown = isShown;
       ApplyHudVisibility(true);
-      KeepFrozenWhileAnyScreenIsOpen();
+      ApplyAnyScreenOpenState();
     }
 
     /// Pause and the progression screen each drive Time.timeScale on their own, so whichever one
     /// closes first restores it to 1 and unfreezes the world behind the other. This is the only
-    /// place that sees both, so it re-freezes while either is still up.
-    private void KeepFrozenWhileAnyScreenIsOpen()
+    /// place that sees both, so it re-freezes while either is still up - and holds the battle
+    /// music on the same condition, so the track cannot drift out of step with the freeze.
+    private void ApplyAnyScreenOpenState()
     {
-      if (_pauseShown || _progressionShown)
+      var isAnyScreenOpen = _pauseShown || _progressionShown;
+      if (isAnyScreenOpen)
         Time.timeScale = 0f;
+
+      _sfxService?.SetMusicPaused(isAnyScreenOpen);
     }
 
     private void OnBattleOver()
