@@ -1,3 +1,4 @@
+using System.Collections;
 using System;
 using System.Collections.Generic;
 using App;
@@ -23,6 +24,8 @@ namespace Destruction
     private const string DestructionFxPath = "Fx/Prefabs/FxBuildingDucksDestruction01";
     private const string HouseDestructionSoundPrefabPath = "SFX/HouseRandomDestruction";
     private const float HouseDestructionSoundCooldown = 0.5f;
+    private const int GoalDestructionSoundBurstCount = 10;
+    private const float GoalDestructionSoundBurstDelay = 0.3f;
     private const string CoinPickupPrefabPath = "Prefabs/Interface/Coin01";
 
     [SerializeField, Min(0f)] private float _breakMagnitude = 5f;
@@ -234,11 +237,31 @@ namespace Destruction
         return;
 
       var health = GetComponent<DestructibleHealth>();
-      if (health == null || health.ObjectType != DestructibleObjectType.House)
+      if (health == null)
         return;
 
+      var isGoal = health.ObjectType == DestructibleObjectType.Goal;
+      if (!isGoal && health.ObjectType != DestructibleObjectType.House)
+        return;
+
+      SpawnHouseDestructionSoundInstance(ignoreCooldown: isGoal);
+      if (isGoal)
+        StartCoroutine(SpawnGoalDestructionSoundBurst());
+    }
+
+    private IEnumerator SpawnGoalDestructionSoundBurst()
+    {
+      for (var i = 0; i < GoalDestructionSoundBurstCount; i++)
+      {
+        yield return new WaitForSecondsRealtime(GoalDestructionSoundBurstDelay);
+        SpawnHouseDestructionSoundInstance(ignoreCooldown: true);
+      }
+    }
+
+    private void SpawnHouseDestructionSoundInstance(bool ignoreCooldown)
+    {
       var now = Time.unscaledTime;
-      if (now < _nextHouseDestructionSoundTime)
+      if (!ignoreCooldown && now < _nextHouseDestructionSoundTime)
         return;
 
       var prefab = HouseDestructionSoundPrefab;
